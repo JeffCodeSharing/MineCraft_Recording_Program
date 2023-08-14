@@ -10,6 +10,7 @@ import javafx.stage.Stage;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Scanner;
@@ -417,13 +418,13 @@ class mod_connector implements Runnable {
     public void run() {
         try {
             ServerSocket server = new ServerSocket(9999);
+            Socket client = server.accept();
+            PrintStream out = new PrintStream(client.getOutputStream());
 
             while (true) {
-                Socket client = server.accept();
-
+                out.println("test");
+                Thread.sleep(1000);
             }
-
-
         } catch (Exception e) {
             e.printStackTrace();
         }
