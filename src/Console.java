@@ -423,11 +423,17 @@ class ModConnector implements Runnable {
         try {
             ServerSocket server = new ServerSocket(9999);
             Socket client = server.accept();
+            Scanner scanner = new Scanner(client.getInputStream());
             PrintStream out = new PrintStream(client.getOutputStream());
 
             while (true) {
-                out.println("test");
-                Thread.sleep(1000);
+                if (scanner.hasNext()) {
+                    String read_str = scanner.next();
+                    // todo 2.0.0版本只推出test功能，2.0.1版本再继续完善
+                    if (read_str.equals("now_doing")) {     // 客户端要获取正在做
+                        out.println("testing");
+                    }
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
