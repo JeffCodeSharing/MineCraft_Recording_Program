@@ -406,6 +406,10 @@ public class Console extends Application {
  */
 class ConsoleEntrance {
     public static void main(String[] args) {
+        // 创建连接
+        Thread thread = new Thread(new ModConnector());
+        thread.start();
+
         Console.main(args);
     }
 }
@@ -413,7 +417,7 @@ class ConsoleEntrance {
 /**
  * @implNote 用于和游戏中的Mod进行连接
  */
-class mod_connector implements Runnable {
+class ModConnector implements Runnable {
     @Override
     public void run() {
         try {
