@@ -1,0 +1,10 @@
+用于创建项目
+
+图片如下：
+image:///data/HelpDocument/菜单/文件/create1.png
+
+每一次创建文件自动选择创建于桌面，项目名为untitled
+若与已存在的文件夹名重复了，程序会显示出来，更改后不再出现则会消失
+如图：
+image:///data/HelpDocument/菜单/文件/create2.png
+种子号可以不填写，在：菜单->项目信息->种子号中可以查询和修改

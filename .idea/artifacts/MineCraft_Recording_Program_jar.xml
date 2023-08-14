@@ -1,0 +1,26 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="MineCraft_Recording_Program:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/MineCraft_Recording_Program_jar</output-path>
+    <root id="archive" name="MineCraft_Recording_Program.jar">
+      <element id="extracted-dir" path="$PROJECT_DIR$/../../../../../ProgramFiles/Java/javafx-sdk-18.0.2/lib/javafx.base.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/../../../../../ProgramFiles/Java/javafx-sdk-18.0.2/lib/javafx.controls.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/../../../../../ProgramFiles/Java/javafx-sdk-18.0.2/lib/javafx.graphics.jar" path-in-jar="/" />
+      <element id="directory" name="Interface">
+        <element id="file-copy" path="$PROJECT_DIR$/out/production/MineCraft_Recording_Program/Interface/AbstractWindow.class" />
+      </element>
+      <element id="directory" name="Tools">
+        <element id="file-copy" path="$PROJECT_DIR$/out/production/MineCraft_Recording_Program/Tools/ClassTool.class" />
+        <element id="file-copy" path="$PROJECT_DIR$/out/production/MineCraft_Recording_Program/Tools/ColorTool.class" />
+        <element id="file-copy" path="$PROJECT_DIR$/out/production/MineCraft_Recording_Program/Tools/EDTool.class" />
+        <element id="file-copy" path="$PROJECT_DIR$/out/production/MineCraft_Recording_Program/Tools/IOTool.class" />
+        <element id="file-copy" path="$PROJECT_DIR$/out/production/MineCraft_Recording_Program/Tools/WinTool.class" />
+        <element id="file-copy" path="$PROJECT_DIR$/out/production/MineCraft_Recording_Program/Tools/ClassExpandTool.class" />
+      </element>
+      <element id="file-copy" path="$PROJECT_DIR$/out/production/MineCraft_Recording_Program/Console.class" />
+      <element id="file-copy" path="$PROJECT_DIR$/out/production/MineCraft_Recording_Program/ConsoleEntrance.class" />
+      <element id="directory" name="META-INF">
+        <element id="file-copy" path="$PROJECT_DIR$/out/artifacts/META-INF/MANIFEST.MF" />
+      </element>
+    </root>
+  </artifact>
+</component>

@@ -1,0 +1,68 @@
+package Modes.ProjectManager;
+
+import Tools.ClassTool;
+import Tools.WinTool;
+import javafx.scene.control.Alert;
+import javafx.stage.DirectoryChooser;
+import javafx.stage.Stage;
+
+import java.io.File;
+import java.util.Scanner;
+
+/**
+ * OpenProject 类负责在 ProjectManager 中打开项目。
+ */
+public class OpenProject {
+    private String path = "";
+
+    /**
+     * 进入方法，用于打开项目。
+     *
+     * @return 返回打开项目的路径
+     */
+    public String[] entrance() {
+        choose_dir();
+        return new String[]{path};
+    }
+
+    /**
+     * 选择项目目录。
+     */
+    private void choose_dir() {
+        DirectoryChooser chooser = new DirectoryChooser();
+        chooser.setTitle("选择项目");
+
+        try {
+            File file = chooser.showDialog(new Stage());
+            File check = new File(file.getPath() + File.separator + "check_item");
+            if (check.exists()) {
+                Scanner sc = new Scanner(check);
+                String time = sc.nextLine();
+                sc.close();
+                if (!time.startsWith("Create Time:")) {
+                    throw new RuntimeException();
+                } else {
+                    // 密码检查
+                    path = file.getPath();    // path设置
+
+                    ClassTool tool = new ClassTool("ProjectSafe" + File.separator + "CheckPassword.class");
+                    Class<?> checker = tool.get_class("ProjectSafe.CheckPassword");
+                    String return_value = ((String[]) tool.invoke_method(checker, "entrance",
+                            new Class[]{String.class}, new Object[]{path}, new Class[0], new Object[0]))[0];
+
+                    if (return_value.equals("true")) {
+                        WinTool.createAlert(Alert.AlertType.INFORMATION, "选择成功", "已成功切换项目", "切换项目:" + path);
+                    } else {
+                        path = "";
+                    }
+                }
+            } else {
+                throw new RuntimeException();
+            }
+        } catch (NullPointerException ignored) {
+            // 留空
+        } catch (Exception e) {
+            WinTool.createAlert(Alert.AlertType.WARNING, "错误", "打开项目出现错误", "");
+        }
+    }
+}
