@@ -6,12 +6,14 @@ import Tools.WinTool;
 import javafx.application.Application;
 import javafx.scene.Group;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ListView;
+import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
 import java.io.File;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.LocalDate;
 
 public class CreateDate extends Application implements AbstractWindow {
     private String date = "";
@@ -36,13 +38,18 @@ public class CreateDate extends Application implements AbstractWindow {
 
     @Override
     public void draw_controls(Group group) {
-        Label year_label = WinTool.createLabel(20, 20, 30, 30, 15, "年：");
-        Label month_label = WinTool.createLabel(20, 70, 30, 30, 15, "月：");
-        Label day_label = WinTool.createLabel(20, 120, 30, 30, 15, "日：");
-
         TextField year_field = WinTool.createTextField(50, 20, 120, 30, 15);
         TextField month_field = WinTool.createTextField(50, 70, 120, 30, 15);
         TextField day_field = WinTool.createTextField(50, 120, 120, 30, 15);
+
+        Button today = WinTool.createButton(120, 160, 60, 30, 15, "今日");
+        today.setOnAction(actionEvent -> {
+            LocalDate currentDate = LocalDate.now();
+
+            year_field.setText(String.valueOf(currentDate.getYear()));
+            day_field.setText(String.valueOf(currentDate.getDayOfMonth()));
+            month_field.setText(String.valueOf(currentDate.getMonthValue()));
+        });
 
         Button confirm = WinTool.createButton(120, 200, 60, 35, 15, "确定");
         Button cancel = WinTool.createButton(200, 200, 60, 35, 15, "取消");
@@ -55,7 +62,10 @@ public class CreateDate extends Application implements AbstractWindow {
         cancel.setOnAction(actionEvent -> global_stage.close());
 
         group.getChildren().addAll(
-                year_label, year_field, month_label, month_field, day_label, day_field,
+                WinTool.createLabel(20, 20, 30, 30, 15, "年："), year_field,
+                WinTool.createLabel(20, 70, 30, 30, 15, "月："), month_field,
+                WinTool.createLabel(20, 120, 30, 30, 15, "日："), day_field,
+                today,
                 confirm, cancel
         );
     }
@@ -95,12 +105,12 @@ public class CreateDate extends Application implements AbstractWindow {
 
             Integer[] day_of_months = return_day_of_month(Integer.parseInt(year.getText()));
 
-            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-            String[] date_str = formatter.format(new Date()).split("-");
-            int[] date_int = new int[3];
-            for (int i = 0; i < 3; i++) {
-                date_int[i] = Integer.parseInt(date_str[i]);
-            }
+            LocalDate currentDate = LocalDate.now();
+            int[] date_int = {
+                    currentDate.getYear(),
+                    currentDate.getMonthValue(),
+                    currentDate.getDayOfMonth()
+            };
 
             // 检查
             if (year_int > date_int[0] || year_int < 1) {
@@ -134,7 +144,9 @@ public class CreateDate extends Application implements AbstractWindow {
                     }
                 }
             }
-            date = year.getText() + "-" + month.getText() + "-" + day.getText();
+
+            // 如果用户输入的day是一位数的，将day扩充到两位数
+            date = year.getText() + "-" + month.getText() + (day.getText().length() == 1 ? "-0" : "-") + day.getText();
         } catch (Exception e) {
             WinTool.createAlert(Alert.AlertType.WARNING, "提示", "输入不完整", "请修改");
             return false;
