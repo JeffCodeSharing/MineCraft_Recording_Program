@@ -430,8 +430,8 @@ class ModConnector implements Runnable {
                 if (scanner.hasNext()) {
                     String read_str = scanner.next();
                     // todo 2.0.0版本只推出test功能，2.0.1版本再继续完善
-                    if (read_str.equals("now_doing")) {     // 客户端要获取正在做
-                        out.println("testing");
+                    if (read_str.equals("test")) {     // 客户端要获取正在做
+                        out.println("testing!!");
                     }
                 }
             }
