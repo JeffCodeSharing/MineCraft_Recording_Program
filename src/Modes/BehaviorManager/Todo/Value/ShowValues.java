@@ -5,7 +5,6 @@ import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -141,7 +140,7 @@ public class ShowValues {
     private void add_label_to_box(String label_value, Color color, boolean is_done, int index) {
         HBox hBox = new HBox();
 
-        Label label = create_label(label_value, color);
+        Label label = WinTool.createLabelWithNoWidth(0, 0, 30, 25, label_value + " ", color);
         label.hoverProperty().addListener((observableValue, old_value, new_value) ->
                 label.setTextFill(new_value ? Color.PURPLE : color));
 
@@ -209,20 +208,6 @@ public class ShowValues {
         }
 
         box.getChildren().add(hBox);
-    }
-
-    /**
-     * 创建带有颜色的标签
-     * @param data 标签内容
-     * @param color 颜色
-     * @return 创建的标签对象
-     */
-    private Label create_label(String data, Color color) {    // 不使用WinTool.createLabel原因是因为这个create_label不设置宽
-        Label label = new Label(data + "  ");     // 添加两格的空格用于在后面添加的SelectButton进行区分
-        label.setMaxHeight(30);
-        label.setFont(Font.font(25));    // 将font数值设置为固定的25
-        label.setTextFill(color);
-        return label;
     }
 
     /**

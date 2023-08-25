@@ -99,7 +99,7 @@ public class GroupAdder {
         int i = 1;
         for (String[] values : group_value) {
             String add_str = title_str + i + "  X:" + values[0] + "  Y:" + values[1] + "  Z:" + values[2] + "  备注:" + values[3];
-            Label label = WinTool.createLabel(0, 0, 630, 25, 18, add_str, ColorTool.english_to_color(values[4]));
+            Label label = WinTool.createLabelWithNoWidth(0, 0, 25, 18, add_str, ColorTool.english_to_color(values[4]));
             box.getChildren().add(label);
 
             i++;
