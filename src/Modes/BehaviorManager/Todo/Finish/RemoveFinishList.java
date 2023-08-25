@@ -11,6 +11,7 @@ import javafx.stage.Stage;
 
 import java.io.File;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class RemoveFinishList extends Application implements AbstractWindow {
     private final Stage global_stage = new Stage();
@@ -30,30 +31,31 @@ public class RemoveFinishList extends Application implements AbstractWindow {
 
     @Override
     public void draw_controls(Group group) {
-        // 提前声明ListView和CheckBox
+        AtomicBoolean select_all = new AtomicBoolean(false);
+
+        // 提前声明
         ListView<String> listView = WinTool.createListView(10, 40, 340, 260, list);
-        CheckBox checkBox = WinTool.createCheckBox(10, 310, 100, 30, 18, "全选");
+        Button select_button = WinTool.createButton(10, 310, 80, 40, 18, "全选");
 
         // 一系列操作
         listView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         listView.getSelectionModel().selectedItemProperty().addListener((observableValue, old_value, new_value) ->
-                checkBox.setSelected(false));
+                select_all.set(false));
 
-        checkBox.setOnAction(actionEvent -> {     // ListView全选
-            if (checkBox.isSelected()) {
-                listView.getItems().forEach(item -> listView.getSelectionModel().select(item));
-            }
+        select_button.setOnAction(actionEvent -> {     // ListView全选
+            listView.getItems().forEach(item -> listView.getSelectionModel().select(item));
+            select_all.set(true);
         });
 
         Button confirm = WinTool.createButton(180, 310, 80, 40, 16, "确定");
         Button cancel = WinTool.createButton(270, 310, 80, 40, 16, "取消");
 
-        confirm.setOnAction(actionEvent -> after_confirm(listView.getSelectionModel().getSelectedItem(), checkBox.isSelected()));
+        confirm.setOnAction(actionEvent -> after_confirm(listView.getSelectionModel().getSelectedItem(), select_all.get()));
         cancel.setOnAction(actionEvent -> global_stage.close());
 
         group.getChildren().addAll(
                 WinTool.createLabel(0, 0, 300, 40, 20, "删除计划表", Color.BLUE),
-                listView, checkBox,
+                listView, select_button,
                 confirm, cancel
         );
     }
