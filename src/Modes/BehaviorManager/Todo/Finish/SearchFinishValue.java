@@ -73,7 +73,7 @@ public class SearchFinishValue {
         hBox.getChildren().addAll(return_menu, return_last);
 
         // 创建列表名标签
-        Label title = WinTool.createLabel(0, 0, 400, 30, 25, list_name, Color.BLUE);
+        Label title = WinTool.createLabelWithNoWidth(0, 0, 30, 25, list_name, Color.BLUE);
 
         // 向界面添加返回按钮、列表名和间距标签
         box.getChildren().addAll(hBox, WinTool.createLabel(0, 0, 0, 10, 0, ""),

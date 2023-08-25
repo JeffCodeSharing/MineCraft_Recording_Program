@@ -54,6 +54,43 @@ public class WinTool {
     }
 
     /**
+     * 创建不含宽度定义的标签控件。
+     *
+     * @param x      标签控件的 x 坐标
+     * @param y      标签控件的 y 坐标
+     * @param height 标签控件的高度
+     * @param size   标签控件的字体大小
+     * @param data   标签控件的文本内容
+     * @return 返回标签控件
+     */
+    public static Label createLabelWithNoWidth(int x, int y, int height, int size, String data) {
+        Label label = new Label(data);
+        label.setLayoutX(x);
+        label.setLayoutY(y);
+        label.setMaxHeight(height);
+        label.setMinHeight(height);
+        label.setFont(Font.font(size));
+        return label;
+    }
+
+    /**
+     * 创建不含宽度定义的标签控件。
+     *
+     * @param x      标签控件的 x 坐标
+     * @param y      标签控件的 y 坐标
+     * @param height 标签控件的高度
+     * @param size   标签控件的字体大小
+     * @param data   标签控件的文本内容
+     * @param color  标签控件的颜色
+     * @return 返回标签控件
+     */
+    public static Label createLabelWithNoWidth(int x, int y, int height, int size, String data, Color color) {
+        Label label = createLabelWithNoWidth(x, y, height, size, data);
+        label.setTextFill(color);
+        return label;
+    }
+
+    /**
      * 创建按钮控件。
      *
      * @param x      按钮控件的 x 坐标
