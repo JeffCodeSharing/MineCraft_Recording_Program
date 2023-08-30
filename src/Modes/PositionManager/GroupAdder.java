@@ -1,9 +1,6 @@
 package Modes.PositionManager;
 
-import Tools.ClassTool;
-import Tools.ColorTool;
-import Tools.IOTool;
-import Tools.WinTool;
+import Tools.*;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -50,7 +47,6 @@ public class GroupAdder {
      * @param title_str 组的标题。
      */
     public void add(List<String[]> group_value, String title_str) {
-        // todo 将所有的操作进行替换！！！
         final int group_type = group_name.size();      // 在调用本方法之前，group_name 已经添加信息了
         HBox hBox = new HBox();
         Label group_title = WinTool.createLabel(0, 0, 320, 35, 20,
@@ -62,7 +58,6 @@ public class GroupAdder {
                     "Group" + File.separator + "RemoveGroup.class");
             Class<?> deleter = tool.get_class("Modes.PositionManager.Group.RemoveGroup");
             tool.invoke_method(deleter, "entrance",
-                    new Class[]{List.class, List.class, List.class}, new Object[]{item_num, group_values, group_name},
                     new Class[]{VBox.class, String.class, String.class},
                     new Object[]{box, group_dir + File.separator + title_str, group_title.getText()});
 
@@ -127,7 +122,7 @@ public class GroupAdder {
                 List<String[]> value_group = new ArrayList<>();
 
                 for (String value : temp) {
-                    String[] add_array = value.split("\0");
+                    String[] add_array = EDTool.decrypt(value).split("\0");
                     value_group.add(add_array);
                 }
 

@@ -6,7 +6,6 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.layout.VBox;
 
 import java.io.File;
-import java.util.List;
 import java.util.Optional;
 import java.util.Scanner;
 
@@ -14,23 +13,6 @@ import java.util.Scanner;
  * 本Class用于删除坐标组
  */
 public class RemoveGroup {
-    private final List<Integer> item_num;
-    private final List<List<String[]>> group_value;
-    private final List<String> group_name;
-
-    /**
-     * DeleteGroup类的构造函数，初始化删除坐标组所需的参数。
-     *
-     * @param item_num   记录每个坐标组中已有的项目数
-     * @param group_value 存储坐标组数据的列表的列表
-     * @param group_name  存储坐标组名的列表
-     */
-    public RemoveGroup(List<Integer> item_num, List<List<String[]>> group_value, List<String> group_name) {
-        this.item_num = item_num;
-        this.group_value = group_value;
-        this.group_name = group_name;
-    }
-
     /**
      * DeleteGroup入口，供调用者使用。
      *
@@ -59,17 +41,6 @@ public class RemoveGroup {
                 "删除项目", "您是否要删除这一个坐标组", "删除后坐标组中的数据将不复存在");
 
         if (type.get() == ButtonType.OK) {
-            int group_item_num = item_num.get(pos);
-            int item_pos = 2;
-            for (int i = 0; i < pos; i++) {
-                item_pos = item_pos + 2 + item_num.get(i);
-            }
-
-            box.getChildren().remove(item_pos, item_pos + group_item_num);
-            item_num.remove(pos);
-            group_value.remove(pos);
-            group_name.remove(pos);
-
             // 删除文件
             try {
                 if (!delete_file.delete()) {
