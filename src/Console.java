@@ -8,9 +8,7 @@ import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintStream;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Scanner;
@@ -423,16 +421,17 @@ class ModConnector implements Runnable {
         try {
             ServerSocket server = new ServerSocket(9999);
             Socket client = server.accept();
-            Scanner scanner = new Scanner(client.getInputStream());
-            PrintStream out = new PrintStream(client.getOutputStream());
+
+            // 获取输入流和输出流
+            BufferedReader in = new BufferedReader(new InputStreamReader(client.getInputStream()));
+            OutputStream out = client.getOutputStream();
 
             while (true) {
-                if (scanner.hasNext()) {
-                    String read_str = scanner.next();
-                    // todo 2.0.0版本只推出test功能，2.0.1版本再继续完善
-                    if (read_str.equals("test")) {     // 客户端要获取正在做
-                        out.println("testing!!");
-                    }
+                String request = String.valueOf(in.read());
+                if (request.equals("test")) {
+                    String response = "Testing!!!";
+                    out.write(response.getBytes());
+                    out.flush();
                 }
             }
         } catch (Exception e) {
