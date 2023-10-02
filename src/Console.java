@@ -427,7 +427,7 @@ class ModConnector implements Runnable {
             OutputStream out = client.getOutputStream();
 
             while (true) {
-                String request = String.valueOf(in.read());
+                String request = in.readLine();
                 if (request.equals("test")) {
                     String response = "Testing!!!";
                     out.write(response.getBytes());
