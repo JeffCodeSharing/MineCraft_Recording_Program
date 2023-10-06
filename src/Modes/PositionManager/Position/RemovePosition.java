@@ -1,6 +1,6 @@
 package Modes.PositionManager.Position;
 
-import Tools.ClassTool;
+import Modes.PositionManager.Group.SaveGroup;
 import Tools.WinTool;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
@@ -67,11 +67,8 @@ public class RemovePosition {
             group_value.remove(index);
             item_num.set(group_index - 1, item_num.get(group_index - 1) - 1);
 
-            ClassTool tool = new ClassTool("Modes" + File.separator + "PositionManager" + File.separator +
-                    "Group" + File.separator + "SaveGroup.class");
-            Class<?> deleter = tool.get_class("Modes.PositionManager.Group.SaveGroup");
-            tool.invoke_method(deleter, "entrance",
-                    new Class[]{String.class, List.class}, new Object[]{group_path, group_value});
+            SaveGroup saver = new SaveGroup();
+            saver.entrance(group_path, group_value);
         }
     }
 }

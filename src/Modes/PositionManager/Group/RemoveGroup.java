@@ -3,7 +3,6 @@ package Modes.PositionManager.Group;
 import Tools.WinTool;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
-import javafx.scene.layout.VBox;
 
 import java.io.File;
 import java.util.Optional;
@@ -15,11 +14,9 @@ public class RemoveGroup {
     /**
      * DeleteGroup入口，供调用者使用。
      *
-     * @param box          坐标组显示的VBox
      * @param delete_path  要删除的坐标组所在的文件路径
-     * @param title_value  坐标组的对应的index
      */
-    public void entrance(VBox box, String delete_path, String title_value) {
+    public void entrance(String delete_path) {
         Optional<ButtonType> type = WinTool.createAlert(Alert.AlertType.CONFIRMATION,
                 "删除项目", "您是否要删除这一个坐标组", "删除后坐标组中的数据将不复存在");
 

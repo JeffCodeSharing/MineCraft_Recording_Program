@@ -5,7 +5,7 @@
  */
 package Modes.BehaviorManager.Todo.Value;
 
-import Tools.ClassExpandTool;
+import Modes.BehaviorManager.Todo.DataController;
 import Tools.WinTool;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Optional;
 
 public class ValueFinish {
-    private final ClassExpandTool controller;
+    private final DataController controller;
     private final int index;
 
     /**
@@ -22,7 +22,7 @@ public class ValueFinish {
      * @param controller 数据控制器对象(ClassExpandTool反射实现)
      * @param index 值的索引
      */
-    public ValueFinish(ClassExpandTool controller, int index) {
+    public ValueFinish(DataController controller, int index) {
         this.controller = controller;
         this.index = index;
     }
@@ -37,7 +37,7 @@ public class ValueFinish {
 
         if (type.get() == ButtonType.OK) {
             if (index == -1) {    // 当用户点击的是标题时
-                List<String[]> values = (List<String[]>) controller.invoke_method("getValues", new Class[0], new Object[0]);
+                List<String[]> values = controller.getValues();
                 for (int i=0; i<values.size(); i++) {
                     String[] temp = values.get(i);
                     temp[1] = "GREEN";
@@ -45,9 +45,8 @@ public class ValueFinish {
                 }
             } else {
                 // 不在数组中直接进行修改是为了防止直接修改了DataController中记录的数据，避免了 不管成不成功都会更改颜色
-                String[] values = (String[]) controller.invoke_method("get", new Class[]{int.class}, new Object[]{index});
-                controller.invoke_method("set",
-                        new Class[]{int.class, String[].class}, new Object[]{index, new String[]{values[0], "GREEN"}});   // set 并获取返回值
+                String[] values = controller.get(index);
+                controller.set(index, values[0], "GREEN");
             }
         }
     }

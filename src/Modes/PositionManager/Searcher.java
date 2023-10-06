@@ -1,5 +1,6 @@
 package Modes.PositionManager;
 
+import Modes.PositionManager.Group.CreateGroup;
 import Tools.*;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -36,24 +37,14 @@ public class Searcher {
         HBox hBox = new HBox();
         Button create_group = WinTool.createButton(0, 0, 130, 40, 20, "创建坐标组");
         create_group.setOnAction(actionEvent -> {
-            ClassTool tool = new ClassTool("Modes" + File.separator + "PositionManager" + File.separator +
-                    "Group" + File.separator + "CreateGroup.class");
-            Class<?> deleter = tool.get_class("Modes.PositionManager.Group.CreateGroup");
-            tool.invoke_method(deleter, "entrance",
-                    new Class[]{VBox.class, List.class, List.class, List.class, String.class},
-                    new Object[]{box, item_num, group_value, group_name, path},
-                    new Class[0], new Object[0]);
+            CreateGroup creator = new CreateGroup(box, item_num, group_value, group_name, path);
+            creator.entrance();
         });
 
         Button positioning_group = WinTool.createButton(0, 0, 130, 40, 20, "定位坐标组");
         positioning_group.setOnAction(actionEvent -> {
-            ClassTool tool = new ClassTool("Modes" + File.separator + "PositionManager" + File.separator +
-                    "PositioningGroup.class");
-            Class<?> deleter = tool.get_class("Modes.PositionManager.PositioningGroup");
-            tool.invoke_method(deleter, "entrance",
-                    new Class[]{ScrollPane.class, List.class, List.class},
-                    new Object[]{pane, group_name, item_num},
-                    new Class[0], new Object[0]);
+            PositioningGroup clazz = new PositioningGroup(pane, group_name, item_num);
+            clazz.entrance();
         });
 
         hBox.getChildren().addAll(create_group, positioning_group);
@@ -70,11 +61,7 @@ public class Searcher {
      * @param dir 目录的文件类
      */
     private void add_group(String dir, VBox box) {
-        ClassExpandTool adder = new ClassExpandTool("Modes" + File.separator + "PositionManager" + File.separator + "GroupAdder.class");
-        adder.initialize_class("Modes.PositionManager.GroupAdder",
-                new Class[]{VBox.class, List.class, List.class, List.class, String.class},
-                new Object[]{box, item_num, group_value, group_name, dir}
-        );     // 初始化class
+        GroupAdder adder = new GroupAdder(box, item_num, group_value, group_name, dir);
 
         String[] list = new File(dir).list();
         for (int i = 0; i < list.length; i++) {
@@ -97,9 +84,7 @@ public class Searcher {
             group_name.add(s);
 
             // 执行GroupAdder中的add的操作
-            adder.invoke_method("add",
-                    new Class[]{List.class, String.class}, new Object[]{group_value.get(i), group_name.get(i)}
-            );
+            adder.add(group_value.get(i), group_name.get(i));
         }
     }
 }

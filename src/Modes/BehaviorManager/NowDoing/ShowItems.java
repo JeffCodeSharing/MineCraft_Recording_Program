@@ -1,7 +1,6 @@
 package Modes.BehaviorManager.NowDoing;
 
 import Interface.AbstractWindow;
-import Tools.ClassTool;
 import Tools.EDTool;
 import Tools.IOTool;
 import Tools.WinTool;
@@ -14,7 +13,6 @@ import javafx.scene.control.ListView;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -73,21 +71,15 @@ public class ShowItems extends Application implements AbstractWindow {
         Button finish = WinTool.createButton(300, 360, 80, 40, 16, "完成");
         Button change = WinTool.createButton(390, 360, 80, 40, 16, "更改");
         create.setOnAction(actionEvent -> {
-            ClassTool tool = new ClassTool("Modes" + File.separator + "BehaviorManager" + File.separator
-                    + "NowDoing" + File.separator + "CreateItem.class");
-            Class<?> clazz = tool.get_class("Modes.BehaviorManager.NowDoing.CreateItem");
-            tool.invoke_method(clazz, "entrance", new Class[]{List.class}, new Object[]{file_data}, new Class[0], new Object[0]);
+            CreateItem creator = new CreateItem(file_data);
+            creator.entrance();
 
             update_listView();   // 刷新
         });
         finish.setOnAction(actionEvent -> finish_item(listView.getSelectionModel().getSelectedIndex()));
         change.setOnAction(actionEvent -> {
-            ClassTool tool = new ClassTool("Modes" + File.separator + "BehaviorManager" + File.separator
-                    + "NowDoing" + File.separator + "SetItemData.class");
-            Class<?> clazz = tool.get_class("Modes.BehaviorManager.NowDoing.SetItemData");
-            tool.invoke_method(clazz, "entrance",
-                    new Class[]{List.class, int.class}, new Object[]{file_data, listView.getSelectionModel().getSelectedIndex()},
-                    new Class[0], new Object[0]);
+            SetItemData setter = new SetItemData(file_data, listView.getSelectionModel().getSelectedIndex());
+            setter.entrance();
 
             update_listView();   // 刷新
         });

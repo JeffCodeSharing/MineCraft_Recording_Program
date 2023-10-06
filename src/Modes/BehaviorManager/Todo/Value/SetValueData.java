@@ -1,7 +1,7 @@
 package Modes.BehaviorManager.Todo.Value;
 
 import Interface.AbstractWindow;
-import Tools.ClassExpandTool;
+import Modes.BehaviorManager.Todo.DataController;
 import Tools.WinTool;
 import javafx.application.Application;
 import javafx.scene.Group;
@@ -20,10 +20,10 @@ import javafx.stage.Stage;
  */
 public class SetValueData extends Application implements AbstractWindow {
     private final Stage global_stage = new Stage();
-    private final ClassExpandTool controller;
+    private final DataController controller;
     private final int index;
 
-    public SetValueData(ClassExpandTool controller, int index) {
+    public SetValueData(DataController controller, int index) {
         this.controller = controller;
         this.index = index;
     }
@@ -45,7 +45,7 @@ public class SetValueData extends Application implements AbstractWindow {
     @Override
     @SuppressWarnings("unckecked")
     public void draw_controls(Group group) {
-        String[] value_data = (String[]) controller.invoke_method("get", new Class[]{int.class}, new Object[]{index});
+        String[] value_data = controller.get(index);
         String[] text_data = value_data[0].split("· ");   // 用点号作切分点
 
         // 进一步切割（分出 notes 和 way），分层讨论，以免在用户更改的是第一层时出错
@@ -119,15 +119,13 @@ public class SetValueData extends Application implements AbstractWindow {
      * @param notes_value "信息内容"的TextField中的内容
      * @param ways_value "实现方法"的TextField中的内容
      */
-    @SuppressWarnings("unckecked")
     private void after_confirm(String notes_value, String ways_value) {
-        String[] value_data = (String[]) controller.invoke_method("get", new Class[]{int.class}, new Object[]{index});
+        String[] value_data = controller.get(index);
         String[] text_data = value_data[0].split("· ");   // 用点号作切分点（切分出"\t"和文字内容）
 
         String set_value = text_data[0] + "· " + notes_value + " " + ways_value;
         // value_data[1]指的是文字的Color
-        controller.invoke_method("set",
-                new Class[]{int.class, String.class, String.class}, new Object[]{index, set_value, value_data[1]});
+        controller.set(index, set_value, value_data[1]);
 
         global_stage.close();
         WinTool.createAlert(Alert.AlertType.INFORMATION, "成功", "更改成功！", "");

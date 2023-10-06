@@ -1,7 +1,7 @@
 package Modes.PositionManager.Position;
 
 import Interface.AbstractWindow;
-import Tools.ClassTool;
+import Modes.PositionManager.Group.SaveGroup;
 import Tools.ColorTool;
 import Tools.WinTool;
 import javafx.application.Application;
@@ -131,13 +131,8 @@ public class SetPositionData extends Application implements AbstractWindow {
                 ColorTool.chinese_to_english(color_box.getSelectionModel().getSelectedItem()), index
         ));
         delete.setOnAction(actionEvent -> {
-            ClassTool tool = new ClassTool("Modes" + File.separator + "PositionManager" + File.separator +
-                    "Position" + File.separator + "RemovePosition.class");
-            Class<?> deleter = tool.get_class("Modes.PositionManager.Position.RemovePosition");
-            tool.invoke_method(deleter, "entrance",
-                    new Class[]{VBox.class, int.class, int.class, List.class, List.class, String.class, String.class},
-                    new Object[]{box, index, group_type, item_num, group_value, group_dir, group_name},
-                    new Class[0], new Object[0]);
+            RemovePosition remover = new RemovePosition(box, index, group_type, item_num, group_value, group_dir, group_name);
+            remover.entrance();
 
             draw_controls(group);     // 回到首页
         });
@@ -180,10 +175,7 @@ public class SetPositionData extends Application implements AbstractWindow {
 
         WinTool.createAlert(Alert.AlertType.INFORMATION, "成功", "更改成功！！", "");
 
-        ClassTool tool = new ClassTool("Modes" + File.separator + "PositionManager" + File.separator +
-                "Group" + File.separator + "SaveGroup.class");
-        Class<?> deleter = tool.get_class("Modes.PositionManager.Group.SaveGroup");
-        tool.invoke_method(deleter, "entrance",
-                new Class[]{String.class, List.class}, new Object[]{group_dir + File.separator + group_name, group_value});
+        SaveGroup saver = new SaveGroup();
+        saver.entrance(group_dir + File.separator + group_name, group_value);
     }
 }

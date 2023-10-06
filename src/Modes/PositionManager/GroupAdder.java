@@ -1,5 +1,8 @@
 package Modes.PositionManager;
 
+import Modes.PositionManager.Group.RemoveGroup;
+import Modes.PositionManager.Position.CreatePosition;
+import Modes.PositionManager.Position.SetPositionData;
 import Tools.*;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -54,36 +57,22 @@ public class GroupAdder {
 
         Button delete_group = WinTool.createButton(0, 0, 90, 30, 15, "删除本组");
         delete_group.setOnAction(actionEvent -> {
-            ClassTool tool = new ClassTool("Modes" + File.separator + "PositionManager" + File.separator +
-                    "Group" + File.separator + "RemoveGroup.class");
-            Class<?> deleter = tool.get_class("Modes.PositionManager.Group.RemoveGroup");
-            tool.invoke_method(deleter, "entrance",
-                    new Class[]{VBox.class, String.class, String.class},
-                    new Object[]{box, group_dir + File.separator + title_str, group_title.getText()});
+            RemoveGroup remover = new RemoveGroup();
+            remover.entrance(group_dir + File.separator + title_str);
 
             update();
         });
 
         Button create_position = WinTool.createButton(0, 0, 90, 30, 15, "创建坐标");
         create_position.setOnAction(actionEvent -> {
-            ClassTool tool = new ClassTool("Modes" + File.separator + "PositionManager" + File.separator +
-                    "Position" + File.separator + "CreatePosition.class");
-            Class<?> deleter = tool.get_class("Modes.PositionManager.Position.CreatePosition");
-            tool.invoke_method(deleter, "entrance",
-                    new Class[]{VBox.class, List.class, List.class, int.class, String.class, String.class, String.class},
-                    new Object[]{box, item_num, group_value, group_type, title_str, group_dir, title_str},
-                    new Class[0], new Object[0]);
+            CreatePosition creator = new CreatePosition(box, item_num, group_value, group_type, title_str, group_dir, title_str);
+            creator.entrance();
         });
 
         Button change = WinTool.createButton(0, 0, 110, 30, 14, "更改坐标信息");
         change.setOnAction(actionEvent -> {
-            ClassTool tool = new ClassTool("Modes" + File.separator + "PositionManager" + File.separator +
-                    "Position" + File.separator + "SetPositionData.class");
-            Class<?> deleter = tool.get_class("Modes.PositionManager.Position.SetPositionData");
-            tool.invoke_method(deleter, "entrance",
-                    new Class[]{VBox.class, List.class, List.class, int.class, String.class, String.class},
-                    new Object[]{box, item_num, group_value, group_type, group_dir, title_str},
-                    new Class[0], new Object[0]);
+            SetPositionData setter = new SetPositionData(box, item_num, group_value, group_type, group_dir, title_str);
+            setter.entrance();
         });
 
         hBox.getChildren().addAll(

@@ -1,6 +1,6 @@
 package Modes.ProjectManager;
 
-import Tools.ClassTool;
+import ProjectSafe.CheckPassword;
 import Tools.WinTool;
 import javafx.scene.control.Alert;
 import javafx.stage.DirectoryChooser;
@@ -45,10 +45,8 @@ public class OpenProject {
                     // 密码检查
                     path = file.getPath();    // path设置
 
-                    ClassTool tool = new ClassTool("ProjectSafe" + File.separator + "CheckPassword.class");
-                    Class<?> checker = tool.get_class("ProjectSafe.CheckPassword");
-                    String return_value = ((String[]) tool.invoke_method(checker, "entrance",
-                            new Class[]{String.class}, new Object[]{path}, new Class[0], new Object[0]))[0];
+                    CheckPassword checker = new CheckPassword(path);
+                    String return_value = checker.entrance()[0];
 
                     if (return_value.equals("true")) {
                         WinTool.createAlert(Alert.AlertType.INFORMATION, "选择成功", "已成功切换项目", "切换项目:" + path);

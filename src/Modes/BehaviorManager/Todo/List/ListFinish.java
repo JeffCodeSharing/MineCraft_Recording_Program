@@ -1,6 +1,6 @@
 package Modes.BehaviorManager.Todo.List;
 
-import Tools.ClassExpandTool;
+import Modes.BehaviorManager.Todo.DataController;
 import Tools.EDTool;
 import Tools.IOTool;
 
@@ -19,10 +19,8 @@ public class ListFinish {
      *
      * @param controller DataController对象(使用ClassExpandTool的反射来完成)，用于获取已完成的计划表中的数据
      */
-    @SuppressWarnings("unchecked")
-    public ListFinish(ClassExpandTool controller) {
-        List<String[]> controller_values =
-                (List<String[]>) controller.invoke_method("getValues", new Class[0], new Object[0]);
+    public ListFinish(DataController controller) {
+        List<String[]> controller_values = controller.getValues();
         // 添加保存内容
         for (String[] temp : controller_values) {
             // 将每个计划项转换为只有文字的格式（没有颜色标记，还要加密）

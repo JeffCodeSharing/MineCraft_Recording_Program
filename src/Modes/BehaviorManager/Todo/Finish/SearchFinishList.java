@@ -1,6 +1,6 @@
 package Modes.BehaviorManager.Todo.Finish;
 
-import Tools.ClassTool;
+import Modes.BehaviorManager.Todo.List.ShowLists;
 import Tools.WinTool;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -44,22 +44,16 @@ public class SearchFinishList {
         return_to_menu.setOnAction(actionEvent -> {
             String doing_path = path.substring(0, path.length()-6) + "doing";
 
-            ClassTool tool = new ClassTool("Modes" + File.separator + "BehaviorManager" + File.separator +
-                    "Todo" + File.separator + "List" + File.separator + "ShowLists.class");
-            Class<?> searcher = tool.get_class("Modes.BehaviorManager.Todo.List.ShowLists");
-            tool.invoke_method(searcher, "entrance",
-                    new Class[]{VBox.class, String.class}, new Object[]{box, doing_path}, new Class[0], new Object[0]);
+            ShowLists clazz = new ShowLists(box, doing_path);
+            clazz.entrance();
         });
 
         Button remove_list = WinTool.createButton(0, 0, 120, 40, 15, "删除计划表");
 
         final String[] finalList = list;
         remove_list.setOnAction(actionEvent -> {
-            ClassTool tool = new ClassTool("Modes" + File.separator + "BehaviorManager" + File.separator +
-                    "Todo" + File.separator + "Finish" + File.separator + "RemoveFinishList.class");
-            Class<?> searcher = tool.get_class("Modes.BehaviorManager.Todo.Finish.RemoveFinishList");
-            tool.invoke_method(searcher, "entrance",
-                    new Class[]{String[].class, String.class}, new Object[]{finalList, path}, new Class[0], new Object[0]);
+            RemoveFinishList remover = new RemoveFinishList(finalList, path);
+            remover.entrance();
 
             // 刷新
             entrance();
@@ -85,12 +79,8 @@ public class SearchFinishList {
         label.hoverProperty().addListener((observableValue, old_value, new_value) ->
                 label.setTextFill(new_value ? Color.PURPLE : Color.BLUE));
         label.setOnMousePressed(mouseEvent -> {
-            ClassTool tool = new ClassTool("Modes" + File.separator + "BehaviorManager" + File.separator +
-                    "Todo" + File.separator + "Finish" + File.separator + "SearchFinishValue.class");
-            Class<?> searcher = tool.get_class("Modes.BehaviorManager.Todo.Finish.SearchFinishValue");
-            tool.invoke_method(searcher, "entrance",
-                    new Class[]{VBox.class, String.class, String.class}, new Object[]{box, path, value},
-                    new Class[0], new Object[0]);
+            SearchFinishValue searcher = new SearchFinishValue(box, path, value);
+            searcher.entrance();
         });
         box.getChildren().add(label);
     }

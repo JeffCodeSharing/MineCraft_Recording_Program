@@ -1,7 +1,7 @@
 package Modes.BehaviorManager.Todo.Value;
 
 import Interface.AbstractWindow;
-import Tools.ClassExpandTool;
+import Modes.BehaviorManager.Todo.DataController;
 import Tools.WinTool;
 import javafx.application.Application;
 import javafx.scene.Group;
@@ -20,7 +20,7 @@ import javafx.stage.Stage;
  */
 public class CreateValue extends Application implements AbstractWindow {
     private final Stage global_stage = new Stage();
-    private final ClassExpandTool controller;
+    private final DataController controller;
     private final int index;
 
     /**
@@ -28,7 +28,7 @@ public class CreateValue extends Application implements AbstractWindow {
      * @param controller 数据控制器(使用ClassExpandTool反射实现)
      * @param index 索引值
      */
-    public CreateValue(ClassExpandTool controller, int index) {
+    public CreateValue(DataController controller, int index) {
         this.controller = controller;
         this.index = index;
     }
@@ -109,9 +109,9 @@ public class CreateValue extends Application implements AbstractWindow {
 
                 String add_str = notes + " " + way;
                 if (index == -1) {    // 若是点击了标题来加入的
-                    controller.invoke_method("add", new Class[]{String.class}, new Object[]{add_str});
+                    controller.add(add_str);
                 } else {      // 其他情况
-                    controller.invoke_method("add", new Class[]{int.class, String.class}, new Object[]{index, add_str});
+                    controller.add(index, add_str);
                 }
 
                 global_stage.close();

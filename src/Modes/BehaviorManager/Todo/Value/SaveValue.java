@@ -1,6 +1,6 @@
 package Modes.BehaviorManager.Todo.Value;
 
-import Tools.ClassExpandTool;
+import Modes.BehaviorManager.Todo.DataController;
 import Tools.EDTool;
 import Tools.IOTool;
 import Tools.WinTool;
@@ -23,9 +23,8 @@ public class SaveValue {
      * @param path 保存文件路径
      * @param list_name 列表名称
      */
-    @SuppressWarnings("unchecked")
-    public void entrance(ClassExpandTool controller, String path, String list_name) {
-        List<String[]> values = (List<String[]>) controller.invoke_method("getValues", new Class[0], new Object[0]);
+    public void entrance(DataController controller, String path, String list_name) {
+        List<String[]> values = controller.getValues();
         String list_path = path + File.separator + list_name;
 
         start(list_path, values);

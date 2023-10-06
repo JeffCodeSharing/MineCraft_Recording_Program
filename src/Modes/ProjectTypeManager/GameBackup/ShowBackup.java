@@ -1,7 +1,6 @@
 package Modes.ProjectTypeManager.GameBackup;
 
 import Interface.AbstractWindow;
-import Tools.ClassTool;
 import Tools.WinTool;
 import javafx.application.Application;
 import javafx.scene.Group;
@@ -48,20 +47,14 @@ public class ShowBackup extends Application implements AbstractWindow {
 
         Button output_backup = WinTool.createButton(30, 100, 100, 40, 15, "导出备份");
         output_backup.setOnAction(actionEvent -> {
-            ClassTool tool = new ClassTool("Modes" + File.separator + "ProjectTypeManager" + File.separator +
-                    "GameBackup" + File.separator + "ExportBackup.class");
-            Class<?> exporter = tool.get_class("Modes.ProjectTypeManager.GameBackup.ExportBackup");
-            tool.invoke_method(exporter, "entrance",
-                    new Class[]{String.class}, new Object[]{path}, new Class[0], new Object[0]);
+            ExportBackup exporter = new ExportBackup(path);
+            exporter.entrance();
         });
 
         Button override_backup = WinTool.createButton(140, 100, 100, 40, 15, "更新备份");
         override_backup.setOnAction(actionEvent -> {
-            ClassTool tool = new ClassTool("Modes" + File.separator + "ProjectTypeManager" + File.separator +
-                    "GameBackup" + File.separator + "ImportBackup.class");
-            Class<?> importer = tool.get_class("Modes.ProjectTypeManager.GameBackup.ImportBackup");
-            tool.invoke_method(importer, "entrance",
-                    new Class[]{String.class}, new Object[]{path}, new Class[0], new Object[0]);
+            ImportBackup importer = new ImportBackup(path);
+            importer.entrance();
         });
 
         group.getChildren().addAll(

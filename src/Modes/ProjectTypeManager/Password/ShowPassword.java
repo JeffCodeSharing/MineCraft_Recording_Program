@@ -1,7 +1,7 @@
 package Modes.ProjectTypeManager.Password;
 
 import Interface.AbstractWindow;
-import Tools.ClassTool;
+import ProjectSafe.CheckPassword;
 import Tools.EDTool;
 import Tools.IOTool;
 import Tools.WinTool;
@@ -68,11 +68,8 @@ public class ShowPassword extends Application implements AbstractWindow {
 
         Button change = WinTool.createButton(10, 110, 100, 40, 15, "更改密码");
         change.setOnAction(actionEvent -> {
-            ClassTool tool = new ClassTool("Modes" + File.separator + "ProjectTypeManager" + File.separator +
-                    "Password" + File.separator + "SetPassword.class");
-            Class<?> setter = tool.get_class("Modes.ProjectTypeManager.Password.SetPassword");
-            tool.invoke_method(setter, "entrance",
-                    new Class[]{Group.class, String.class}, new Object[]{group, path}, new Class[0], new Object[0]);
+            SetPassword setter = new SetPassword(group, path);
+            setter.entrance();
         });
 
         group.getChildren().addAll(
@@ -88,10 +85,8 @@ public class ShowPassword extends Application implements AbstractWindow {
             WinTool.createAlert(Alert.AlertType.INFORMATION, "提示", "你还没有打开项目", "请打开后重试");
         } else {
             // 密码确认
-            ClassTool tool = new ClassTool("ProjectSafe" + File.separator + "CheckPassword.class");
-            Class<?> checker = tool.get_class("ProjectSafe.CheckPassword");
-            String return_value = ((String[]) tool.invoke_method(checker, "entrance",
-                    new Class[]{String.class}, new Object[]{path}, new Class[0], new Object[0]))[0];
+            CheckPassword checker = new CheckPassword(path);
+            String return_value = checker.entrance()[0];
 
             if (return_value.equals("true")) {
                 Group group = new Group();

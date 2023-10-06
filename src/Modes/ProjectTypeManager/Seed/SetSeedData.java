@@ -1,6 +1,5 @@
 package Modes.ProjectTypeManager.Seed;
 
-import Tools.ClassTool;
 import Tools.EDTool;
 import Tools.IOTool;
 import Tools.WinTool;
@@ -10,8 +9,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.paint.Color;
-
-import java.io.File;
 
 /**
  * 更改种子号用
@@ -45,11 +42,8 @@ public class SetSeedData {
         confirm.setOnAction(actionEvent -> save_data(seedInput.getText()));
         return_menu.setOnAction(actionEvent -> {
             // 返回
-            ClassTool tool = new ClassTool("Modes" + File.separator + "ProjectTypeManager" + File.separator +
-                    "Seed" + File.separator + "ShowSeed.class");
-            Class<?> clazz = tool.get_class("Modes.ProjectTypeManager.Seed.ShowSeed");
-            tool.invoke_method(clazz, "draw_controls",
-                    new Class[]{String.class}, new Object[]{path}, new Class[]{Group.class}, new Object[]{group});
+            ShowSeed clazz = new ShowSeed(path);
+            clazz.draw_controls(group);
         });
 
         group.getChildren().addAll(title, label, seedInput, confirm, return_menu);

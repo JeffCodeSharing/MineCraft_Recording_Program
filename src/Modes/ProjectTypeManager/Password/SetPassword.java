@@ -1,6 +1,5 @@
 package Modes.ProjectTypeManager.Password;
 
-import Tools.ClassTool;
 import Tools.EDTool;
 import Tools.IOTool;
 import Tools.WinTool;
@@ -22,7 +21,6 @@ public class SetPassword {
 
     /**
      * 构造函数，初始化Group，Group来自ShowPassword的传入
-     * @param group
      */
     public SetPassword(Group group, String path) {
         this.group = group;
@@ -112,11 +110,8 @@ public class SetPassword {
     }
 
     private void to_menu() {
-        ClassTool tool = new ClassTool("Modes" + File.separator + "ProjectTypeManager" + File.separator +
-                "Password" + File.separator + "ShowPassword.class");
-        Class<?> changer = tool.get_class("Modes.ProjectTypeManager.Password.ShowPassword");
-        tool.invoke_method(changer, "draw_controls",
-                new Class[]{String.class}, new Object[]{path}, new Class[]{Group.class}, new Object[]{group});
+        ShowPassword clazz = new ShowPassword(path);
+        clazz.draw_controls(group);
     }
 
     private boolean write_password(String password) {

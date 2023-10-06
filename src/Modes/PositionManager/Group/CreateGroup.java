@@ -1,7 +1,7 @@
 package Modes.PositionManager.Group;
 
 import Interface.AbstractWindow;
-import Tools.ClassTool;
+import Modes.PositionManager.GroupAdder;
 import Tools.WinTool;
 import javafx.application.Application;
 import javafx.scene.Group;
@@ -64,12 +64,8 @@ public class CreateGroup extends Application implements AbstractWindow {
                 group_name.add(field.getText());
 
                 // 添加控件
-                ClassTool tool = new ClassTool("Modes" + File.separator + "PositionManager" + File.separator + "GroupAdder.class");
-                Class<?> adder = tool.get_class("Modes.PositionManager.GroupAdder");
-                tool.invoke_method(adder, "add",
-                        new Class[]{VBox.class, List.class, List.class, List.class, String.class},
-                        new Object[]{box, item_num, group_value, group_name, create_dir},
-                        new Class[]{List.class, String.class}, new Object[]{new ArrayList<>(), field.getText()});
+                GroupAdder adder = new GroupAdder(box, item_num, group_value, group_name, create_dir);
+                adder.add(new ArrayList<>(), field.getText());
 
                 WinTool.createAlert(Alert.AlertType.INFORMATION, "提示", "创建成功！", "");
                 item_num.add(0);

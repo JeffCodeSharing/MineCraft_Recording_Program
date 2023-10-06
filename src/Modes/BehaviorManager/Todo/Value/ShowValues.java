@@ -1,5 +1,8 @@
 package Modes.BehaviorManager.Todo.Value;
 
+import Modes.BehaviorManager.Todo.DataController;
+import Modes.BehaviorManager.Todo.List.ListFinish;
+import Modes.BehaviorManager.Todo.List.ShowLists;
 import Tools.*;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
@@ -20,7 +23,7 @@ public class ShowValues {
     private final VBox box;
     private final String path;
     private final String list_name;
-    private final ClassExpandTool controller;
+    private final DataController controller;
 
     /**
      * 构造方法
@@ -45,10 +48,7 @@ public class ShowValues {
             }
         }
 
-        controller = new ClassExpandTool("Modes" + File.separator + "BehaviorManager" + File.separator +
-                "Todo" + File.separator + "DataController.class");
-        controller.initialize_class("Modes.BehaviorManager.Todo.DataController",
-                new Class[]{String[].class}, new Object[]{values});    // 将controller实例化
+        controller = new DataController(values);
     }
 
     /**
@@ -62,7 +62,6 @@ public class ShowValues {
      * 启动搜索操作
      * @param is_done 指示计划表是否已完成
      */
-    @SuppressWarnings("unchecked")
     private void start(boolean is_done) {
         // 清空box
         box.getChildren().clear();
@@ -71,22 +70,16 @@ public class ShowValues {
         Button return_menu = WinTool.createButton(0, 0, 120, 40, 18, "返回首页");
         return_menu.setOnAction(actionEvent -> {
             // 保存程序
-            save_data((List<String[]>) controller.invoke_method("getValues", new Class[0], new Object[0]));
+            save_data(controller.getValues());
 
-            ClassTool tool = new ClassTool("Modes" + File.separator + "BehaviorManager" + File.separator +
-                    "Todo" + File.separator + "List" + File.separator + "ShowLists.class");
-            Class<?> searcher = tool.get_class("Modes.BehaviorManager.Todo.List.ShowLists");
-            tool.invoke_method(searcher, "entrance",
-                    new Class[]{VBox.class, String.class}, new Object[]{box, path}, new Class[0], new Object[0]);
+            ShowLists clazz = new ShowLists(box, path);
+            clazz.entrance();
         });
 
         Button save = WinTool.createButton(0, 0, 120, 40, 20, "保存");
         save.setOnAction(actionEvent -> {
-            ClassTool tool = new ClassTool("Modes" + File.separator + "BehaviorManager" + File.separator +
-                    "Todo" + File.separator + "Value" + File.separator + "SaveValue.class");
-            Class<?> searcher = tool.get_class("Modes.BehaviorManager.Todo.Value.SaveValue");
-            tool.invoke_method(searcher, "entrance",
-                    new Class[]{ClassExpandTool.class, String.class, String.class}, new Object[]{controller, path, list_name});
+            SaveValue saver = new SaveValue();
+            saver.entrance(controller, path, list_name);
         });
 
         hBox.getChildren().addAll(return_menu, save);
@@ -95,7 +88,7 @@ public class ShowValues {
         add_label_to_box(list_name, Color.BLUE, get_done(), -1);    // 添加列表名，index为-1，用于在末尾添加
         box.getChildren().add(WinTool.createLabel(0, 0, 0, 10, 0, ""));    // 在列表名和信息之间增加空行
 
-        List<String[]> values = (List<String[]>) controller.invoke_method("getValues", new Class[0], new Object[0]);
+        List<String[]> values = controller.getValues();
         for (int i=0; i<values.size(); i++) {
             String[] temp = values.get(i);
             add_label_to_box(temp[0], ColorTool.english_to_color(temp[1]), temp[1].equals("GREEN"), i);
@@ -107,22 +100,15 @@ public class ShowValues {
                     "移动计划表", "本计划表已经完成", "是否将这一个计划表转移至完成区？");
 
             if (type.get() == ButtonType.OK) {
-                ClassTool finish_tool = new ClassTool("Modes" + File.separator + "BehaviorManager" + File.separator +
-                        "Todo" + File.separator + "List" + File.separator + "ListFinish.class");
-                Class<?> changer = finish_tool.get_class("Modes.BehaviorManager.Todo.List.ListFinish");
-                String return_value = (String) finish_tool.invoke_method(changer, "entrance",
-                        new Class[]{ClassExpandTool.class}, new Object[]{controller},
-                        new Class[]{String.class, String.class}, new Object[]{path, list_name});
+                ListFinish finisher = new ListFinish(controller);
+                String return_value = finisher.entrance(path, list_name);
 
                 if (!(return_value == null)) {
                     WinTool.createAlert(Alert.AlertType.INFORMATION, "成功", "已将计划表转移至完成区",
                             "转以后计划表名：" + return_value);
 
-                    ClassTool search_tool = new ClassTool("Modes" + File.separator + "BehaviorManager" + File.separator +
-                            "Todo" + File.separator + "List" + File.separator + "ShowLists.class");
-                    Class<?> searcher = search_tool.get_class("Modes.BehaviorManager.Todo.List.ShowLists");
-                    search_tool.invoke_method(searcher, "entrance",
-                            new Class[]{VBox.class, String.class}, new Object[]{box, path}, new Class[0], new Object[0]);
+                    ShowLists clazz = new ShowLists(box, path);
+                    clazz.entrance();
                 } else {
                     WinTool.createAlert(Alert.AlertType.ERROR, "失败", "转移失败", "");
                 }
@@ -152,29 +138,20 @@ public class ShowValues {
         MenuItem change = new MenuItem("更改信息");
 
         create.setOnAction(actionEvent -> {
-            ClassTool tool = new ClassTool("Modes" + File.separator + "BehaviorManager" + File.separator +
-                    "Todo" + File.separator + "Value" + File.separator + "CreateValue.class");
-            Class<?> creator = tool.get_class("Modes.BehaviorManager.Todo.Value.CreateValue");
-            tool.invoke_method(creator, "entrance",
-                    new Class[]{ClassExpandTool.class, int.class}, new Object[]{controller, index}, new Class[0], new Object[0]);
+            CreateValue creator = new CreateValue(controller, index);
+            creator.entrance();
 
             start(get_done());    // 刷新
         });
         delete.setOnAction(actionEvent -> {
-            ClassTool tool = new ClassTool("Modes" + File.separator + "BehaviorManager" + File.separator +
-                    "Todo" + File.separator + "Value" + File.separator + "RemoveValue.class");
-            Class<?> deleter = tool.get_class("Modes.BehaviorManager.Todo.Value.RemoveValue");
-            tool.invoke_method(deleter, "entrance",
-                    new Class[]{ClassExpandTool.class, int.class}, new Object[]{controller, index});
+            RemoveValue remover = new RemoveValue();
+            remover.entrance(controller, index);
 
             start(get_done());   // 刷新
         });
         change.setOnAction(actionEvent -> {
-            ClassTool tool = new ClassTool("Modes" + File.separator + "BehaviorManager" + File.separator +
-                    "Todo" + File.separator + "Value" + File.separator + "SetValueData.class");
-            Class<?> changer = tool.get_class("Modes.BehaviorManager.Todo.Value.SetValueData");
-            tool.invoke_method(changer, "entrance",
-                    new Class[]{ClassExpandTool.class, int.class}, new Object[]{controller, index}, new Class[0], new Object[0]);
+            SetValueData setter = new SetValueData(controller, index);
+            setter.entrance();
 
             start(get_done());   // 刷新
         });
@@ -195,11 +172,8 @@ public class ShowValues {
                 CheckBox checkBox = WinTool.createCheckBox(0, 0, 120, 30, 18, "完成");
                 checkBox.selectedProperty().addListener((observableValue, old_type, new_type) -> {
                     if (new_type) {
-                        ClassTool tool = new ClassTool("Modes" + File.separator + "BehaviorManager" + File.separator +
-                                "Todo" + File.separator + "Value" + File.separator + "ValueFinish.class");
-                        Class<?> changer = tool.get_class("Modes.BehaviorManager.Todo.Value.ValueFinish");
-                        tool.invoke_method(changer, "entrance",
-                                new Class[]{ClassExpandTool.class, int.class}, new Object[]{controller, index}, new Class[0], new Object[0]);
+                        ValueFinish finisher = new ValueFinish(controller, index);
+                        finisher.entrance();
                     }
                     start(get_done());   // 刷新
                 });
@@ -214,9 +188,8 @@ public class ShowValues {
      * 检查是否所有值的第二个属性都为GREEN
      * @return 如果是则返回true，否则返回false
      */
-    @SuppressWarnings("unchecked")
     private boolean get_done() {
-        List<String[]> values = (List<String[]>) controller.invoke_method("getValues", new Class[0], new Object[0]);
+        List<String[]> values = controller.getValues();
 
         boolean is_done = values.size() != 0;      // 当values是空的时，is_done仍然为false;
         if (is_done) {

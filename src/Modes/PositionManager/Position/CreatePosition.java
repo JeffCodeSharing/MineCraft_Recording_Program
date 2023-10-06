@@ -1,7 +1,7 @@
 package Modes.PositionManager.Position;
 
 import Interface.AbstractWindow;
-import Tools.ClassTool;
+import Modes.PositionManager.Group.SaveGroup;
 import Tools.WinTool;
 import javafx.application.Application;
 import javafx.scene.Group;
@@ -124,10 +124,7 @@ public class CreatePosition extends Application implements AbstractWindow {
 
         global_stage.close();
 
-        ClassTool tool = new ClassTool("Modes" + File.separator + "PositionManager" + File.separator +
-                "Group" + File.separator + "SaveGroup.class");
-        Class<?> deleter = tool.get_class("Modes.PositionManager.Group.SaveGroup");
-        tool.invoke_method(deleter, "entrance",
-                new Class[]{String.class, List.class}, new Object[]{group_path, group_value});
+        SaveGroup saver = new SaveGroup();
+        saver.entrance(group_path, group_value);
     }
 }

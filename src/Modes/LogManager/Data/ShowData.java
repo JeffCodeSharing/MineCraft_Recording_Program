@@ -1,6 +1,5 @@
 package Modes.LogManager.Data;
 
-import Tools.ClassTool;
 import Tools.EDTool;
 import Tools.IOTool;
 import Tools.WinTool;
@@ -66,21 +65,14 @@ public class ShowData {
 
         Button delete = WinTool.createButton(0, 0, 60, 30, 15, "删除");
         delete.setOnAction(actionEvent -> {
-            ClassTool tool = new ClassTool("Modes" + File.separator + "LogManager" + File.separator +
-                    "Data" + File.separator + "RemoveData.class");
-            Class<?> deleter = tool.get_class("Modes.LogManager.Data.RemoveData");
-            tool.invoke_method(deleter, "entrance",
-                    new Class[]{VBox.class, List.class, List.class}, new Object[]{box, fields, areas},
-                    new Class[0], new Object[0]);
+            RemoveData remover = new RemoveData(box, fields, areas);
+            remover.entrance();
         });
 
         Button save = WinTool.createButton(0, 0, 60, 30, 15, "保存");
         save.setOnAction(actionEvent -> {
-            ClassTool tool = new ClassTool("Modes" + File.separator + "LogManager" + File.separator +
-                    "Data" + File.separator + "SaveData.class");
-            Class<?> saver = tool.get_class("Modes.LogManager.Data.SaveData");
-            tool.invoke_method(saver, "entrance",
-                    new Class[]{String.class, List.class, List.class}, new Object[]{date_path, fields, areas});
+            SaveData saver = new SaveData();
+            saver.entrance(date_path, fields, areas);
         });
 
         hbox.getChildren().addAll(create_point_label, point, create_button, delete, save);

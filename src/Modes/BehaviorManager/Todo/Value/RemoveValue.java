@@ -1,6 +1,6 @@
 package Modes.BehaviorManager.Todo.Value;
 
-import Tools.ClassExpandTool;
+import Modes.BehaviorManager.Todo.DataController;
 import Tools.WinTool;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
@@ -19,12 +19,12 @@ public class RemoveValue {
      * @param controller 数据控制器(ClassExpandTool反射实现)
      * @param index 索引值
      */
-    public void entrance(ClassExpandTool controller, int index) {
+    public void entrance(DataController controller, int index) {
         Optional<ButtonType> type = WinTool.createAlert(Alert.AlertType.CONFIRMATION,
                 "删除信息", "您是否要删除这一个信息", "删除后信息将不复存在，其下的信息也将不复存在");
 
         if (type.get() == ButtonType.OK) {
-            controller.invoke_method("remove", new Class[]{int.class}, new Object[]{index});
+            controller.remove(index);
             WinTool.createAlert(Alert.AlertType.INFORMATION, "成功", "删除成功", "");
         }
     }

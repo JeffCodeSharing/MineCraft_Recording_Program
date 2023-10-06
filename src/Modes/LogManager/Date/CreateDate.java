@@ -1,7 +1,6 @@
 package Modes.LogManager.Date;
 
 import Interface.AbstractWindow;
-import Tools.ClassTool;
 import Tools.WinTool;
 import javafx.application.Application;
 import javafx.scene.Group;
@@ -180,12 +179,8 @@ public class CreateDate extends Application implements AbstractWindow {
                         }
 
                         // 刷新listView
-                        ClassTool tool = new ClassTool("Modes" + File.separator + "LogManager" + File.separator +
-                                "Date" + File.separator + "ShowDate.class");
-                        Class<?> searcher = tool.get_class("Modes.LogManager.Date.ShowDate");
-                        tool.invoke_method(searcher, "entrance",
-                                new Class[]{ListView.class, boolean.class}, new Object[]{listView, true},
-                                new Class[]{String.class, String.class, String.class}, new Object[]{path, field_data[0], field_data[1]});
+                        ShowDate clazz = new ShowDate(listView, true);
+                        clazz.entrance(path, field_data[0], field_data[1]);
 
                         WinTool.createAlert(Alert.AlertType.INFORMATION, "成功", "创建日志成功！",
                                 "创建日志于：" + date);

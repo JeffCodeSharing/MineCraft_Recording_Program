@@ -1,6 +1,6 @@
 package Modes.BehaviorManager.Todo.Finish;
 
-import Tools.ClassTool;
+import Modes.BehaviorManager.Todo.List.ShowLists;
 import Tools.EDTool;
 import Tools.IOTool;
 import Tools.WinTool;
@@ -53,21 +53,14 @@ public class SearchFinishValue {
         HBox hBox = new HBox();
         Button return_menu = WinTool.createButton(0, 0, 120, 40, 18, "返回首页");
         return_menu.setOnAction(actionEvent -> {
-            ClassTool tool = new ClassTool("Modes" + File.separator + "BehaviorManager" + File.separator +
-                    "Todo" + File.separator + "List" + File.separator + "ShowLists.class");
-            Class<?> searcher = tool.get_class("Modes.BehaviorManager.Todo.List.ShowLists");
-            tool.invoke_method(searcher, "entrance",
-                    new Class[]{VBox.class, String.class}, new Object[]{box, path.substring(0, path.length()-6) + "doing"},
-                    new Class[0], new Object[0]);
+            ShowLists clazz = new ShowLists(box, path.substring(0, path.length()-6) + "doing");
+            clazz.entrance();
         });
 
         Button return_last = WinTool.createButton(0, 0, 120, 40, 20, "返回上级");
         return_last.setOnAction(actionEvent -> {
-            ClassTool tool = new ClassTool("Modes" + File.separator + "BehaviorManager" + File.separator +
-                    "Todo" + File.separator + "Finish" + File.separator + "SearchFinishList.class");
-            Class<?> searcher = tool.get_class("Modes.BehaviorManager.Todo.Finish.SearchFinishList");
-            tool.invoke_method(searcher, "entrance",
-                    new Class[]{VBox.class, String.class}, new Object[]{box, path}, new Class[0], new Object[0]);
+            SearchFinishList searcher = new SearchFinishList(box, path);
+            searcher.entrance();
         });
 
         hBox.getChildren().addAll(return_menu, return_last);

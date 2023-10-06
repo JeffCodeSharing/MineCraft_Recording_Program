@@ -1,7 +1,6 @@
 package Modes.ProjectTypeManager.Seed;
 
 import Interface.AbstractWindow;
-import Tools.ClassTool;
 import Tools.EDTool;
 import Tools.IOTool;
 import Tools.WinTool;
@@ -12,8 +11,6 @@ import javafx.scene.control.*;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.stage.Stage;
-
-import java.io.File;
 
 /**
  * ShowSeed类负责显示种子号并允许用户更改种子号。
@@ -101,12 +98,8 @@ public class ShowSeed extends Application implements AbstractWindow {
         Button changeButton = WinTool.createButton(10, 70, 100, 40, 15, "更改种子号");
         changeButton.setOnAction(actionEvent -> {
             if (file_values[1].equals("FALSE")) {
-                ClassTool tool = new ClassTool("Modes" + File.separator + "ProjectTypeManager" + File.separator +
-                        "Seed" + File.separator + "SetSeedData.class");
-                Class<?> clazz = tool.get_class("Modes.ProjectTypeManager.Seed.SetSeedData");
-                tool.invoke_method(clazz, "entrance",
-                        new Class[]{Group.class, String[].class, String.class}, new Object[]{group, file_values, path},
-                        new Class[0], new Object[0]);
+                SetSeedData setter = new SetSeedData(group, file_values, path);
+                setter.entrance();
             } else {
                 WinTool.createAlert(Alert.AlertType.INFORMATION, "禁止", "修改种子号的行为被禁止", "请解锁之后再进行更改");
             }
@@ -117,23 +110,15 @@ public class ShowSeed extends Application implements AbstractWindow {
         if (file_values[1].equals("FALSE")) {
             Button lockButton = WinTool.createButton(120, 70, 100, 40, 18, "锁定");
             lockButton.setOnAction(actionEvent -> {
-                ClassTool tool = new ClassTool("Modes" + File.separator + "ProjectTypeManager" + File.separator +
-                        "Seed" + File.separator + "SetLocking.class");
-                Class<?> changer = tool.get_class("Modes.ProjectTypeManager.Seed.SetLocking");
-                tool.invoke_method(changer, "entrance",
-                        new Class[]{Group.class, String.class, boolean.class}, new Object[]{group, path, true},
-                        new Class[0], new Object[0]);
+                SetLocking setter = new SetLocking(group, path, true);
+                setter.entrance();
             });
             group.getChildren().add(lockButton);
         } else {
             Button unlockButton = WinTool.createButton(120, 70, 100, 40, 18, "解锁");
             unlockButton.setOnAction(actionEvent -> {
-                ClassTool tool = new ClassTool("Modes" + File.separator + "ProjectTypeManager" + File.separator +
-                        "Seed" + File.separator + "SetLocking.class");
-                Class<?> changer = tool.get_class("Modes.ProjectTypeManager.Seed.SetLocking");
-                tool.invoke_method(changer, "entrance",
-                        new Class[]{Group.class, String.class, boolean.class}, new Object[]{group, path, false},
-                        new Class[0], new Object[0]);
+                SetLocking setter = new SetLocking(group, path, true);
+                setter.entrance();
             });
             group.getChildren().add(unlockButton);
         }

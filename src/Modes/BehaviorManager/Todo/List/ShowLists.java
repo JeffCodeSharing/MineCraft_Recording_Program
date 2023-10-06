@@ -1,6 +1,8 @@
 package Modes.BehaviorManager.Todo.List;
 
-import Tools.ClassTool;
+import Modes.BehaviorManager.NowDoing.ShowItems;
+import Modes.BehaviorManager.Todo.Finish.SearchFinishList;
+import Modes.BehaviorManager.Todo.Value.ShowValues;
 import Tools.WinTool;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -47,47 +49,32 @@ public class ShowLists {
         Button now_doing = WinTool.createButton(0, 0, 120, 40, 16, "正在做");
 
         create.setOnAction(actionEvent -> {
-            ClassTool tool = new ClassTool("Modes" + File.separator + "BehaviorManager" + File.separator +
-                    "Todo" + File.separator + "List" + File.separator + "CreateList.class");
-            Class<?> creator = tool.get_class("Modes.BehaviorManager.Todo.List.CreateList");
-            tool.invoke_method(creator, "entrance", new Class[]{String.class}, new Object[]{path}, new Class[0], new Object[0]);
+            CreateList creator = new CreateList(path);
+            creator.entrance();
 
             entrance();   // 重新加载
         });
         delete.setOnAction(actionEvent -> {
-            ClassTool tool = new ClassTool("Modes" + File.separator + "BehaviorManager" + File.separator +
-                    "Todo" + File.separator + "List" + File.separator + "RemoveList.class");
-            Class<?> creator = tool.get_class("Modes.BehaviorManager.Todo.List.RemoveList");
-            tool.invoke_method(creator, "entrance",
-                    new Class[]{String.class, String[].class}, new Object[]{path, list}, new Class[0], new Object[0]);
+            RemoveList remover = new RemoveList(path, list);
+            remover.entrance();
 
             entrance();   // 重新加载
         });
         change.setOnAction(actionEvent -> {
-            ClassTool tool = new ClassTool("Modes" + File.separator + "BehaviorManager" + File.separator +
-                    "Todo" + File.separator + "List" + File.separator + "SetListName.class");
-            Class<?> creator = tool.get_class("Modes.BehaviorManager.Todo.List.SetListName");
-            tool.invoke_method(creator, "entrance",
-                    new Class[]{String.class, String[].class}, new Object[]{path, list}, new Class[0], new Object[0]);
+            SetListName setter = new SetListName(path, list);
+            setter.entrance();
 
             entrance();   // 重新加载
         });
         see_finish.setOnAction(actionEvent -> {
             String path_for_finish = path.substring(0, path.length()-5) + "finish";
 
-            ClassTool tool = new ClassTool("Modes" + File.separator + "BehaviorManager" + File.separator +
-                    "Todo" + File.separator + "Finish" + File.separator + "SearchFinishList.class");
-            Class<?> searcher = tool.get_class("Modes.BehaviorManager.Todo.Finish.SearchFinishList");
-            tool.invoke_method(searcher, "entrance",
-                    new Class[]{VBox.class, String.class}, new Object[]{box, path_for_finish}, new Class[0], new Object[0]);
+            SearchFinishList searcher = new SearchFinishList(box, path_for_finish);
+            searcher.entrance();
         });
         now_doing.setOnAction(actionEvent -> {
-            ClassTool tool = new ClassTool("Modes" + File.separator + "BehaviorManager" + File.separator +
-                    "NowDoing" + File.separator + "ShowItems.class");
-            Class<?> manager = tool.get_class("Modes.BehaviorManager.NowDoing.ShowItems");
-            tool.invoke_method(manager, "entrance",
-                    new Class[]{String.class}, new Object[]{path.substring(0, path.length()-5) + "now_doing"},
-                    new Class[0], new Object[0]);
+            ShowItems clazz = new ShowItems(path.substring(0, path.length()-5) + "now_doing");
+            clazz.entrance();
         });
 
         hBox.getChildren().addAll(create, delete, change, see_finish, now_doing);
@@ -111,12 +98,8 @@ public class ShowLists {
         label.hoverProperty().addListener((observableValue, old_value, new_value) ->
                 label.setTextFill(new_value ? Color.PURPLE : Color.BLUE));
         label.setOnMousePressed(mouseEvent -> {
-            ClassTool tool = new ClassTool("Modes" + File.separator + "BehaviorManager" + File.separator +
-                    "Todo" + File.separator + "Value" + File.separator + "ShowValues.class");
-            Class<?> searcher = tool.get_class("Modes.BehaviorManager.Todo.Value.ShowValues");
-            tool.invoke_method(searcher, "entrance",
-                    new Class[]{VBox.class, String.class, String.class}, new Object[]{box, path, list_name},
-                    new Class[0], new Object[0]);
+            ShowValues clazz = new ShowValues(box, path, list_name);
+            clazz.entrance();
         });
         box.getChildren().add(label);
     }

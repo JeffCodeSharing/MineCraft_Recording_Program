@@ -1,4 +1,18 @@
-import Tools.ClassTool;
+import Modes.BehaviorManager.Todo.List.ShowLists;
+import Modes.HelpDocument.HelpDocument;
+import Modes.LogManager.Data.ShowData;
+import Modes.LogManager.Date.CreateDate;
+import Modes.LogManager.Date.RemoveDate;
+import Modes.LogManager.Date.ShowDate;
+import Modes.PositionManager.Searcher;
+import Modes.ProjectManager.CreateProject;
+import Modes.ProjectManager.OpenProject;
+import Modes.ProjectManager.RemoveProject;
+import Modes.ProjectManager.SaveAsProject;
+import Modes.ProjectTypeManager.GameBackup.ShowBackup;
+import Modes.ProjectTypeManager.Password.ShowPassword;
+import Modes.ProjectTypeManager.Seed.ShowSeed;
+import ProjectSafe.CheckPassword;
 import Tools.IOTool;
 import Tools.WinTool;
 import javafx.application.Application;
@@ -45,10 +59,8 @@ public class Console extends Application {
     @Override
     public void start(Stage stage) {
         // 密码确认
-        ClassTool tool = new ClassTool("ProjectSafe" + File.separator + "CheckPassword.class");
-        Class<?> checker = tool.get_class("ProjectSafe.CheckPassword");
-        String return_value = ((String[]) tool.invoke_method(checker, "entrance",
-                new Class[]{String.class}, new Object[]{path}, new Class[0], new Object[0]))[0];
+        CheckPassword checker = new CheckPassword(path);
+        String return_value = checker.entrance()[0];
 
         if (return_value.equals("false")) {
             // 所有的东西进行归零
@@ -123,10 +135,9 @@ public class Console extends Application {
 
         MenuItem createProject = new MenuItem("创建项目");
         createProject.setOnAction(actionEvent -> {
-            ClassTool tool = new ClassTool(
-                    "Modes" + File.separator + "ProjectManager" + File.separator + "CreateProject.class");
-            Class<?> clazz = tool.get_class("Modes.ProjectManager.CreateProject");
-            String return_path = ((String[]) tool.invoke_method(clazz, "entrance", new Class[0], new Object[0]))[0];
+            CreateProject creator = new CreateProject();
+            String return_path = creator.entrance()[0];
+
             if (!return_path.equals("")) {
                 path = return_path;
                 update_project_name();
@@ -137,10 +148,9 @@ public class Console extends Application {
 
         MenuItem openProject = new MenuItem("打开项目");
         openProject.setOnAction(actionEvent -> {
-            ClassTool tool = new ClassTool(
-                    "Modes" + File.separator + "ProjectManager" + File.separator + "OpenProject.class");
-            Class<?> clazz = tool.get_class("Modes.ProjectManager.OpenProject");
-            String return_path = ((String[]) tool.invoke_method(clazz, "entrance", new Class[0], new Object[0]))[0];
+            OpenProject opener = new OpenProject();
+            String return_path = opener.entrance()[0];
+
             if (!return_path.equals("")) {
                 path = return_path;
                 update_project_name();
@@ -151,11 +161,8 @@ public class Console extends Application {
 
         MenuItem removeProject = new MenuItem("删除项目");
         removeProject.setOnAction(actionEvent -> {
-            ClassTool tool = new ClassTool(
-                    "Modes" + File.separator + "ProjectManager" + File.separator + "RemoveProject.class");
-            Class<?> clazz = tool.get_class("Modes.ProjectManager.RemoveProject");
-            String return_value = (String) tool.invoke_method(clazz, "entrance",
-                    new Class[]{String.class}, new Object[]{path});
+            RemoveProject remover = new RemoveProject();
+            String return_value = remover.entrance(path);
 
             // 删除项目后重置路径并清空界面
             if (return_value.equals("TRUE")) {
@@ -167,11 +174,8 @@ public class Console extends Application {
 
         MenuItem saveAsProject = new MenuItem("另存为");
         saveAsProject.setOnAction(actionEvent -> {
-            ClassTool tool = new ClassTool(
-                    "Modes" + File.separator + "ProjectManager" + File.separator + "SaveAsProject.class");
-            Class<?> clazz = tool.get_class("Modes.ProjectManager.SaveAsProject");
-            tool.invoke_method(clazz, "entrance",
-                    new Class[]{String.class}, new Object[]{path});
+            SaveAsProject saver = new SaveAsProject();
+            saver.entrance(path);
         });
 
         file.getItems().addAll(createProject, openProject, new SeparatorMenuItem(),
@@ -184,13 +188,8 @@ public class Console extends Application {
         MenuItem seed = new MenuItem("种子");
         seed.setOnAction(actionEvent -> {
             if (!path.equals("none")) {
-                ClassTool tool = new ClassTool(
-                        "Modes" + File.separator + "ProjectTypeManager" + File.separator +
-                                "Seed" + File.separator + "ShowSeed.class");
-                Class<?> clazz = tool.get_class("Modes.ProjectTypeManager.Seed.ShowSeed");
-                tool.invoke_method(clazz, "entrance",
-                        new Class[]{String.class}, new Object[]{path + File.separator + "check_item"},
-                        new Class[0], new Object[0]);
+                ShowSeed clazz = new ShowSeed(path + File.separator + "check_item");
+                clazz.entrance();
             } else {
                 WinTool.createAlert(Alert.AlertType.INFORMATION, "提示", "还没有打开或创建项目", "请打开或创建项目后重试");
             }
@@ -198,21 +197,14 @@ public class Console extends Application {
 
         MenuItem password = new MenuItem("密码");
         password.setOnAction(actionEvent -> {
-            ClassTool tool = new ClassTool(
-                    "Modes" + File.separator + "ProjectTypeManager" + File.separator +
-                            "Password" + File.separator + "ShowPassword.class");
-            Class<?> clazz = tool.get_class("Modes.ProjectTypeManager.Password.ShowPassword");
-            tool.invoke_method(clazz, "entrance",
-                    new Class[]{String.class}, new Object[]{path}, new Class[0], new Object[0]);
+            ShowPassword clazz = new ShowPassword(path);
+            clazz.entrance();
         });
 
         MenuItem game_backup = new MenuItem("游戏备份");
         game_backup.setOnAction(actionEvent -> {
-            ClassTool tool = new ClassTool("Modes" + File.separator + "ProjectTypeManager" + File.separator +
-                    "GameBackup" + File.separator + "ShowBackup.class");
-            Class<?> clazz = tool.get_class("Modes.ProjectTypeManager.GameBackup.ShowBackup");
-            tool.invoke_method(clazz, "entrance",
-                    new Class[]{String.class}, new Object[]{path}, new Class[0], new Object[0]);
+            ShowBackup clazz = new ShowBackup(path);
+            clazz.entrance();
         });
 
         project_type.getItems().addAll(seed, password, game_backup);
@@ -222,10 +214,8 @@ public class Console extends Application {
 
         MenuItem help_document = new MenuItem("帮助文档");
         help_document.setOnAction(actionEvent -> {
-            ClassTool tool = new ClassTool(
-                    "Modes" + File.separator + "HelpDocument" + File.separator + "HelpDocument.class");
-            Class<?> clazz = tool.get_class("Modes.HelpDocument.HelpDocument");
-            tool.invoke_method(clazz, "entrance", new Class[0], new Object[0]);
+            HelpDocument helper = new HelpDocument();
+            helper.entrance();
         });
 
         help.getItems().addAll(help_document);
@@ -277,51 +267,29 @@ public class Console extends Application {
                 });
                 Button button_search = WinTool.createButton(10, 690, 60, 30, 15, "查询");
                 button_search.setOnAction(actionEvent -> {
-                    ClassTool tool = new ClassTool(
-                            "Modes" + File.separator + "LogManager" + File.separator +
-                                    "Date" + File.separator + "ShowDate.class");
-                    Class<?> clazz = tool.get_class("Modes.LogManager.Date.ShowDate");
-                    tool.invoke_method(clazz, "entrance",
-                            new Class[]{ListView.class, boolean.class}, new Object[]{date_list, false},
-                            new Class[]{String.class, String.class, String.class},
-                            new Object[]{path, year_field.getText(), month_field.getText()});
+                    ShowDate clazz = new ShowDate(date_list, false);
+                    clazz.entrance(path, year_field.getText(), month_field.getText());
                 });
                 Button button_delete = WinTool.createButton(80, 690, 60, 30, 15, "删除");
                 button_delete.setOnAction(actionEvent -> {
                     initial_content[2] = "";
                     IOTool.override_file(path + File.separator + "temp" + File.separator + "log_temp", initial_content);
 
-                    ClassTool tool = new ClassTool(
-                            "Modes" + File.separator + "LogManager" + File.separator +
-                                    "Date" + File.separator + "RemoveDate.class");
-                    Class<?> clazz = tool.get_class("Modes.LogManager.Date.RemoveDate");
-                    tool.invoke_method(clazz, "entrance",
-                            new Class[]{ListView.class, String.class}, new Object[]{date_list, path});
+                    RemoveDate remover = new RemoveDate();
+                    remover.entrance(date_list, path);
                 });
                 Button button_create = WinTool.createButton(10, 725, 60, 30, 10, "创建日志");
                 button_create.setOnAction(actionEvent -> {
-                    ClassTool tool = new ClassTool(
-                            "Modes" + File.separator + "LogManager" + File.separator +
-                                    "Date" + File.separator + "CreateDate.class");
-                    Class<?> clazz = tool.get_class("Modes.LogManager.Date.CreateDate");
-                    tool.invoke_method(clazz, "entrance",
-                            new Class[]{String.class, ListView.class, String.class, String.class},
-                            new Object[]{path, date_list, year_field.getText(), month_field.getText()},
-                            new Class[0], new Object[0]);    // 使用有参构造
+                    CreateDate creator = new CreateDate(path, date_list, year_field.getText(), month_field.getText());
+                    creator.entrance();
                 });
                 Button button_open = WinTool.createButton(80, 725, 60, 30, 10, "打开日志");
                 button_open.setOnAction(actionEvent -> {
                     initial_content[2] = date_list.getSelectionModel().getSelectedItem();
                     IOTool.override_file(path + File.separator + "temp" + File.separator + "log_temp", initial_content);
 
-                    ClassTool tool = new ClassTool(
-                            "Modes" + File.separator + "LogManager" + File.separator +
-                                    "Data" + File.separator + "ShowData.class");
-                    Class<?> clazz = tool.get_class("Modes.LogManager.Data.ShowData");
-                    tool.invoke_method(clazz, "entrance",
-                            new Class[]{VBox.class}, new Object[]{pane_box},
-                            new Class[]{String.class, String.class},
-                            new Object[]{path, date_list.getSelectionModel().getSelectedItem()});    // 使用有参构造
+                    ShowData clazz = new ShowData(pane_box);
+                    clazz.entrance(path, date_list.getSelectionModel().getSelectedItem());
                 });
                 group.getChildren().addAll(year, year_field, month, month_field, date_list,
                         button_search, button_delete, button_create, button_open);
@@ -329,45 +297,23 @@ public class Console extends Application {
                 // 打开基本信息
                 if (!is_first) {
                     // SearchDate
-                    ClassTool SearchDate = new ClassTool(
-                            "Modes" + File.separator + "LogManager" + File.separator +
-                                    "Date" + File.separator + "ShowDate.class");
-                    Class<?> date_clazz = SearchDate.get_class("Modes.LogManager.Date.ShowDate");
-                    SearchDate.invoke_method(date_clazz, "entrance",
-                            new Class[]{ListView.class, boolean.class}, new Object[]{date_list, true},
-                            new Class[]{String.class, String.class, String.class},
-                            new Object[]{path, year_field.getText(), month_field.getText()});    // 使用有参构造
+                    ShowDate searchDate = new ShowDate(date_list, true);
+                    searchDate.entrance(path, year_field.getText(), month_field.getText());
 
                     // SearchData
-                    ClassTool SearchData = new ClassTool(
-                            "Modes" + File.separator + "LogManager" + File.separator +
-                                    "Data" + File.separator + "ShowData.class");
-                    Class<?> data_clazz = SearchData.get_class("Modes.LogManager.Data.ShowData");
-                    SearchData.invoke_method(data_clazz, "entrance",
-                            new Class[]{VBox.class}, new Object[]{pane_box},
-                            new Class[]{String.class, String.class},
-                            new Object[]{path, initial_content[2]});    // 使用有参构造
+                    ShowData searchData = new ShowData(pane_box);
+                    searchData.entrance(path, initial_content[2]);
                 }
             }
 
             case "坐标" -> {
-                ClassTool tool = new ClassTool(
-                        "Modes" + File.separator + "PositionManager" + File.separator + "Searcher.class");
-                Class<?> clazz = tool.get_class("Modes.PositionManager.Searcher");
-                tool.invoke_method(clazz, "entrance",
-                        new Class[]{ScrollPane.class, VBox.class, String.class},
-                        new Object[]{scrollPane, pane_box, path});
+                Searcher searcher = new Searcher();
+                searcher.entrance(scrollPane, pane_box, path);
             }
 
             case "计划表及正在做" -> {
-                ClassTool tool = new ClassTool(
-                        "Modes" + File.separator + "BehaviorManager" + File.separator +
-                                "Todo" + File.separator + "List" + File.separator + "ShowLists.class");
-                Class<?> clazz = tool.get_class("Modes.BehaviorManager.Todo.List.ShowLists");
-                tool.invoke_method(clazz, "entrance",
-                        new Class[]{VBox.class, String.class},
-                        new Object[]{pane_box, path + File.separator + "behavior" + File.separator + "doing"},
-                        new Class[0], new Object[0]);
+                ShowLists clazz = new ShowLists(pane_box, path + File.separator + "behavior" + File.separator + "doing");
+                clazz.entrance();
             }
         }
     }
