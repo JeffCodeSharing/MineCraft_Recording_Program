@@ -14,7 +14,9 @@ import Modes.ProjectTypeManager.Password.ShowPassword;
 import Modes.ProjectTypeManager.Seed.ShowSeed;
 import ProjectSafe.CheckPassword;
 import Tools.IOTool;
+import Tools.JsonTool;
 import Tools.WinTool;
+import com.alibaba.fastjson.JSONObject;
 import javafx.application.Application;
 import javafx.scene.Group;
 import javafx.scene.Scene;
@@ -41,15 +43,16 @@ public class Console extends Application {
      * 构造函数，初始化系统数据和项目路径，并创建临时文件夹
      */
     public Console() {
-        String[] system_data = IOTool.read_file(System.getProperty("user.dir") + File.separator +
-                "data" + File.separator + "last_usage_information");
+        JSONObject system_data = JsonTool.read_json(System.getProperty("user.dir") + File.separator +
+                "data" + File.separator + "information.json");
+
         if (system_data == null) {
             WinTool.createAlert(Alert.AlertType.ERROR, "错误", "读取系统文件错误", "");
             path = "none";
             type = "日志";
         } else {
-            path = system_data[0];
-            type = system_data[1];
+            path = system_data.getString("path");
+            type = system_data.getString("function");
         }
     }
 
@@ -102,9 +105,13 @@ public class Console extends Application {
         stage.setHeight(800);
         stage.setResizable(false);
         stage.setOnCloseRequest(windowEvent -> {
-            boolean exit_value = IOTool.override_file(System.getProperty("user.dir") + File.separator +
-                    "data" + File.separator + "last_usage_information", new String[]{path, type});
-            System.exit(exit_value ? 0 : 1);
+            String jsonPath = System.getProperty("user.dir") + File.separator + "data" + File.separator + "information.json";
+            JSONObject object = new JSONObject();
+            object.put("path", path);
+            object.put("function", type);
+
+            JsonTool.write_json(object, jsonPath);
+            System.exit(0);
         });
         stage.show();
     }
