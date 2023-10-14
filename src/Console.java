@@ -16,6 +16,8 @@ import ProjectSafe.CheckPassword;
 import Tools.IOTool;
 import Tools.JsonTool;
 import Tools.WinTool;
+import Update.CheckUpdate;
+import Update.Update;
 import com.alibaba.fastjson.JSONObject;
 import javafx.application.Application;
 import javafx.scene.Group;
@@ -33,6 +35,7 @@ import java.util.Scanner;
  * 主程序入口，为Minecraft玩家提供信息记录的辅助功能。
  */
 public class Console extends Application {
+    private JSONObject jsonData;
     private static String path;
     private String type;
     private Label project_name;
@@ -40,27 +43,18 @@ public class Console extends Application {
     private ScrollPane scrollPane;
 
     /**
-     * 构造函数，初始化系统数据和项目路径，并创建临时文件夹
-     */
-    public Console() {
-        JSONObject system_data = JsonTool.read_json(System.getProperty("user.dir") + File.separator +
-                "data" + File.separator + "information.json");
-
-        if (system_data == null) {
-            WinTool.createAlert(Alert.AlertType.ERROR, "错误", "读取系统文件错误", "");
-            path = "none";
-            type = "日志";
-        } else {
-            path = system_data.getString("path");
-            type = system_data.getString("function");
-        }
-    }
-
-    /**
-     * 启动JavaFX应用程序，创建主舞台
+     * 启动JavaFX应用程序，创建主舞台，检查更新
      */
     @Override
     public void start(Stage stage) {
+        // 检查更新
+        if (CheckUpdate.check()) {
+            Update.update();
+        }
+
+        // 初始化所有数据
+        init_json_data();
+
         // 密码确认
         CheckPassword checker = new CheckPassword(path);
         String return_value = checker.entrance()[0];
@@ -106,11 +100,10 @@ public class Console extends Application {
         stage.setResizable(false);
         stage.setOnCloseRequest(windowEvent -> {
             String jsonPath = System.getProperty("user.dir") + File.separator + "data" + File.separator + "information.json";
-            JSONObject object = new JSONObject();
-            object.put("path", path);
-            object.put("function", type);
+            jsonData.replace("path", path);
+            jsonData.replace("function", type);
 
-            JsonTool.write_json(object, jsonPath);
+            JsonTool.write_json(jsonData, jsonPath);
             System.exit(0);
         });
         stage.show();
@@ -342,6 +335,20 @@ public class Console extends Application {
             String[] initial_content = {"", "", ""};    // 年，月，日志编号
             IOTool.override_file(log_temp.getPath(), initial_content);
         } catch (IOException ignored){}
+    }
+
+    private void init_json_data() {
+        jsonData = JsonTool.read_json(System.getProperty("user.dir") + File.separator +
+                "data" + File.separator + "information.json");
+
+        if (jsonData == null) {
+            WinTool.createAlert(Alert.AlertType.ERROR, "错误", "读取系统文件错误", "");
+            path = "none";
+            type = "日志";
+        } else {
+            path = jsonData.getString("path");
+            type = jsonData.getString("function");
+        }
     }
 
     /**

@@ -63,28 +63,32 @@ public class Searcher {
     private void add_group(String dir, VBox box) {
         GroupAdder adder = new GroupAdder(box, item_num, group_value, group_name, dir);
 
-        String[] list = new File(dir).list();
-        for (int i = 0; i < list.length; i++) {
-            String s = list[i];
-            try {
-                String[] temp = IOTool.read_file(dir + File.separator + s);
-                List<String[]> value_group = new ArrayList<>();
+        try {
+            String[] list = new File(dir).list();
+            for (int i = 0; i < list.length; i++) {
+                String s = list[i];
+                try {
+                    String[] temp = IOTool.read_file(dir + File.separator + s);
+                    List<String[]> value_group = new ArrayList<>();
 
-                for (String value : temp) {
-                    String[] add_array = EDTool.decrypt(value).split("\0");
-                    value_group.add(add_array);
+                    for (String value : temp) {
+                        String[] add_array = EDTool.decrypt(value).split("\0");
+                        value_group.add(add_array);
+                    }
+
+                    item_num.add(value_group.size());
+                    group_value.add(value_group);
+                } catch (Exception e) {
+                    WinTool.createAlert(Alert.AlertType.ERROR, "错误", "读取文件错误", "请重新尝试或删除项目重新尝试");
                 }
 
-                item_num.add(value_group.size());
-                group_value.add(value_group);
-            } catch (Exception e) {
-                WinTool.createAlert(Alert.AlertType.ERROR, "错误", "读取文件错误", "请重新尝试或删除项目重新尝试");
+                group_name.add(s);
+
+                // 执行GroupAdder中的add的操作
+                adder.add(group_value.get(i), group_name.get(i));
             }
-
-            group_name.add(s);
-
-            // 执行GroupAdder中的add的操作
-            adder.add(group_value.get(i), group_name.get(i));
+        } catch (Exception ignored) {
+            // 这里的报错忽略忽略的是当用户没有打开项目时出现的检索错误
         }
     }
 }
