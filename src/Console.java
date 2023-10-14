@@ -16,8 +16,8 @@ import ProjectSafe.CheckPassword;
 import Tools.IOTool;
 import Tools.JsonTool;
 import Tools.WinTool;
-import Update.CheckUpdate;
-import Update.Update;
+import Update.Checker;
+import Update.Updater;
 import com.alibaba.fastjson.JSONObject;
 import javafx.application.Application;
 import javafx.scene.Group;
@@ -47,9 +47,24 @@ public class Console extends Application {
      */
     @Override
     public void start(Stage stage) {
-        // 检查更新
-        if (CheckUpdate.check()) {
-            Update.update();
+        // 检查更新，循环更新
+        boolean sent_information = true;
+        while (true) {
+            Checker updateChecker = new Checker();
+            boolean can_update = updateChecker.check();
+            if (can_update) {
+                // 发出消息
+                if (sent_information) {
+                    WinTool.createAlert(Alert.AlertType.INFORMATION, "提示", "更新：有新版本可以更新", "请更新");
+                }
+
+                Updater updater = new Updater(updateChecker.getUpdateVersion());
+                updater.update();
+            } else {
+                break;
+            }
+
+            sent_information = false;
         }
 
         // 初始化所有数据

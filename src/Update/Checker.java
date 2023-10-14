@@ -1,43 +1,30 @@
 package Update;
 
+import Constant.SSLConstant;
 import Tools.JsonTool;
 import com.alibaba.fastjson.JSONObject;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
 import java.io.File;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.security.cert.X509Certificate;
 
-public class CheckUpdate {
-    public static boolean check() {
+public class Checker {
+    private String update_version = "";
+
+    public boolean check() {
         JSONObject jsonObject = JsonTool.read_json(System.getProperty("user.dir") + File.separator + "data" +
                 File.separator + "information.json");
         String root_path = jsonObject.getString("root_path");
-        String version = jsonObject.getString("version");
-
-        // 创建一个信任所有证书的 TrustManager
-        TrustManager[] trustAllCerts = new TrustManager[] {
-                new X509TrustManager() {
-                    public X509Certificate[] getAcceptedIssuers() {
-                        return null;
-                    }
-                    public void checkClientTrusted(X509Certificate[] certs, String authType) {
-                    }
-                    public void checkServerTrusted(X509Certificate[] certs, String authType) {
-                    }
-                }
-        };
+        update_version = jsonObject.getString("version");
 
         for (int i=0; i<2; i++) {
-            String path = root_path + "/" + get_update_version(i, version) + "/update_item.json";
+            String path = root_path + "/" + get_update_version(i, update_version) + "/update_item.json";
             try {
                 // 获取默认的 SSLContext
                 SSLContext sslContext = SSLContext.getInstance("TLS");
-                sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
+                sslContext.init(null, SSLConstant.TRUST_MANAGER, new java.security.SecureRandom());
 
                 // 设置默认的 SSLSocketFactory
                 HttpsURLConnection.setDefaultSSLSocketFactory(sslContext.getSocketFactory());
@@ -78,6 +65,10 @@ public class CheckUpdate {
             version_split[0] = String.valueOf(temp + 1);
         }
 
-        return version_split[0] + "." + version_split[1] + "." + version_split[2];
+        return String.join(".", version_split);
+    }
+
+    public String getUpdateVersion() {
+        return update_version;
     }
 }
