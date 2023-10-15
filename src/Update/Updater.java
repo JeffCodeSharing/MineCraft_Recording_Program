@@ -5,27 +5,28 @@ import Tools.JsonTool;
 import Tools.WinTool;
 import com.alibaba.fastjson.JSONObject;
 import javafx.application.Application;
-import javafx.concurrent.Task;
+import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ProgressBar;
-import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
-import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileOutputStream;
+import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Updater extends Application {
     private final String UPDATE_VERSION;
-    private final String FILE_URL;
+    private final String ROOT_PATH;
     private final String SAVE_PATH;
 
-    public Updater(String version) {
+    public Updater(String version, String root_path) {
         this.UPDATE_VERSION = version;
-        this.FILE_URL = "https://update.codeforfree.kesug.com/mc_recording_program/" + version + "/sources.zip";
+        this.ROOT_PATH = root_path + "/" + version + "/";
         this.SAVE_PATH = System.getProperty("user.dir") + File.separator + "cache";
     }
 
@@ -36,24 +37,30 @@ public class Updater extends Application {
 
     @Override
     public void start(Stage stage) {
+        Group group = new Group();
+        Scene scene = new Scene(group);
+
         ProgressBar progressBar = new ProgressBar();
         progressBar.setPrefWidth(200);
 
-        VBox root = new VBox(progressBar);
-        Scene scene = new Scene(root, 300, 100);
+        group.getChildren().addAll(progressBar);
 
         stage.setScene(scene);
         stage.setTitle("下载进度");
         stage.show();
 
-        Task<Void> downloadTask = createDownloadTask();
-        Thread downloadThread = new Thread(downloadTask);
-        downloadThread.start();
+        try {
+            download_file(ROOT_PATH + "update_items.json", SAVE_PATH + "/update_items.json");
+            download_file(ROOT_PATH + "sources.zip", SAVE_PATH + "/sources.zip");
+        } catch (Exception e) {
+            WinTool.createAlert(Alert.AlertType.ERROR, "失败", "更新失败", "请重新尝试");
+        }
 
         // 更改信息
-        JSONObject jsonObject = JsonTool.read_json(System.getProperty("user.dir") + File.separator + "data" +
-                File.separator + "information.json");
+        String json_path = System.getProperty("user.dir") + File.separator + "data" + File.separator + "information.json";
+        JSONObject jsonObject = JsonTool.read_json(json_path);
         jsonObject.replace("version", UPDATE_VERSION);
+        JsonTool.write_json(jsonObject, json_path);
     }
 
     private void init_cache() {
@@ -69,33 +76,20 @@ public class Updater extends Application {
         cache_file.mkdirs();
     }
 
-    private Task<Void> createDownloadTask() {
-        return new Task<>() {
-            @Override
-            protected Void call() throws Exception {
-                URL url = new URL(FILE_URL);
-                URLConnection connection = url.openConnection();
-                int fileSize = connection.getContentLength();
+    private void download_file(String download_path, String save_path) throws Exception {
+        URLConnection connection = new URL(download_path).openConnection();
+        BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
 
-                try (BufferedInputStream in = new BufferedInputStream(connection.getInputStream());
-                     FileOutputStream out = new FileOutputStream(SAVE_PATH)) {
-                    byte[] buffer = new byte[1024];
-                    int bytesRead;
-                    int totalBytesRead = 0;
+        File file = new File(save_path);
+        file.createNewFile();
 
-                    while ((bytesRead = in.read(buffer)) != -1) {
-                        out.write(buffer, 0, bytesRead);
-                        totalBytesRead += bytesRead;
+        List<String> list = new ArrayList<>();
 
-                        double progress = (double) totalBytesRead / fileSize;
-                        updateProgress(progress, 1);
-                    }
-                } catch (Exception e) {
-                    WinTool.createAlert(Alert.AlertType.ERROR, "错误", "升级出现错误", "错误原因：" + e.getMessage());
-                }
+        String line;
+        while ((line = reader.readLine()) != null) {
+            list.add(line);
+        }
 
-                return null;
-            }
-        };
+        IOTool.override_file(save_path, list);
     }
 }

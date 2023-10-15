@@ -58,7 +58,7 @@ public class Console extends Application {
                     WinTool.createAlert(Alert.AlertType.INFORMATION, "提示", "更新：有新版本可以更新", "请更新");
                 }
 
-                Updater updater = new Updater(updateChecker.getUpdateVersion());
+                Updater updater = new Updater(updateChecker.getUpdateVersion(), updateChecker.getRootPath());
                 updater.update();
             } else {
                 break;

@@ -6,21 +6,25 @@ import com.alibaba.fastjson.JSONObject;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
 public class Checker {
     private String update_version = "";
+    private String root_path = "";
 
     public boolean check() {
         JSONObject jsonObject = JsonTool.read_json(System.getProperty("user.dir") + File.separator + "data" +
                 File.separator + "information.json");
-        String root_path = jsonObject.getString("root_path");
-        update_version = jsonObject.getString("version");
+        root_path = jsonObject.getString("root_path");
+        String now_version = jsonObject.getString("version");
 
         for (int i=0; i<2; i++) {
-            String path = root_path + "/" + get_update_version(i, update_version) + "/update_item.json";
+            update_version = get_update_version(i, now_version);
+            String path = root_path + "/" + update_version + "/update_items.json";
             try {
                 // 获取默认的 SSLContext
                 SSLContext sslContext = SSLContext.getInstance("TLS");
@@ -35,7 +39,13 @@ public class Checker {
 
                 int responseCode = connection.getResponseCode();
                 if (responseCode == HttpURLConnection.HTTP_OK) {
-                    return true;
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                    if (reader.readLine() != null) {
+                        return true;
+                    }
+                    reader.close();
+
+                    return false;
                 }
 
                 connection.disconnect();
@@ -70,5 +80,9 @@ public class Checker {
 
     public String getUpdateVersion() {
         return update_version;
+    }
+
+    public String getRootPath() {
+        return root_path;
     }
 }
