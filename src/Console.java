@@ -59,7 +59,11 @@ public class Console extends Application {
                 }
 
                 Updater updater = new Updater(updateChecker.getUpdateVersion(), updateChecker.getRootPath());
-                updater.update();
+                boolean update_success = updater.update();
+
+                if (!update_success) {
+                    break;
+                }
             } else {
                 break;
             }
