@@ -16,8 +16,7 @@ import ProjectSafe.CheckPassword;
 import Tools.IOTool;
 import Tools.JsonTool;
 import Tools.WinTool;
-import Update.Checker;
-import Update.Updater;
+import Update.UpdateManager;
 import com.alibaba.fastjson.JSONObject;
 import javafx.application.Application;
 import javafx.scene.Group;
@@ -47,30 +46,6 @@ public class Console extends Application {
      */
     @Override
     public void start(Stage stage) {
-        // 检查更新，循环更新
-        boolean sent_information = true;
-        while (true) {
-            Checker updateChecker = new Checker();
-            boolean can_update = updateChecker.check();
-            if (can_update) {
-                // 发出消息
-                if (sent_information) {
-                    WinTool.createAlert(Alert.AlertType.INFORMATION, "提示", "更新：有新版本可以更新", "请更新");
-                }
-
-                Updater updater = new Updater(updateChecker.getUpdateVersion(), updateChecker.getRootPath());
-                boolean update_success = updater.update();
-
-                if (!update_success) {
-                    break;
-                }
-            } else {
-                break;
-            }
-
-            sent_information = false;
-        }
-
         // 初始化所有数据
         init_json_data();
 
@@ -126,6 +101,10 @@ public class Console extends Application {
             System.exit(0);
         });
         stage.show();
+
+        // 检查更新，循环更新
+        Thread manager = new Thread(new UpdateManager(stage));
+        manager.start();
     }
 
     /**

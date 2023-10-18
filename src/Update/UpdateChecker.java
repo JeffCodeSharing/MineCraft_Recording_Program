@@ -12,7 +12,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-public class Checker {
+public class UpdateChecker {
     private String update_version = "";
     private String root_path = "";
 

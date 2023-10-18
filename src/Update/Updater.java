@@ -4,6 +4,7 @@ import Tools.IOTool;
 import Tools.JsonTool;
 import Tools.WinTool;
 import com.alibaba.fastjson.JSONObject;
+import com.sun.javafx.application.PlatformImpl;
 import javafx.application.Application;
 import javafx.scene.Group;
 import javafx.scene.Scene;
@@ -31,7 +32,7 @@ public class Updater extends Application {
 
     public boolean update() {
         init_cache();
-        start(new Stage());
+        PlatformImpl.runAndWait(() -> start(new Stage()));
 
         return update_success;
     }
@@ -100,23 +101,21 @@ public class Updater extends Application {
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
 
         // 创建输出流，用于保存下载的代码文件
-        FileOutputStream fileOutputStream = new FileOutputStream(save_path);
+        FileWriter writer = new FileWriter(save_path);
 
         // 读取输入流中的数据，并写入输出流中
         String line;
         while ((line = reader.readLine()) != null) {
-            fileOutputStream.write(line.getBytes());
+            writer.append(line).append("\n");
         }
 
         // 关闭流
-        fileOutputStream.close();
+        writer.close();
         reader.close();
         inputStream.close();
     }
 
     private void unpack_zip(String zip_path) throws Exception {
-        System.out.println(new File(zip_path).exists());
-
         byte[] buffer = new byte[1024];
         try (ZipInputStream zis = new ZipInputStream(new FileInputStream(zip_path))) {
             ZipEntry zipEntry = zis.getNextEntry();

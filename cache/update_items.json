@@ -1,1 +1,4 @@
-{    "Create" : ["Hello", "Print.Hello"],     "Remove" : []}
+{
+    "Create" : ["Hello", "Print.Hello"], 
+    "Remove" : []
+}
