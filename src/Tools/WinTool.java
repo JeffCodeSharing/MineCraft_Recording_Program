@@ -299,15 +299,6 @@ public class WinTool {
         return checkBox;
     }
 
-    public static ProgressIndicator createProgressIndicator(int x, int y, int width, int height) {
-        ProgressIndicator indicator = new ProgressIndicator();
-        indicator.setLayoutX(x);
-        indicator.setLayoutY(y);
-        indicator.setMinSize(width, height);
-        indicator.setMaxSize(width, height);
-        return indicator;
-    }
-
     /**
      * 创建警告、错误、信息等提示对话框。
      *
