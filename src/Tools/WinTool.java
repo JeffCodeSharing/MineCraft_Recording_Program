@@ -325,4 +325,12 @@ public class WinTool {
         alert.setContentText(text2);
         return alert.showAndWait();
     }
+
+    public static void createAlertWithNoWait(Alert.AlertType alert_type, String title, String text1, String text2) {
+        Alert alert = new Alert(alert_type);
+        alert.setTitle(title);
+        alert.setHeaderText(text1);
+        alert.setContentText(text2);
+        alert.show();
+    }
 }

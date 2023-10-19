@@ -103,7 +103,7 @@ public class Console extends Application {
         stage.show();
 
         // 检查更新，循环更新
-        Thread manager = new Thread(new UpdateManager(stage));
+        Thread manager = new Thread(new UpdateManager());
         manager.start();
     }
 

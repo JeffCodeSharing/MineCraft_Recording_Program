@@ -1,17 +1,10 @@
 package Update;
 
 import Tools.WinTool;
-import com.sun.javafx.application.PlatformImpl;
+import javafx.application.Platform;
 import javafx.scene.control.Alert;
-import javafx.stage.Stage;
 
 public class UpdateManager implements Runnable {
-    private final Stage stage;
-
-    public UpdateManager(Stage stage) {
-        this.stage = stage;
-    }
-
     @Override
     public void run() {
         try {
@@ -23,8 +16,14 @@ public class UpdateManager implements Runnable {
 
                 if (can_update) {
                     if (sent_alert) {
-                        PlatformImpl.runAndWait(() ->
-                                WinTool.createAlert(Alert.AlertType.INFORMATION, "升级", "有新版本升级", "请升级"));
+                        Platform.runLater(() ->
+                                WinTool.createAlertWithNoWait(Alert.AlertType.INFORMATION, "升级", "有新版本升级", "将在5秒后升级"));
+
+                        // 更新线程休眠五秒
+                        try {
+                            Thread.sleep(5000);
+                        } catch (Exception ignored) {}
+
                         sent_alert = false;
                     }
 
@@ -42,14 +41,19 @@ public class UpdateManager implements Runnable {
             }
 
             if (has_been_updated) {
-                PlatformImpl.runAndWait(() ->
-                        WinTool.createAlert(Alert.AlertType.INFORMATION, "更新完成", "请重启程序", "程序自动关闭"));
+                Platform.runLater(() ->
+                        WinTool.createAlertWithNoWait(Alert.AlertType.INFORMATION, "更新完成", "请重启程序", "5秒后程序自动关闭"));
+
+                try {
+                    Thread.sleep(5000);
+                } catch (Exception ignored) {}
 
                 System.exit(0);
             }
         } catch (Exception e) {
-            PlatformImpl.runAndWait(() ->
-                    WinTool.createAlert(Alert.AlertType.ERROR, "错误", "在更新中发生错误", "如果不影响使用，请忽略"));
+            e.printStackTrace();
+            Platform.runLater(() ->
+                    WinTool.createAlertWithNoWait(Alert.AlertType.ERROR, "错误", "在更新中发生错误", "如果不影响使用，请忽略"));
         }
     }
 }

@@ -4,8 +4,8 @@ import Tools.IOTool;
 import Tools.JsonTool;
 import Tools.WinTool;
 import com.alibaba.fastjson.JSONObject;
-import com.sun.javafx.application.PlatformImpl;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
@@ -32,7 +32,7 @@ public class Updater extends Application {
 
     public boolean update() {
         init_cache();
-        PlatformImpl.runAndWait(() -> start(new Stage()));
+        Platform.runLater(() -> start(new Stage()));
 
         return update_success;
     }
