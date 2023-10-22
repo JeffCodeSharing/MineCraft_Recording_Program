@@ -3,6 +3,7 @@ package Update;
 import Tools.IOTool;
 import Tools.JsonTool;
 import Tools.WinTool;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -22,19 +23,29 @@ public class Updater extends Application {
     private final String UPDATE_VERSION;
     private final String ROOT_PATH;
     private final String SAVE_PATH;
+    private final String LIB_PATH;
     private static boolean update_success = true;
+    private static boolean run_finish = false;
 
     public Updater(String version, String root_path) {
         this.UPDATE_VERSION = version;
         this.ROOT_PATH = root_path + "/" + version + "/";
         this.SAVE_PATH = System.getProperty("user.dir") + File.separator + "cache";
+        this.LIB_PATH = System.getProperty("user.dir") + File.separator + "lib";
     }
 
     public boolean update() {
         init_cache();
         Platform.runLater(() -> start(new Stage()));
 
-        return update_success;
+        while (true) {
+            try {
+                Thread.sleep(5);
+            } catch (InterruptedException ignored) {}
+            if (run_finish) {
+                return update_success;
+            }
+        }
     }
 
     @Override
@@ -61,19 +72,23 @@ public class Updater extends Application {
             // 解压文件
             unpack_zip(source_path);
 
+            // 将解压后的信息归位到程序中位置
+            cover_files();
+
             // 更改版本信息
             String information_path = System.getProperty("user.dir") + File.separator + "data" + File.separator + "information.json";
             JSONObject jsonObject = JsonTool.read_json(information_path);
             jsonObject.replace("version", UPDATE_VERSION);
             JsonTool.write_json(jsonObject, information_path);
         } catch (Exception e) {
-            update_success = false;
-
             e.printStackTrace();
-            WinTool.createAlert(Alert.AlertType.ERROR, "失败", "更新失败", "请重新尝试");
+            update_success = false;
+            WinTool.createAlert(Alert.AlertType.ERROR, "失败", "更新失败", "若不影响使用请忽略");
         }
 
         stage.close();
+
+        run_finish = true;
     }
 
     private void init_cache() {
@@ -97,45 +112,79 @@ public class Updater extends Application {
         connection.connect();
 
         // 获取输入流
-        InputStream inputStream = connection.getInputStream();
-        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-
-        // 创建输出流，用于保存下载的代码文件
-        FileWriter writer = new FileWriter(save_path);
+        InputStream input = connection.getInputStream();
+        OutputStream output = new FileOutputStream(save_path);
 
         // 读取输入流中的数据，并写入输出流中
-        String line;
-        while ((line = reader.readLine()) != null) {
-            writer.append(line).append("\n");
+        int reading_byte;
+        while ((reading_byte = input.read()) != -1) {
+            output.write(reading_byte);
         }
 
         // 关闭流
-        writer.close();
-        reader.close();
-        inputStream.close();
+        input.close();
+        output.close();
     }
 
     private void unpack_zip(String zip_path) throws Exception {
         byte[] buffer = new byte[1024];
         try (ZipInputStream zis = new ZipInputStream(new FileInputStream(zip_path))) {
-            ZipEntry zipEntry = zis.getNextEntry();
-            while (zipEntry != null) {
+            ZipEntry zipEntry;
+            while ((zipEntry = zis.getNextEntry()) != null) {
                 String destinationPath = System.getProperty("user.dir") + File.separator + "cache" + File.separator + "unpack_data";
                 File newFile = new File(destinationPath, zipEntry.getName());
 
-                // 创建父目录
-                newFile.getParentFile().mkdirs();
+                if (zipEntry.isDirectory()) {
+                    // 创建文件夹
+                    newFile.mkdirs();
+                } else {
+                    // 创建文件
+                    newFile.getParentFile().mkdirs();
+                    if (newFile.getName().contains(".")) {    // 如果文件名中有"."号，就创建文件
+                        newFile.createNewFile();
+                    }
 
-                // 写入文件内容
-                try (FileOutputStream fos = new FileOutputStream(newFile)) {
-                    int len;
-                    while ((len = zis.read(buffer)) > 0) {
-                        fos.write(buffer, 0, len);
+                    // 写入文件内容
+                    try (FileOutputStream fos = new FileOutputStream(newFile)) {
+                        int len;
+                        while ((len = zis.read(buffer)) > 0) {
+                            fos.write(buffer, 0, len);
+                        }
                     }
                 }
-
-                zipEntry = zis.getNextEntry();
             }
+        }
+    }
+
+    private void cover_files() throws Exception {
+        JSONObject change_log = JsonTool.read_json(
+                System.getProperty("user.dir") + File.separator + "cache" + File.separator + "update_items.json"
+        );
+
+        JSONArray create_array = change_log.getJSONArray("Create");
+        JSONArray remove_array = change_log.getJSONArray("Remove");
+        JSONArray set_array = change_log.getJSONArray("Set");
+
+        // 按照json列表中查看
+        if (create_array != null) {
+            for (int i=0; i<create_array.size(); i++) {
+                // 以"."号的package包来寻址
+                String package_path = create_array.getString(i).replace(".", "/") + ".class";
+                File temp_file = new File(SAVE_PATH + "unpack_data", package_path);
+                File lib_file = new File(LIB_PATH, package_path);
+
+                lib_file.getParentFile().mkdirs();
+                lib_file.createNewFile();
+                IOTool.copyFile(temp_file.getPath(), lib_file.getPath());
+            }
+        }
+
+        if (remove_array != null) {
+            // todo
+        }
+
+        if (set_array != null) {
+            // todo
         }
     }
 }

@@ -1,9 +1,6 @@
 package Tools;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -135,6 +132,22 @@ public class IOTool {
         }
 
         return true;
+    }
+
+    public static boolean copyFile(String start, String end) {
+        try {
+            InputStream in = new FileInputStream(start);
+            OutputStream out = new FileOutputStream(end);
+
+            int reading_byte;
+            while ((reading_byte = in.read()) != -1) {
+                out.write(reading_byte);
+            }
+
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
 
