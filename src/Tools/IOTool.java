@@ -150,7 +150,7 @@ public class IOTool {
         }
     }
 
-    public static boolean removeFile(String path) {
+    public static boolean remove_file(String path) {
         try {
             File file = new File(path);
             file.delete();
@@ -178,6 +178,25 @@ public class IOTool {
             return true;
         } catch (Exception e) {
             return false;
+        }
+    }
+
+    public static void remove_empty_dir(String folderPath) throws Exception {
+        File folder = new File(folderPath);
+
+        File[] files = folder.listFiles();
+
+        if (files != null) {
+            for (File file : files) {
+                if (file.isDirectory()) {
+                    remove_empty_dir(file.getAbsolutePath());
+                }
+            }
+        }
+
+        if (folder.listFiles().length == 0) {
+            folder.delete();
+            System.out.println("Deleted empty folder: " + folder.getAbsolutePath());
         }
     }
 }

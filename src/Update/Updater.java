@@ -183,34 +183,35 @@ public class Updater extends Application {
         }
 
         if (remove_array != null) {
-            // todo 测试的过程
             for (int i=0; i<remove_array.size(); i++) {
                 // 以"."号的package包来寻址
                 String package_path = remove_array.getString(i).replace(".", "/") + ".class";
                 File lib_file = new File(LIB_PATH, package_path);
 
-                if (!IOTool.remove_directory(lib_file.getPath())) {
+                if (!IOTool.remove_file(lib_file.getPath())) {
                     throw new RuntimeException("Remove File Failed");
                 }
             }
         }
 
         if (set_array != null) {
-            // todo 测试的过程，调整Github上的下载包
             for (int i=0; i<set_array.size(); i++) {
                 String package_path = set_array.getString(i).replace(".", "/") + ".class";
                 File lib_file = new File(LIB_PATH, package_path);
 
-                if (!IOTool.removeFile(lib_file.getPath())) {
+                if (!IOTool.remove_file(lib_file.getPath())) {
                     throw new RuntimeException("Remove File Failed");
                 }
 
                 lib_file.createNewFile();
 
-                if (!IOTool.copyFile(SAVE_PATH + package_path, lib_file.getPath())) {
+                if (!IOTool.copyFile(SAVE_PATH + "unpack_data" + File.separator + package_path, lib_file.getPath())) {
                     throw new RuntimeException("Copy Data Failed");
                 }
             }
         }
+
+        // 遍历文件夹，并且删除空文件夹
+        IOTool.remove_empty_dir(LIB_PATH);
     }
 }
