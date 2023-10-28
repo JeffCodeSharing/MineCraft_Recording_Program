@@ -150,6 +150,17 @@ public class IOTool {
         }
     }
 
+    public static boolean removeFile(String path) {
+        try {
+            File file = new File(path);
+            file.delete();
+
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
 
     /**
      * 移动文件或文件夹。

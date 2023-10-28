@@ -30,7 +30,7 @@ public class Updater extends Application {
     public Updater(String version, String root_path) {
         this.UPDATE_VERSION = version;
         this.ROOT_PATH = root_path + "/" + version + "/";
-        this.SAVE_PATH = System.getProperty("user.dir") + File.separator + "cache";
+        this.SAVE_PATH = System.getProperty("user.dir") + File.separator + "cache" + File.separator;
         this.LIB_PATH = System.getProperty("user.dir") + File.separator + "lib";
     }
 
@@ -175,16 +175,42 @@ public class Updater extends Application {
 
                 lib_file.getParentFile().mkdirs();
                 lib_file.createNewFile();
-                IOTool.copyFile(temp_file.getPath(), lib_file.getPath());
+
+                if (!IOTool.copyFile(temp_file.getPath(), lib_file.getPath())) {
+                    throw new RuntimeException("Copy File Failed");
+                }
             }
         }
 
         if (remove_array != null) {
-            // todo
+            // todo 测试的过程
+            for (int i=0; i<remove_array.size(); i++) {
+                // 以"."号的package包来寻址
+                String package_path = remove_array.getString(i).replace(".", "/") + ".class";
+                File lib_file = new File(LIB_PATH, package_path);
+
+                if (!IOTool.remove_directory(lib_file.getPath())) {
+                    throw new RuntimeException("Remove File Failed");
+                }
+            }
         }
 
         if (set_array != null) {
-            // todo
+            // todo 测试的过程，调整Github上的下载包
+            for (int i=0; i<set_array.size(); i++) {
+                String package_path = set_array.getString(i).replace(".", "/") + ".class";
+                File lib_file = new File(LIB_PATH, package_path);
+
+                if (!IOTool.removeFile(lib_file.getPath())) {
+                    throw new RuntimeException("Remove File Failed");
+                }
+
+                lib_file.createNewFile();
+
+                if (!IOTool.copyFile(SAVE_PATH + package_path, lib_file.getPath())) {
+                    throw new RuntimeException("Copy Data Failed");
+                }
+            }
         }
     }
 }
