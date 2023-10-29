@@ -5,9 +5,12 @@ import Tools.WinTool;
 import javafx.application.Application;
 import javafx.scene.Group;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
+
+import java.io.File;
 
 public class ModelManager extends Application implements AbstractWindow {
     private final Stage global_stage = new Stage();
@@ -23,13 +26,19 @@ public class ModelManager extends Application implements AbstractWindow {
         Button download_button = WinTool.createButton(30, 80, 80, 40, 16, "下载");
         download_button.setOnAction(actionEvent -> {
             Downloader downloader = new Downloader();
-            downloader.entrance();
+            boolean success = downloader.entrance();
+
+            if (success) {
+                WinTool.createAlert(Alert.AlertType.INFORMATION, "成功下载", "已下载",
+                        "已下载到：" + System.getProperty("user.dir") + File.separator + "mrp_mod.jar");
+                global_stage.close();
+            } else {
+                WinTool.createAlert(Alert.AlertType.ERROR, "失败", "下载失败", "请检查网络配置");
+            }
         });
 
         Button close_window = WinTool.createButton(130, 80, 80, 40, 16, "关闭窗口");
-        close_window.setOnAction(actionEvent -> {
-            global_stage.close();
-        });
+        close_window.setOnAction(actionEvent -> global_stage.close());
 
         group.getChildren().addAll(
                 WinTool.createLabel(10, 10, 300, 40, 20, "下载模组", Color.BLUE),

@@ -227,7 +227,9 @@ public class Console extends Application {
             manager.entrance();
         });
 
-        menuBar.getMenus().addAll(file, project_type, help);
+        model.getItems().addAll(download_model);
+
+        menuBar.getMenus().addAll(file, project_type, help, model);
         group.getChildren().addAll(menuBar, project_name, typeBox, scrollPane);
 
         update_type(group, true);
