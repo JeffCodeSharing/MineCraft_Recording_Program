@@ -1,3 +1,4 @@
+import Model.ModelManager;
 import Modes.BehaviorManager.Todo.List.ShowLists;
 import Modes.HelpDocument.HelpDocument;
 import Modes.LogManager.Data.ShowData;
@@ -217,6 +218,14 @@ public class Console extends Application {
         });
 
         help.getItems().addAll(help_document);
+
+        // java版Model下载菜单
+        Menu model = new Menu("模组");
+        MenuItem download_model = new MenuItem("下载模组");
+        download_model.setOnAction(actionEvent -> {
+            ModelManager manager = new ModelManager();
+            manager.entrance();
+        });
 
         menuBar.getMenus().addAll(file, project_type, help);
         group.getChildren().addAll(menuBar, project_name, typeBox, scrollPane);

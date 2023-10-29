@@ -1,5 +1,0 @@
-{
-    "Create" : ["Hello", "Print.Hello"], 
-    "Remove" : ["Bye", "Print.Bye"], 
-    "Set" : ["Greet", "Print.Greet"]
-}

@@ -22,16 +22,16 @@ import java.util.zip.ZipInputStream;
 public class Updater extends Application {
     private final String UPDATE_VERSION;
     private final String ROOT_PATH;
-    private final String SAVE_PATH;
-    private final String LIB_PATH;
+    private final String CACHE_PATH;
+    private final String BIN_PATH;
     private static boolean update_success = true;
     private static boolean run_finish = false;
 
     public Updater(String version, String root_path) {
         this.UPDATE_VERSION = version;
         this.ROOT_PATH = root_path + "/" + version + "/";
-        this.SAVE_PATH = System.getProperty("user.dir") + File.separator + "cache" + File.separator;
-        this.LIB_PATH = System.getProperty("user.dir") + File.separator + "lib";
+        this.CACHE_PATH = System.getProperty("user.dir") + File.separator + "cache" + File.separator;
+        this.BIN_PATH = System.getProperty("user.dir") + File.separator + "bin" + File.separator;
     }
 
     public boolean update() {
@@ -41,7 +41,7 @@ public class Updater extends Application {
         while (true) {
             try {
                 Thread.sleep(5);
-            } catch (InterruptedException ignored) {}
+            } catch (Exception ignored) {}
             if (run_finish) {
                 return update_success;
             }
@@ -62,8 +62,8 @@ public class Updater extends Application {
         stage.setTitle("下载进度");
         stage.show();
 
-        String json_path = SAVE_PATH + "/update_items.json";
-        String source_path = SAVE_PATH + "/sources.zip";
+        String json_path = CACHE_PATH + "/update_items.json";
+        String source_path = CACHE_PATH + "/sources.zip";
         try {
             // 下载文件
             download_file(ROOT_PATH + "update_items.json", json_path);
@@ -73,7 +73,12 @@ public class Updater extends Application {
             unpack_zip(source_path);
 
             // 将解压后的信息归位到程序中位置
-            cover_files();
+            JSONObject change_log = JsonTool.read_json(
+                    System.getProperty("user.dir") + File.separator + "cache" + File.separator + "update_items.json"
+            );
+
+            cover_files(BIN_PATH, "bin", change_log);
+            cover_files(System.getProperty("user.dir") + File.separator, "root", change_log);
 
             // 更改版本信息
             String information_path = System.getProperty("user.dir") + File.separator + "data" + File.separator + "information.json";
@@ -156,27 +161,27 @@ public class Updater extends Application {
         }
     }
 
-    private void cover_files() throws Exception {
-        JSONObject change_log = JsonTool.read_json(
-                System.getProperty("user.dir") + File.separator + "cache" + File.separator + "update_items.json"
-        );
+    private void cover_files(String root_path, String type, JSONObject change_log) throws Exception {
+        JSONObject jsonObject = change_log.getJSONObject(type);
 
-        JSONArray create_array = change_log.getJSONArray("Create");
-        JSONArray remove_array = change_log.getJSONArray("Remove");
-        JSONArray set_array = change_log.getJSONArray("Set");
+        JSONArray create_array = jsonObject.getJSONArray("Create");
+        JSONArray remove_array = jsonObject.getJSONArray("Remove");
+        JSONArray set_array = jsonObject.getJSONArray("Set");
+
+        String unpack_root = CACHE_PATH + "unpack_data" + File.separator + type + File.separator;
 
         // 按照json列表中查看
         if (create_array != null) {
             for (int i=0; i<create_array.size(); i++) {
                 // 以"."号的package包来寻址
                 String package_path = create_array.getString(i).replace(".", "/") + ".class";
-                File temp_file = new File(SAVE_PATH + "unpack_data", package_path);
-                File lib_file = new File(LIB_PATH, package_path);
+                File cache_file = new File(unpack_root, package_path);
+                File lib_file = new File(root_path, package_path);
 
                 lib_file.getParentFile().mkdirs();
                 lib_file.createNewFile();
 
-                if (!IOTool.copyFile(temp_file.getPath(), lib_file.getPath())) {
+                if (!IOTool.copyFile(cache_file.getPath(), lib_file.getPath())) {
                     throw new RuntimeException("Copy File Failed");
                 }
             }
@@ -186,7 +191,7 @@ public class Updater extends Application {
             for (int i=0; i<remove_array.size(); i++) {
                 // 以"."号的package包来寻址
                 String package_path = remove_array.getString(i).replace(".", "/") + ".class";
-                File lib_file = new File(LIB_PATH, package_path);
+                File lib_file = new File(root_path, package_path);
 
                 if (!IOTool.remove_file(lib_file.getPath())) {
                     throw new RuntimeException("Remove File Failed");
@@ -197,7 +202,7 @@ public class Updater extends Application {
         if (set_array != null) {
             for (int i=0; i<set_array.size(); i++) {
                 String package_path = set_array.getString(i).replace(".", "/") + ".class";
-                File lib_file = new File(LIB_PATH, package_path);
+                File lib_file = new File(root_path, package_path);
 
                 if (!IOTool.remove_file(lib_file.getPath())) {
                     throw new RuntimeException("Remove File Failed");
@@ -205,13 +210,14 @@ public class Updater extends Application {
 
                 lib_file.createNewFile();
 
-                if (!IOTool.copyFile(SAVE_PATH + "unpack_data" + File.separator + package_path, lib_file.getPath())) {
+                File cache_file = new File(unpack_root, package_path);
+                if (!IOTool.copyFile(cache_file.getPath(), lib_file.getPath())) {
                     throw new RuntimeException("Copy Data Failed");
                 }
             }
         }
 
         // 遍历文件夹，并且删除空文件夹
-        IOTool.remove_empty_dir(LIB_PATH);
+        IOTool.remove_empty_dir(root_path);
     }
 }

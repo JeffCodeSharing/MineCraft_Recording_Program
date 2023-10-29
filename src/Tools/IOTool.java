@@ -196,7 +196,6 @@ public class IOTool {
 
         if (folder.listFiles().length == 0) {
             folder.delete();
-            System.out.println("Deleted empty folder: " + folder.getAbsolutePath());
         }
     }
 }
