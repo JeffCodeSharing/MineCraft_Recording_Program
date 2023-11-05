@@ -5,13 +5,8 @@ import Tools.JsonTool;
 import Tools.WinTool;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.scene.Group;
-import javafx.scene.Scene;
 import javafx.scene.control.Alert;
-import javafx.scene.control.ProgressBar;
-import javafx.stage.Stage;
 
 import java.io.*;
 import java.net.URL;
@@ -19,7 +14,7 @@ import java.net.URLConnection;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-public class Updater extends Application {
+public class Updater {
     private final String UPDATE_VERSION;
     private final String ROOT_PATH;
     private final String CACHE_PATH;
@@ -36,7 +31,7 @@ public class Updater extends Application {
 
     public boolean update() {
         init_cache();
-        Platform.runLater(() -> start(new Stage()));
+        Platform.runLater(this::start);
 
         while (true) {
             try {
@@ -48,20 +43,7 @@ public class Updater extends Application {
         }
     }
 
-    @Override
-    public void start(Stage stage) {
-        Group group = new Group();
-        Scene scene = new Scene(group);
-
-        ProgressBar progressBar = new ProgressBar();
-        progressBar.setPrefWidth(200);
-
-        group.getChildren().addAll(progressBar);
-
-        stage.setScene(scene);
-        stage.setTitle("下载进度");
-        stage.show();
-
+    public void start() {
         String json_path = CACHE_PATH + "/update_items.json";
         String source_path = CACHE_PATH + "/sources.zip";
         try {
@@ -90,8 +72,6 @@ public class Updater extends Application {
             update_success = false;
             WinTool.createAlert(Alert.AlertType.ERROR, "失败", "更新失败", "若不影响使用请忽略");
         }
-
-        stage.close();
 
         run_finish = true;
     }

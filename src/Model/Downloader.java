@@ -11,7 +11,17 @@ import java.net.URL;
 import java.net.URLConnection;
 
 public class Downloader {
-    public boolean entrance() {
+    public boolean entrance(String download_path) {
+        if (download_path != null) {
+            if (download_path.equals("")) {
+                download_path = System.getProperty("user.dir") + File.separator + "mrp_mod.jar";
+            } else {
+                download_path = download_path + File.separator + "mrp_mod.jar";
+            }
+        } else {
+            download_path = System.getProperty("user.dir") + File.separator + "mrp_mod.jar";
+        }
+
         try {
             JSONObject jsonData = JsonTool.read_json(System.getProperty("user.dir") + File.separator + "data" +
                     File.separator + "information.json");
@@ -20,7 +30,7 @@ public class Downloader {
             URLConnection connection = url.openConnection();
             connection.connect();
 
-            File output_file = new File(System.getProperty("user.dir") + File.separator + "mrp_mod.jar");
+            File output_file = new File(download_path);
             output_file.getParentFile().mkdirs();
             output_file.createNewFile();
 
