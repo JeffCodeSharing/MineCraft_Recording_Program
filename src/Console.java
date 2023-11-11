@@ -5,6 +5,7 @@ import Modes.LogManager.Data.ShowData;
 import Modes.LogManager.Date.CreateDate;
 import Modes.LogManager.Date.RemoveDate;
 import Modes.LogManager.Date.ShowDate;
+import Modes.ModCommunicator.Communicator;
 import Modes.PositionManager.Searcher;
 import Modes.ProjectManager.CreateProject;
 import Modes.ProjectManager.OpenProject;
@@ -26,9 +27,8 @@ import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
-import java.io.*;
-import java.net.ServerSocket;
-import java.net.Socket;
+import java.io.File;
+import java.io.IOException;
 import java.util.Scanner;
 
 /**
@@ -374,37 +374,9 @@ public class Console extends Application {
 class ConsoleEntrance {
     public static void main(String[] args) {
         // 创建连接
-        Thread thread = new Thread(new ModConnector());
+        Thread thread = new Thread(new Communicator());
         thread.start();
 
         Console.main(args);
-    }
-}
-
-/**
- * @implNote 用于和游戏中的Mod进行连接
- */
-class ModConnector implements Runnable {
-    @Override
-    public void run() {
-        try {
-            ServerSocket server = new ServerSocket(9999);
-            Socket client = server.accept();
-
-            // 获取输入流和输出流
-            BufferedReader in = new BufferedReader(new InputStreamReader(client.getInputStream()));
-            OutputStream out = client.getOutputStream();
-
-            while (true) {
-                String request = in.readLine();
-                if (request.equals("test")) {
-                    String response = "Testing!!!\n";
-                    out.write(response.getBytes());
-                    out.flush();
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 }
