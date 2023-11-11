@@ -14,6 +14,7 @@ import Modes.ProjectManager.SaveAsProject;
 import Modes.ProjectTypeManager.GameBackup.ShowBackup;
 import Modes.ProjectTypeManager.Password.ShowPassword;
 import Modes.ProjectTypeManager.Seed.ShowSeed;
+import Modes.SettingManager.SettingManager;
 import ProjectSafe.CheckPassword;
 import Tools.IOTool;
 import Tools.JsonTool;
@@ -208,17 +209,6 @@ public class Console extends Application {
 
         project_type.getItems().addAll(seed, password, game_backup);
 
-        // 帮助菜单
-        Menu help = new Menu("帮助");
-
-        MenuItem help_document = new MenuItem("帮助文档");
-        help_document.setOnAction(actionEvent -> {
-            HelpDocument helper = new HelpDocument();
-            helper.entrance();
-        });
-
-        help.getItems().addAll(help_document);
-
         // java版Model下载菜单
         Menu model = new Menu("模组");
         MenuItem download_model = new MenuItem("下载模组");
@@ -229,7 +219,26 @@ public class Console extends Application {
 
         model.getItems().addAll(download_model);
 
-        menuBar.getMenus().addAll(file, project_type, help, model);
+        // 帮助菜单
+        Menu help = new Menu("帮助");
+        MenuItem help_document = new MenuItem("帮助文档");
+        help_document.setOnAction(actionEvent -> {
+            HelpDocument helper = new HelpDocument();
+            helper.entrance();
+        });
+
+        help.getItems().addAll(help_document);
+
+        // 设置菜单
+        Menu settings = new Menu("设置");
+        MenuItem settings_item = new MenuItem("设置");
+        settings_item.setOnAction(actionEvent -> {
+            SettingManager manager = new SettingManager();
+            manager.entrance();
+        });
+        settings.getItems().addAll(settings_item);
+
+        menuBar.getMenus().addAll(file, project_type, model, help, settings);
         group.getChildren().addAll(menuBar, project_name, typeBox, scrollPane);
 
         update_type(group, true);
