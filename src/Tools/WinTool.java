@@ -3,7 +3,7 @@ package Tools;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 
@@ -240,7 +240,7 @@ public class WinTool {
      * @param content_box  面板控件的内部内容
      * @return 返回设置完所有属性的带有滚动条的面板控件
      */
-    public static ScrollPane createScrollPane(int x, int y, int width, int height, VBox content_box) {
+    public static ScrollPane createScrollPane(int x, int y, int width, int height, Pane content_box) {
         ScrollPane scrollPane = new ScrollPane();
         scrollPane.setLayoutX(x);
         scrollPane.setLayoutY(y);

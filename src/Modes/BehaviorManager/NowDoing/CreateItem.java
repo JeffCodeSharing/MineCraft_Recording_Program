@@ -5,7 +5,6 @@ import Tools.WinTool;
 import javafx.application.Application;
 import javafx.scene.Group;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.scene.paint.Color;
@@ -87,6 +86,5 @@ public class CreateItem extends Application implements AbstractWindow {
     private void after_confirm(String create_data) {
         list.add(create_data);
         global_stage.close();
-        WinTool.createAlert(Alert.AlertType.INFORMATION, "成功", "创建成功", "");
     }
 }

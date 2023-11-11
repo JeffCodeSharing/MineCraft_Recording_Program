@@ -30,7 +30,6 @@ public class ValueFinish {
     /**
      * 入口方法，用于启动完成操作
      */
-    @SuppressWarnings("unchecked")
     public void entrance() {
         Optional<ButtonType> type = WinTool.createAlert(Alert.AlertType.CONFIRMATION,
                 "完成？", "你真的确定完成了吗", "完成后将无法再调整为未完成！！！");

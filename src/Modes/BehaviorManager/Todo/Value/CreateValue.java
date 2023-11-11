@@ -115,7 +115,6 @@ public class CreateValue extends Application implements AbstractWindow {
                 }
 
                 global_stage.close();
-                WinTool.createAlert(Alert.AlertType.INFORMATION, "成功", "创建成功!!", "请务必记得保存");
             } else {
                 WinTool.createAlert(Alert.AlertType.WARNING, "提示", "请填写”信息“一栏", "");
             }

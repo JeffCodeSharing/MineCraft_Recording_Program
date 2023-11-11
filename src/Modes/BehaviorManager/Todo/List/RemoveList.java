@@ -77,13 +77,15 @@ public class RemoveList extends Application implements AbstractWindow {
      * @param view_choice 选中的计划表名称
      */
     private void after_confirm(String view_choice) {
-        File file = new File(path + File.separator + view_choice);
+        if ((view_choice != null) && (!view_choice.equals(""))) {
+            File file = new File(path + File.separator + view_choice);
 
-        if (!file.delete()) {
-            WinTool.createAlert(Alert.AlertType.ERROR, "错误", "删除失败", "请重新尝试");
-        } else {
-            global_stage.close();
-            WinTool.createAlert(Alert.AlertType.INFORMATION, "成功", "删除成功！", "计划表名：" + view_choice);
+            if (!file.delete()) {
+                WinTool.createAlert(Alert.AlertType.ERROR, "错误", "删除失败", "请重新尝试");
+            } else {
+                global_stage.close();
+                WinTool.createAlert(Alert.AlertType.INFORMATION, "成功", "删除成功", "");
+            }
         }
     }
 }

@@ -39,8 +39,8 @@ public class CreateList extends Application implements AbstractWindow {
     public void draw_controls(Group group) {
         TextField name_field = WinTool.createTextField(65, 40, 200, 30, 15);
 
-        Button confirm = WinTool.createButton(95, 160, 80, 40, 18, "确定");
-        Button cancel = WinTool.createButton(185, 160, 80, 40, 18, "取消");
+        Button confirm = WinTool.createButton(95, 140, 80, 40, 18, "确定");
+        Button cancel = WinTool.createButton(185, 140, 80, 40, 18, "取消");
 
         confirm.setOnAction(actionEvent -> after_confirm(name_field.getText()));
         cancel.setOnAction(actionEvent -> global_stage.close());
