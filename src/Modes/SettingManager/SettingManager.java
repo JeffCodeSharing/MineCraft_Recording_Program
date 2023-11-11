@@ -21,7 +21,9 @@ public class SettingManager extends Application implements AbstractWindow {
         VBox pane_box = new VBox();
         ScrollPane scrollPane = WinTool.createScrollPane(0, 0, 400, 400, pane_box);
 
-        // todo 填充settings信息
+        pane_box.getChildren().addAll(
+                WinTool.createLabel(0, 0, 300, 30, 20, "还没有设置项哦")
+        );
 
         group.getChildren().addAll(scrollPane);
     }
