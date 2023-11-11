@@ -67,7 +67,6 @@ public class CreateGroup extends Application implements AbstractWindow {
                 GroupAdder adder = new GroupAdder(box, item_num, group_value, group_name, create_dir);
                 adder.add(new ArrayList<>(), field.getText());
 
-                WinTool.createAlert(Alert.AlertType.INFORMATION, "提示", "创建成功！", "");
                 item_num.add(0);
             } else {
                 WinTool.createAlert(Alert.AlertType.ERROR, "创建失败", "创建失败", "原因可能：\n记录文件创建失败或组名已经存在");
