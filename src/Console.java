@@ -1,4 +1,3 @@
-import Model.ModelManager;
 import Modes.BehaviorManager.Todo.List.ShowLists;
 import Modes.HelpDocument.HelpDocument;
 import Modes.LogManager.Data.ShowData;
@@ -6,6 +5,7 @@ import Modes.LogManager.Date.CreateDate;
 import Modes.LogManager.Date.RemoveDate;
 import Modes.LogManager.Date.ShowDate;
 import Modes.ModCommunicator.Communicator;
+import Modes.ModDownloader.ModDownloader;
 import Modes.PositionManager.Searcher;
 import Modes.ProjectManager.CreateProject;
 import Modes.ProjectManager.OpenProject;
@@ -213,7 +213,7 @@ public class Console extends Application {
         Menu model = new Menu("模组");
         MenuItem download_model = new MenuItem("下载模组");
         download_model.setOnAction(actionEvent -> {
-            ModelManager manager = new ModelManager();
+            ModDownloader manager = new ModDownloader();
             manager.entrance();
         });
 

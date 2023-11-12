@@ -1,7 +1,9 @@
-package Model;
+package Modes.ModDownloader;
 
 import Interface.AbstractWindow;
+import Tools.JsonTool;
 import Tools.WinTool;
+import com.alibaba.fastjson.JSONObject;
 import javafx.application.Application;
 import javafx.scene.Group;
 import javafx.scene.Scene;
@@ -13,8 +15,13 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URL;
+import java.net.URLConnection;
 
-public class ModelManager extends Application implements AbstractWindow {
+public class ModDownloader extends Application implements AbstractWindow {
     private final Stage global_stage = new Stage();
 
     @Override
@@ -40,8 +47,7 @@ public class ModelManager extends Application implements AbstractWindow {
 
         Button download_button = WinTool.createButton(30, 120, 120, 40, 16, "下载");
         download_button.setOnAction(actionEvent -> {
-            Downloader downloader = new Downloader();
-            boolean success = downloader.entrance(download_path.getText());
+            boolean success = download_mod(download_path.getText());
 
             if (success) {
                 WinTool.createAlert(Alert.AlertType.INFORMATION, "成功下载", "已下载",
@@ -75,5 +81,41 @@ public class ModelManager extends Application implements AbstractWindow {
         stage.setWidth(400);
         stage.setHeight(250);
         stage.showAndWait();
+    }
+
+    public boolean download_mod(String download_path) {
+        if ((download_path != null) && !download_path.equals("")) {
+            download_path = download_path + File.separator + "mrp_mod.jar";
+        } else {
+            download_path = System.getProperty("user.dir") + File.separator + "mrp_mod.jar";
+        }
+
+        try {
+            JSONObject jsonData = JsonTool.read_json(System.getProperty("user.dir") + File.separator + "data" +
+                    File.separator + "information.json");
+
+            URL url = new URL("https://jeffcodesharing.github.io/Files/mrp_mod/" + jsonData.getString("version") + "/mrp_mod.jar");
+            URLConnection connection = url.openConnection();
+            connection.connect();
+
+            File output_file = new File(download_path);
+            output_file.getParentFile().mkdirs();
+            output_file.createNewFile();
+
+            InputStream in = connection.getInputStream();
+            OutputStream out = new FileOutputStream(output_file.getPath());
+
+            int reading_byte;
+            while ((reading_byte = in.read()) != -1) {
+                out.write(reading_byte);
+            }
+
+            in.close();
+            out.close();
+
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 }
