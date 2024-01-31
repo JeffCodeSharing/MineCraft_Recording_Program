@@ -119,7 +119,7 @@ public class Console extends Application {
         project_name = WinTool.createLabel(0, 30, 150, 40, 14, "项目名:");
 
         ComboBox<String> typeBox = WinTool.createComboBox(0, 70, 150, 25, false,
-                type, "日志", "坐标", "计划表及正在做");
+                type, "日志", "坐标", "计划表及正在做", "地铁线路");
         typeBox.valueProperty().addListener((observableValue, strings, t1) -> {
             type = typeBox.getSelectionModel().getSelectedItem();
             updateType(group, false);
@@ -264,34 +264,42 @@ public class Console extends Application {
             case "日志" -> {
                 // 从temp文件夹中读取缓存
                 // 在lambda中不能使用非final的数据，所以给initRial_content加了final标签
-                String[] temp_array = IOTool.readFile(path + File.separator + "temp" + File.separator + "log_temp");
-                if (temp_array == null) {    // 如果temp_array是空
+                String temp_path = path + File.separator + "temp" + File.separator + "log_temp.json";
+                JSONObject temp_data = JsonTool.readJson(temp_path);
+                if (temp_data == null) {    // 如果temp_array是空
                     createTempDirectory();
                 }
-                final String[] initial_content = (temp_array == null) ? new String[]{"", "", ""} : temp_array;
+
+                // 创建一个空的JsonObject
+                JSONObject empty_data = new JSONObject();
+                empty_data.put("year", "");
+                empty_data.put("month", "");
+                empty_data.put("day", "");
+
+                final JSONObject temp_data_final = (temp_data == null) ? empty_data : temp_data;
 
                 Label year = WinTool.createLabel(5, 100, 20, 25, 12, "年:");
-                TextField year_field = WinTool.createTextField(25, 100, 50, 25, 12, initial_content[0], "");
+                TextField year_field = WinTool.createTextField(25, 100, 50, 25, 12, temp_data_final.getString("year"), "");
                 Label month = WinTool.createLabel(85, 100, 20, 25, 12, "月:");
-                TextField month_field = WinTool.createTextField(105, 100, 30, 25, 12, initial_content[1], "");
+                TextField month_field = WinTool.createTextField(105, 100, 30, 25, 12, temp_data_final.getString("month"), "");
                 ListView<String> date_list = WinTool.createListView(0, 130, 150, 560);
                 year_field.textProperty().addListener((observableValue, s, t1) -> {
-                    initial_content[0] = year_field.getText();
-                    IOTool.overrideFile(path + File.separator + "temp" + File.separator + "log_temp", initial_content);
+                    temp_data_final.replace("year", year_field.getText());
+                    JsonTool.write_json(temp_data_final, temp_path);
                 });
                 month_field.textProperty().addListener((observableValue, s, t1) -> {
-                    initial_content[1] = month_field.getText();
-                    IOTool.overrideFile(path + File.separator + "temp" + File.separator + "log_temp", initial_content);
+                    temp_data_final.replace("month", month_field.getText());
+                    JsonTool.write_json(temp_data_final, temp_path);
                 });
                 Button button_search = WinTool.createButton(10, 690, 60, 30, 15, "查询");
                 button_search.setOnAction(actionEvent -> {
-                    ShowDate clazz = new ShowDate(date_list, false);
-                    clazz.entrance(path, year_field.getText(), month_field.getText());
+                    ShowDate showDate = new ShowDate(date_list, false);
+                    showDate.entrance(path, year_field.getText(), month_field.getText());
                 });
                 Button button_delete = WinTool.createButton(80, 690, 60, 30, 15, "删除");
                 button_delete.setOnAction(actionEvent -> {
-                    initial_content[2] = "";
-                    IOTool.overrideFile(path + File.separator + "temp" + File.separator + "log_temp", initial_content);
+                    temp_data_final.replace("day", "");
+                    JsonTool.write_json(temp_data_final, temp_path);
 
                     RemoveDate remover = new RemoveDate();
                     remover.entrance(date_list, path);
@@ -303,11 +311,11 @@ public class Console extends Application {
                 });
                 Button button_open = WinTool.createButton(80, 725, 60, 30, 10, "打开日志");
                 button_open.setOnAction(actionEvent -> {
-                    initial_content[2] = date_list.getSelectionModel().getSelectedItem();
-                    IOTool.overrideFile(path + File.separator + "temp" + File.separator + "log_temp", initial_content);
+                    temp_data_final.replace("day", date_list.getSelectionModel().getSelectedItem());
+                    JsonTool.write_json(temp_data_final, temp_path);
 
-                    ShowData clazz = new ShowData(pane_box);
-                    clazz.entrance(path, date_list.getSelectionModel().getSelectedItem());
+                    ShowData showData = new ShowData(pane_box);
+                    showData.entrance(path, date_list.getSelectionModel().getSelectedItem());
                 });
                 group.getChildren().addAll(year, year_field, month, month_field, date_list,
                         button_search, button_delete, button_create, button_open);
@@ -320,7 +328,7 @@ public class Console extends Application {
 
                     // SearchData
                     ShowData searchData = new ShowData(pane_box);
-                    searchData.entrance(path, initial_content[2]);
+                    searchData.entrance(path, temp_data_final.getString("day"));
                 }
             }
 
@@ -333,6 +341,10 @@ public class Console extends Application {
                 ShowLists clazz = new ShowLists(pane_box, path + File.separator + "behavior" + File.separator + "doing");
                 clazz.entrance();
             }
+
+            case "地铁线路" -> {
+                // todo
+            }
         }
     }
 
@@ -341,17 +353,21 @@ public class Console extends Application {
      */
     private void createTempDirectory() {
         File temp_dir = new File(path + File.separator + "temp");
+        File log_temp = new File(temp_dir.getPath() + File.separator + "log_temp.json");
 
-        File log_temp = new File(temp_dir.getPath() + File.separator + "log_temp");
-        if (!temp_dir.mkdir()) {
-            log_temp.delete();
-        }
+        IOTool.removeDirectory(temp_dir.getPath());
+        temp_dir.mkdirs();
 
         try {
             log_temp.createNewFile();
 
-            String[] initial_content = {"", "", ""};    // 年，月，日志编号
-            IOTool.overrideFile(log_temp.getPath(), initial_content);
+            // 添加空的 年、月、日编号
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("year", "");
+            jsonObject.put("month", "");
+            jsonObject.put("day", "");
+
+            JsonTool.write_json(jsonObject, log_temp.getPath());
         } catch (IOException ignored){}
     }
 

@@ -8,6 +8,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class IOTool {
     /**
@@ -85,9 +86,11 @@ public class IOTool {
         File file = new File(path);
         if (file.isDirectory()) {
             String[] list = file.list();
-            for (String temp : list) {
-                if (!removeDirectory(file.getPath() + File.separator + temp)) {
-                    return true;
+            if (list != null) {
+                for (String temp : list) {
+                    if (!removeDirectory(file.getPath() + File.separator + temp)) {
+                        return true;
+                    }
                 }
             }
         }
@@ -144,6 +147,9 @@ public class IOTool {
                 out.write(reading_byte);
             }
 
+            in.close();
+            out.close();
+
             return false;
         } catch (Exception e) {
             return true;
@@ -194,7 +200,7 @@ public class IOTool {
             }
         }
 
-        if (folder.listFiles().length == 0) {
+        if (Objects.requireNonNull(folder.listFiles()).length == 0) {
             folder.delete();
         }
     }
