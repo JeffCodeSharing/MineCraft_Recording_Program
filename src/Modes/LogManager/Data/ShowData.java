@@ -4,8 +4,7 @@ import Tools.EDTool;
 import Tools.IOTool;
 import Tools.WinTool;
 import javafx.scene.control.*;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 
 import java.io.File;
@@ -16,14 +15,14 @@ import java.util.List;
  * 数据搜索类，用于搜索特定日期的数据。
  */
 public class ShowData {
-    private final VBox box;
+    private final Pane box;
 
     /**
      * 构造函数，初始化 SearchData 类的实例。
      *
      * @param box 显示搜索结果的 VBox 对象。
      */
-    public ShowData(VBox box) {
+    public ShowData(Pane box) {
         this.box = box;
     }
 
@@ -54,30 +53,29 @@ public class ShowData {
         List<TextArea> areas = new ArrayList<>();
 
         // 创建工具
-        HBox hbox = new HBox();
-        Label createPoint_label = WinTool.createLabel(0, 0, 80, 30, 15, "事件点名：");
-        TextField point = WinTool.createTextField(0, 0, 350, 30, 15);
-        Button create_button = WinTool.createButton(0, 0, 60, 30, 15, "创建");
+        TextField eventPoint = WinTool.createTextField(0, 0, 350, 30, 15);
+        Button create_button = WinTool.createButton(350, 0, 60, 30, 15, "创建");
         create_button.setOnAction(actionEvent -> {
-            createPoint(point.getText(), "", fields, areas);
-            point.setText("");    // 清空TextField
+            createPoint(eventPoint.getText(), "", fields, areas);
+            eventPoint.setText("");    // 清空TextField
         });
 
-        Button delete = WinTool.createButton(0, 0, 60, 30, 15, "删除");
+        Button delete = WinTool.createButton(410, 0, 60, 30, 15, "删除");
         delete.setOnAction(actionEvent -> {
             RemoveData remover = new RemoveData(box, fields, areas);
             remover.entrance();
         });
 
-        Button save = WinTool.createButton(0, 0, 60, 30, 15, "保存");
+        Button save = WinTool.createButton(470, 0, 60, 30, 15, "保存");
         save.setOnAction(actionEvent -> {
             SaveData saver = new SaveData();
             saver.entrance(date_path, fields, areas);
         });
 
-        hbox.getChildren().addAll(createPoint_label, point, create_button, delete, save);
-
-        box.getChildren().addAll(hbox, WinTool.createLabel(0, 0, 0, 30, 0, ""));
+        box.getChildren().addAll(
+                WinTool.createLabel(0, 0, 80, 30, 15, "事件点名："),
+                eventPoint, create_button, delete, save
+        );
 
         // 创建控件
         String[] temp_array = IOTool.readFile(date_path + File.separator + "simple_data");

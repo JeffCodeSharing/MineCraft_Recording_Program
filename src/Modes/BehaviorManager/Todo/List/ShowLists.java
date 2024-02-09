@@ -7,7 +7,7 @@ import Tools.WinTool;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 
 import java.io.File;
@@ -17,14 +17,14 @@ import java.io.File;
  * 它包括创建、删除和更改待办列表的方法，以及查看已完成列表和当前活动列表的方法。
  */
 public class ShowLists {
-    private final VBox box;
+    private final Pane box;
     private final String path;
 
     /**
      * @param box 用于显示搜索结果的VBox。
      * @param path 包含待办列表的文件夹的路径。
      */
-    public ShowLists(VBox box, String path) {
+    public ShowLists(Pane box, String path) {
         this.box = box;
         this.path = path;
     }

@@ -19,13 +19,14 @@ public class CreateDate extends Application implements AbstractWindow {
     private final Stage global_stage = new Stage();
     private final String path;
     private final ListView<String> listView;
-    private final String[] field_data = new String[2];    // 从两个TextField提取的数据
+    private final String year_value;
+    private final String month_value;
 
     public CreateDate(String path, ListView<String> listView, String year_value, String month_value) {
         this.path = path;
         this.listView = listView;
-        this.field_data[0] = year_value;
-        this.field_data[1] = month_value;
+        this.year_value = year_value;
+        this.month_value = month_value;
     }
 
     @Override
@@ -179,8 +180,8 @@ public class CreateDate extends Application implements AbstractWindow {
                         }
 
                         // 刷新listView
-                        ShowDate clazz = new ShowDate(listView, true);
-                        clazz.entrance(path, field_data[0], field_data[1]);
+                        ShowDate showDate = new ShowDate(listView, true);
+                        showDate.entrance(path, year_value, month_value);
 
                         WinTool.createAlert(Alert.AlertType.INFORMATION, "成功", "创建日志成功！",
                                 "创建日志于：" + date);

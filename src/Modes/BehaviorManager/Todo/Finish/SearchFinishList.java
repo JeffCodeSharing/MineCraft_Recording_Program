@@ -5,7 +5,7 @@ import Tools.WinTool;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 
 import java.io.File;
@@ -14,7 +14,7 @@ import java.io.File;
  * SearchFinishList类用于展示已完成任务列表
  */
 public class SearchFinishList {
-    private final VBox box;
+    private final Pane box;
     private final String path;     // 已包含到finish文件夹的路径
 
     /**
@@ -22,7 +22,7 @@ public class SearchFinishList {
      * @param box VBox对象，用于展示UI界面
      * @param path 已完成任务列表所在路径
      */
-    public SearchFinishList(VBox box, String path) {
+    public SearchFinishList(Pane box, String path) {
         this.box = box;
         this.path = path;
     }

@@ -3,12 +3,15 @@ package Modes.PositionManager;
 import Modes.PositionManager.Group.RemoveGroup;
 import Modes.PositionManager.Position.CreatePosition;
 import Modes.PositionManager.Position.SetPositionData;
-import Tools.*;
+import Tools.ColorTool;
+import Tools.EDTool;
+import Tools.IOTool;
+import Tools.WinTool;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 
 import java.io.File;
@@ -20,7 +23,7 @@ import java.util.List;
  */
 // 注意：本class中，group_values和group_value是不一样的
 public class GroupAdder {
-    private final VBox box;
+    private final Pane box;
     private final List<Integer> item_num;
     private final List<List<String[]>> group_values;
     private final String group_dir;
@@ -34,7 +37,7 @@ public class GroupAdder {
      * @param group_name 组名列表。
      * @param group_dir 组的目录。
      */
-    public GroupAdder(VBox box, List<Integer> item_num,
+    public GroupAdder(Pane box, List<Integer> item_num,
                       List<List<String[]>> group_values, List<String> group_name,
                       String group_dir) {
         this.box = box;

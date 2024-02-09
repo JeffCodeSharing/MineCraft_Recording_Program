@@ -1,5 +1,7 @@
 package Tools;
 
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -326,4 +328,22 @@ public class WinTool {
         alert.setContentText(text2);
         alert.show();
     }
+
+    public static Canvas createCanvas(int x, int y, int width, int height) {
+        Canvas canvas = new Canvas();
+        canvas.setLayoutX(x);
+        canvas.setLayoutY(y);
+        canvas.setWidth(width);
+        canvas.setHeight(height);
+        return canvas;
+    }
+
+    public static Canvas createCanvas(int x, int y, int width, int height, Color back_color) {
+        Canvas canvas = createCanvas(x, y, width, height);
+        GraphicsContext context = canvas.getGraphicsContext2D();
+        context.setFill(back_color);
+        context.fillRect(x, y, width, height);
+        return canvas;
+    }
 }
+

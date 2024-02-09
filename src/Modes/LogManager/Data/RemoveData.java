@@ -6,7 +6,7 @@ import javafx.application.Application;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
@@ -17,7 +17,7 @@ import java.util.Optional;
  * 删除数据类。
  */
 public class RemoveData extends Application implements AbstractWindow {
-    private final VBox box;
+    private final Pane box;
     private final Stage global_stage = new Stage();
     private final List<TextField> fields;
     private final List<TextArea> areas;
@@ -30,7 +30,7 @@ public class RemoveData extends Application implements AbstractWindow {
      * @param fields 用于存储文本框的列表。
      * @param areas 用于存储文本区域的列表。
      */
-    public RemoveData(VBox box, List<TextField> fields, List<TextArea> areas) {
+    public RemoveData(Pane box, List<TextField> fields, List<TextArea> areas) {
         this.box = box;
         this.fields = fields;
         this.areas = areas;
@@ -92,7 +92,7 @@ public class RemoveData extends Application implements AbstractWindow {
                 fields.remove(index);
                 areas.remove(index);
 
-                // 更新vbox
+                // 更新
                 box.getChildren().remove(index * 6 + 2, index * 6 + 8);
                 for (int i = 2, j = 1; i < box.getChildren().size(); i += 6, j++) {
                     Label label = WinTool.createLabel(0, 0, 100, 40, 20, "事件点" + j, Color.BLUE);
@@ -101,7 +101,6 @@ public class RemoveData extends Application implements AbstractWindow {
             }
 
             global_stage.close();
-            WinTool.createAlert(Alert.AlertType.INFORMATION, "完成", "已成功删除此事件点！", "");
         }
     }
 }

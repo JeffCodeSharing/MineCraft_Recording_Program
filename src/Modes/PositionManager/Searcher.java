@@ -1,12 +1,14 @@
 package Modes.PositionManager;
 
 import Modes.PositionManager.Group.CreateGroup;
-import Tools.*;
+import Tools.EDTool;
+import Tools.IOTool;
+import Tools.WinTool;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.Pane;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -24,16 +26,15 @@ public class Searcher {
      * @param box 添加控件的VBox
      * @implNote 调用者可以使用此入口点
      */
-    public void entrance(ScrollPane pane, VBox box, String path) {
+    public void entrance(ScrollPane pane, Pane box, String path) {
+        box.getChildren().clear();
         start(pane, box, path + File.separator + "positions");
     }
 
     /**
      * @implNote 实际的入口点，仅可由同一类中的方法调用
      */
-    private void start(ScrollPane pane, VBox box, String path) {      // 传入path已经到了positions路径下了
-        box.getChildren().clear();
-
+    private void start(ScrollPane pane, Pane box, String path) {      // 传入path已经到了positions路径下了
         HBox hBox = new HBox();
         Button create_group = WinTool.createButton(0, 0, 130, 40, 20, "创建坐标组");
         create_group.setOnAction(actionEvent -> {
@@ -60,24 +61,25 @@ public class Searcher {
      *
      * @param dir 目录的文件类
      */
-    private void addGroup(String dir, VBox box) {
+    private void addGroup(String dir, Pane box) {
         GroupAdder adder = new GroupAdder(box, item_num, group_value, group_name, dir);
 
         try {
             String[] list = new File(dir).list();
+
             for (int i = 0; i < list.length; i++) {
                 String s = list[i];
                 try {
                     String[] temp = IOTool.readFile(dir + File.separator + s);
-                    List<String[]> value_group = new ArrayList<>();
+                    List<String[]> piece_value = new ArrayList<>();
 
                     for (String value : temp) {
                         String[] add_array = EDTool.decrypt(value).split("\0");
-                        value_group.add(add_array);
+                        piece_value.add(add_array);
                     }
 
-                    item_num.add(value_group.size());
-                    group_value.add(value_group);
+                    item_num.add(piece_value.size());
+                    group_value.add(piece_value);
                 } catch (Exception e) {
                     WinTool.createAlert(Alert.AlertType.ERROR, "错误", "读取文件错误", "请重新尝试或删除项目重新尝试");
                 }

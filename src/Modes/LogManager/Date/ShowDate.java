@@ -34,9 +34,12 @@ public class ShowDate {
      * @param monthValue 月份
      */
     public void entrance(String path, String yearValue, String monthValue) {
-        if ((yearValue == null || monthValue == null) && !isUpdate) {
-            WinTool.createAlert(Alert.AlertType.WARNING, "提示", "年或月没有输入", "");
-        } else if ((yearValue.equals("") || monthValue.equals("")) && !isUpdate) {
+        // 数据初始化
+        yearValue = (yearValue != null) ? yearValue : "";
+        monthValue = (monthValue != null) ?monthValue : "";
+
+        // 读取信息
+        if ((yearValue.equals("") || monthValue.equals("")) && !isUpdate) {
             WinTool.createAlert(Alert.AlertType.WARNING, "提示", "年或月没有输入", "");
         } else {
             try {
@@ -72,17 +75,16 @@ public class ShowDate {
     private String[] getMonthFile(int year, int month, String path) {
         File file = new File(path);
         if (file.exists()) {
-            List<String> returnList = new ArrayList<>(List.of(file.list()));
+            List<String> rightList = new ArrayList<>();
             String headType = year + "-" + month + "-";
 
-            for (int i = returnList.size() - 1; i >= 0; i--) { // 从末尾进行删减，避免了删除时出现因为索引值变化而漏删的情况
-                String temp = returnList.get(i);
-                if (!temp.startsWith(headType)) {
-                    returnList.remove(i);
+            for (String name : file.list()) { // 从末尾进行删减，避免了删除时出现因为索引值变化而漏删的情况
+                if (name.startsWith(headType)) {
+                    rightList.add(name);
                 }
             }
 
-            return returnList.toArray(new String[0]);
+            return rightList.toArray(new String[0]);
         } else {
             WinTool.createAlert(Alert.AlertType.ERROR, "错误", "项目读取错误", "路径错误！");
             return null;

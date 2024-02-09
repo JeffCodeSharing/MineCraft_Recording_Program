@@ -8,7 +8,7 @@ import javafx.application.Application;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
@@ -19,7 +19,7 @@ import java.util.List;
  * 更改坐标组中坐标的信息
  */
 public class SetPositionData extends Application implements AbstractWindow {
-    private final VBox box;
+    private final Pane box;
     private final List<Integer> item_num;
     private final List<String[]> group_value;
     private final int group_type;
@@ -30,21 +30,21 @@ public class SetPositionData extends Application implements AbstractWindow {
     /**
      * ChangePositionData类的构造方法。
      *
-     * @param box_in          存放位置数据的VBox对象
-     * @param item_num_in     每个组的项目数列表
-     * @param group_value_in  存储位置数据的列表
-     * @param group_type_in   组类型
-     * @param group_dir_in    分组数据保存的目录
-     * @param group_name_in   分组名称
+     * @param box          存放位置数据的VBox对象
+     * @param item_num     每个组的项目数列表
+     * @param group_value  存储位置数据的列表
+     * @param group_type   组类型
+     * @param group_dir    分组数据保存的目录
+     * @param group_name   分组名称
      */
-    public SetPositionData(VBox box_in, List<Integer> item_num_in, List<String[]> group_value_in, int group_type_in,
-                           String group_dir_in, String group_name_in) {
-        box = box_in;
-        item_num = item_num_in;
-        group_value = group_value_in;
-        group_type = group_type_in;
-        group_name = group_name_in;
-        group_dir = group_dir_in;
+    public SetPositionData(Pane box, List<Integer> item_num, List<String[]> group_value, int group_type,
+                           String group_dir, String group_name) {
+        this.box = box;
+        this.item_num = item_num;
+        this.group_value = group_value;
+        this.group_type = group_type;
+        this.group_name = group_name;
+        this.group_dir = group_dir;
     }
 
     @Override

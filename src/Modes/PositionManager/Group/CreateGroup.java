@@ -9,7 +9,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
@@ -22,7 +22,7 @@ import java.util.List;
  */
 public class CreateGroup extends Application implements AbstractWindow {
     private final Stage global_stage = new Stage();
-    private final VBox box;
+    private final Pane box;
     private final String create_dir;
     private final List<Integer> item_num;
     private final List<List<String[]>> group_value;
@@ -37,7 +37,7 @@ public class CreateGroup extends Application implements AbstractWindow {
      * @param group_name   存储坐标组名的列表
      * @param create_dir       坐标组所在文件夹的路径
      */
-    public CreateGroup(VBox box, List<Integer> item_num, List<List<String[]>> group_value, List<String> group_name, String create_dir) {
+    public CreateGroup(Pane box, List<Integer> item_num, List<List<String[]>> group_value, List<String> group_name, String create_dir) {
         this.box = box;
         this.item_num = item_num;
         this.group_value = group_value;

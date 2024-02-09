@@ -8,7 +8,7 @@ import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
@@ -19,7 +19,7 @@ import java.util.List;
  * 创建位置数据的窗口类，实现了AbstractWindow接口。
  */
 public class CreatePosition extends Application implements AbstractWindow {
-    private final VBox box;
+    private final Pane box;
     private final List<Integer> item_num;
     private final List<String[]> group_value;
     private final int group_type;
@@ -38,7 +38,7 @@ public class CreatePosition extends Application implements AbstractWindow {
      * @param group_dir  分组数据保存的目录
      * @param group_name 分组名称
      */
-    public CreatePosition(VBox box, List<Integer> item_num, List<String[]> group_value, int group_type, String title_str,
+    public CreatePosition(Pane box, List<Integer> item_num, List<String[]> group_value, int group_type, String title_str,
                           String group_dir, String group_name) {
         this.box = box;
         this.item_num = item_num;
@@ -69,7 +69,7 @@ public class CreatePosition extends Application implements AbstractWindow {
         Button confirm = WinTool.createButton(120, 200, 70, 35, 15, "确定");
         Button cancel = WinTool.createButton(200, 200, 70, 35, 15, "取消");
 
-        confirm.setOnAction(actionEvent -> afterCaonfirm(
+        confirm.setOnAction(actionEvent -> afterConfirm(
                 x_in.getText(), y_in.getText(), z_in.getText(), notes_in.getText()
         ));
         cancel.setOnAction(actionEvent -> global_stage.close());
@@ -107,7 +107,7 @@ public class CreatePosition extends Application implements AbstractWindow {
      * @param z     Z 坐标的字符串值
      * @param notes 备注的字符串值
      */
-    private void afterCaonfirm(String x, String y, String z, String notes) {
+    private void afterConfirm(String x, String y, String z, String notes) {
         int before_control_num = 2;
         for (int i = 0; i < group_type; i++) {
             before_control_num = before_control_num + item_num.get(i) + 2;

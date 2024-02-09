@@ -3,10 +3,13 @@ package Modes.BehaviorManager.Todo.Value;
 import Modes.BehaviorManager.Todo.DataController;
 import Modes.BehaviorManager.Todo.List.ListFinish;
 import Modes.BehaviorManager.Todo.List.ShowLists;
-import Tools.*;
+import Tools.ColorTool;
+import Tools.EDTool;
+import Tools.IOTool;
+import Tools.WinTool;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 
 import java.io.File;
@@ -20,7 +23,7 @@ import java.util.Optional;
  * 用途：用于搜索值的操作类
  */
 public class ShowValues {
-    private final VBox box;
+    private final Pane box;
     private final String path;
     private final String list_name;
     private final DataController controller;
@@ -31,7 +34,7 @@ public class ShowValues {
      * @param path 文件路径
      * @param list_name 列表名称
      */
-    public ShowValues(VBox box, String path, String list_name) {
+    public ShowValues(Pane box, String path, String list_name) {
         this.box = box;
         this.path = path;
         this.list_name = list_name;

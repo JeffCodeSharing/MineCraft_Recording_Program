@@ -4,7 +4,7 @@ import Modes.PositionManager.Group.SaveGroup;
 import Tools.WinTool;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.Pane;
 
 import java.io.File;
 import java.util.List;
@@ -14,7 +14,7 @@ import java.util.Optional;
  * DeletePosition 类负责从 指定坐标组中删除一个坐标
  */
 public class RemovePosition {
-    private final VBox box;
+    private final Pane box;
     private final int index;
     private final int group_index;
     private final List<Integer> item_num;
@@ -32,7 +32,7 @@ public class RemovePosition {
      * @param group_dir   储存文件所在目录。
      * @param group_name  要删除的组的名称。
      */
-    public RemovePosition(VBox box, int index, int group_index, List<Integer> item_num, List<String[]> group_value,
+    public RemovePosition(Pane box, int index, int group_index, List<Integer> item_num, List<String[]> group_value,
                           String group_dir, String group_name) {
         this.box = box;
         this.index = index;

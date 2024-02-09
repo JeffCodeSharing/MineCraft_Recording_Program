@@ -8,13 +8,13 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 
 import java.io.File;
 
 public class SearchFinishValue {
-    private final VBox box;
+    private final Pane box;
     private final String path;
     private final String list_name;
     private final String[] file_values;
@@ -25,7 +25,7 @@ public class SearchFinishValue {
      * @param path 已完成任务列表所在路径
      * @param list_name 当前列表名称
      */
-    public SearchFinishValue(VBox box, String path, String list_name) {
+    public SearchFinishValue(Pane box, String path, String list_name) {
         this.box = box;
         this.path = path;
         this.list_name = list_name;

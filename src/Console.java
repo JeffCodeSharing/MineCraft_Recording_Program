@@ -4,8 +4,6 @@ import Modes.LogManager.Data.ShowData;
 import Modes.LogManager.Date.CreateDate;
 import Modes.LogManager.Date.RemoveDate;
 import Modes.LogManager.Date.ShowDate;
-import ModServer.Communicator;
-import Modes.ModDownloader.ModDownloader;
 import Modes.PositionManager.Searcher;
 import Modes.ProjectManager.CreateProject;
 import Modes.ProjectManager.OpenProject;
@@ -15,6 +13,7 @@ import Modes.ProjectTypeManager.GameBackup.ShowBackup;
 import Modes.ProjectTypeManager.Password.ShowPassword;
 import Modes.ProjectTypeManager.Seed.ShowSeed;
 import Modes.SettingManager.SettingManager;
+import Modes.StationMap.ShowMap;
 import ProjectSafe.CheckPassword;
 import Tools.IOTool;
 import Tools.JsonTool;
@@ -25,7 +24,7 @@ import javafx.application.Application;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
 import java.io.File;
@@ -40,7 +39,7 @@ public class Console extends Application {
     private static String path;
     private String type;
     private Label project_name;
-    private VBox pane_box;
+    private Pane detail_pane;
     private ScrollPane scrollPane;
 
     /**
@@ -113,8 +112,8 @@ public class Console extends Application {
      * 绘制控件和菜单
      */
     public void drawControls(Group group) {
-        pane_box = new VBox();
-        scrollPane = WinTool.createScrollPane(150, 30, 630, 720, pane_box);
+        detail_pane = new Pane();
+        scrollPane = WinTool.createScrollPane(150, 30, 630, 720, detail_pane);
 
         project_name = WinTool.createLabel(0, 30, 150, 40, 14, "项目名:");
 
@@ -142,7 +141,7 @@ public class Console extends Application {
                 path = return_path;
                 updateProjectName();
 
-                pane_box.getChildren().clear();
+                detail_pane.getChildren().clear();
             }
         });
 
@@ -168,7 +167,7 @@ public class Console extends Application {
             if (return_value) {
                 path = "none";
                 project_name.setText("项目名:");
-                pane_box.getChildren().clear();
+                detail_pane.getChildren().clear();
             }
         });
 
@@ -209,16 +208,6 @@ public class Console extends Application {
 
         project_type.getItems().addAll(seed, password, game_backup);
 
-        // java版Model下载菜单
-        Menu model = new Menu("模组");
-        MenuItem download_model = new MenuItem("下载模组");
-        download_model.setOnAction(actionEvent -> {
-            ModDownloader manager = new ModDownloader();
-            manager.entrance();
-        });
-
-        model.getItems().addAll(download_model);
-
         // 帮助菜单
         Menu help = new Menu("帮助");
         MenuItem help_document = new MenuItem("帮助文档");
@@ -238,7 +227,7 @@ public class Console extends Application {
         });
         settings.getItems().addAll(settings_item);
 
-        menuBar.getMenus().addAll(file, project_type, model, help, settings);
+        menuBar.getMenus().addAll(file, project_type, help, settings);
         group.getChildren().addAll(menuBar, project_name, typeBox, scrollPane);
 
         updateType(group, true);
@@ -257,7 +246,7 @@ public class Console extends Application {
      * 更新项目类型
      */
     private void updateType(Group group, boolean is_first) {
-        pane_box.getChildren().clear();
+        detail_pane.getChildren().clear();
         group.getChildren().remove(4, group.getChildren().size());
 
         switch (type) {
@@ -314,7 +303,7 @@ public class Console extends Application {
                     temp_data_final.replace("day", date_list.getSelectionModel().getSelectedItem());
                     JsonTool.write_json(temp_data_final, temp_path);
 
-                    ShowData showData = new ShowData(pane_box);
+                    ShowData showData = new ShowData(detail_pane);
                     showData.entrance(path, date_list.getSelectionModel().getSelectedItem());
                 });
                 group.getChildren().addAll(year, year_field, month, month_field, date_list,
@@ -327,23 +316,24 @@ public class Console extends Application {
                     searchDate.entrance(path, year_field.getText(), month_field.getText());
 
                     // SearchData
-                    ShowData searchData = new ShowData(pane_box);
+                    ShowData searchData = new ShowData(detail_pane);
                     searchData.entrance(path, temp_data_final.getString("day"));
                 }
             }
 
             case "坐标" -> {
                 Searcher searcher = new Searcher();
-                searcher.entrance(scrollPane, pane_box, path);
+                searcher.entrance(scrollPane, detail_pane, path);
             }
 
             case "计划表及正在做" -> {
-                ShowLists clazz = new ShowLists(pane_box, path + File.separator + "behavior" + File.separator + "doing");
-                clazz.entrance();
+                ShowLists showLists = new ShowLists(detail_pane, path + File.separator + "behavior" + File.separator + "doing");
+                showLists.entrance();
             }
 
             case "地铁线路" -> {
-                // todo
+                ShowMap showMap = new ShowMap();
+                showMap.entrance(detail_pane);
             }
         }
     }
@@ -398,10 +388,6 @@ public class Console extends Application {
  */
 class ConsoleEntrance {
     public static void main(String[] args) {
-        // 创建连接
-        Thread thread = new Thread(new Communicator());
-        thread.start();
-
         Console.main(args);
     }
 }
