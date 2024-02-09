@@ -303,8 +303,8 @@ public class Console extends Application {
                     temp_data_final.replace("day", date_list.getSelectionModel().getSelectedItem());
                     JsonTool.write_json(temp_data_final, temp_path);
 
-                    ShowData showData = new ShowData(detail_pane);
-                    showData.entrance(path, date_list.getSelectionModel().getSelectedItem());
+                    ShowData showData = new ShowData(detail_pane, path, date_list.getSelectionModel().getSelectedItem());
+                    showData.entrance();
                 });
                 group.getChildren().addAll(year, year_field, month, month_field, date_list,
                         button_search, button_delete, button_create, button_open);
@@ -316,8 +316,8 @@ public class Console extends Application {
                     searchDate.entrance(path, year_field.getText(), month_field.getText());
 
                     // SearchData
-                    ShowData searchData = new ShowData(detail_pane);
-                    searchData.entrance(path, temp_data_final.getString("day"));
+                    ShowData searchData = new ShowData(detail_pane, path, temp_data_final.getString("day"));
+                    searchData.entrance();
                 }
             }
 

@@ -16,60 +16,72 @@ import java.util.List;
  */
 public class ShowData {
     private final Pane box;
+    private final List<TextField> fields;
+    private final List<TextArea> areas;
+    private final boolean isUpdate;
+    private final boolean can_start;      // 为了防止出现用户没有选择日期就查询的情况
+    private final String datePath;
 
     /**
      * 构造函数，初始化 SearchData 类的实例。
      *
      * @param box 显示搜索结果的 VBox 对象。
      */
-    public ShowData(Pane box) {
+    public ShowData(Pane box, String projectPath, String date) {
         this.box = box;
+        this.fields = new ArrayList<>();
+        this.areas = new ArrayList<>();
+        this.isUpdate = false;
+        this.can_start = !((date == null) || date.equals(""));
+        this.datePath = new File(projectPath, date).getPath();
+    }
+
+    public ShowData(Pane box, List<TextField> fields, List<TextArea> areas) {
+        this.box = box;
+        this.fields = fields;
+        this.areas = areas;
+        this.isUpdate = true;
+        this.can_start = true;
+        this.datePath = "";
     }
 
     /**
      * 搜索特定日期的数据。
      *
-     * @param project_path 项目的路径。
-     * @param date 用户选择的日期。
      * @implNote 该方法为外部调用的入口。
      */
-    public void entrance(String project_path, String date) {
-        if (!(date == null)) {
-            if (!date.equals("")) {
-                start(project_path + File.separator + date);
-            }
+    public void entrance() {
+        if (can_start) {
+            start();
         }
     }
 
     /**
      * 开始搜索数据的过程。
      *
-     * @param date_path 日期的路径。
      * @implNote 该方法为私有入口，外部无法调用。
      */
-    private void start(String date_path) {
+    private void start() {
         box.getChildren().clear();
-        List<TextField> fields = new ArrayList<>();
-        List<TextArea> areas = new ArrayList<>();
 
         // 创建工具
-        TextField eventPoint = WinTool.createTextField(0, 0, 350, 30, 15);
-        Button create_button = WinTool.createButton(350, 0, 60, 30, 15, "创建");
+        TextField eventPoint = WinTool.createTextField(80, 0, 350, 30, 15);
+        Button create_button = WinTool.createButton(430, 0, 60, 30, 15, "创建");
         create_button.setOnAction(actionEvent -> {
             createPoint(eventPoint.getText(), "", fields, areas);
             eventPoint.setText("");    // 清空TextField
         });
 
-        Button delete = WinTool.createButton(410, 0, 60, 30, 15, "删除");
+        Button delete = WinTool.createButton(490, 0, 60, 30, 15, "删除");
         delete.setOnAction(actionEvent -> {
             RemoveData remover = new RemoveData(box, fields, areas);
             remover.entrance();
         });
 
-        Button save = WinTool.createButton(470, 0, 60, 30, 15, "保存");
+        Button save = WinTool.createButton(550, 0, 60, 30, 15, "保存");
         save.setOnAction(actionEvent -> {
             SaveData saver = new SaveData();
-            saver.entrance(date_path, fields, areas);
+            saver.entrance(datePath, fields, areas);
         });
 
         box.getChildren().addAll(
@@ -78,14 +90,22 @@ public class ShowData {
         );
 
         // 创建控件
-        String[] temp_array = IOTool.readFile(date_path + File.separator + "simple_data");
-        if (temp_array == null) {
-            WinTool.createAlert(Alert.AlertType.ERROR, "错误", "读取文件错误", "请重新尝试");
+        if (isUpdate) {
+            for (int i = 0; i < fields.size(); i++) {
+                String fieldData = fields.get(i).getText();
+                String areaData = areas.get(i).getText();
+                createPoint(fieldData, areaData, i);
+            }
         } else {
-            for (int i = 0; i < temp_array.length; i += 2) {
-                String field_data = EDTool.decrypt(temp_array[i]);
-                String area_data = EDTool.decrypt(temp_array[i+1]).replace("\0", "\n");
-                createPoint(field_data, area_data, fields, areas);
+            String[] temp_array = IOTool.readFile(new File(datePath, "simple_data").getPath());
+            if (temp_array == null) {
+                WinTool.createAlert(Alert.AlertType.ERROR, "错误", "读取文件错误", "请重新尝试");
+            } else {
+                for (int i = 0; i < temp_array.length; i += 2) {
+                    String fieldData = EDTool.decrypt(temp_array[i]);
+                    String areaData = EDTool.decrypt(temp_array[i + 1]).replace("\0", "\n");
+                    createPoint(fieldData, areaData, fields, areas);
+                }
             }
         }
     }
@@ -93,24 +113,41 @@ public class ShowData {
     /**
      * 创建事件点，并添加到界面中。
      *
-     * @param field_value TextField 在文件中的储存值。
-     * @param area_value TextArea 在文件中的储存值。
+     * @param fieldValue TextField 在文件中的储存值。
+     * @param areaValue TextArea 在文件中的储存值。
      * @param fields TextField 对象的列表。
      * @param areas TextArea 对象的列表。
      */
-    private void createPoint(String field_value, String area_value, List<TextField> fields, List<TextArea> areas) {
-        int num = fields.size() + 1;
+    private void createPoint(String fieldValue, String areaValue, List<TextField> fields, List<TextArea> areas) {
+        int posType = fields.size();
 
-        Label label1 = WinTool.createLabel(0, 0, 100, 40, 20, "事件点" + num, Color.BLUE);
-        Label label2 = WinTool.createLabel(0, 0, 100, 30, 15, "纲要：");
-        TextField textfield = WinTool.createTextField(0, 0, 500, 30, 15, field_value, "");
-        Label label3 = WinTool.createLabel(0, 0, 100, 30, 15, "内容");
-        TextArea textArea = WinTool.createTextArea(0, 0, 500, 200, 15, true, area_value);
-        Label label4 = WinTool.createLabel(0, 0, 100, 40, 20, "");
+        TextField textfield = WinTool.createTextField(0, posType*360+60+70, 500, 30, 15, fieldValue, "");
+        TextArea textArea = WinTool.createTextArea(0, posType*360+60+130, 500, 200, 15, true, areaValue);
 
         fields.add(textfield);
         areas.add(textArea);
-        box.getChildren().addAll(label1, label2, textfield, label3, textArea, label4);
+        box.getChildren().addAll(
+                WinTool.createLabel(0, posType*360+60, 100, 40, 20, "事件点" + (posType + 1), Color.BLUE),
+                WinTool.createLabel(0, posType*360+60+40, 100, 30, 15, "纲要"), textfield,
+                WinTool.createLabel(0, posType*360+60+100, 100, 30, 15, "内容"), textArea
+        );
+    }
+
+    /**
+     * 创建事件点，并添加到界面中（更新时）
+     *
+     * @param fieldValue 创建的TextField中的值。
+     * @param areaValue 创建的TextArea中的值。
+     */
+    private void createPoint(String fieldValue, String areaValue, int posType) {
+        TextField textfield = WinTool.createTextField(0, posType*360+60+70, 500, 30, 15, fieldValue, "");
+        TextArea textArea = WinTool.createTextArea(0, posType*360+60+130, 500, 200, 15, true, areaValue);
+
+        box.getChildren().addAll(
+                WinTool.createLabel(0, posType*360+60, 100, 40, 20, "事件点" + (posType + 1), Color.BLUE),
+                WinTool.createLabel(0, posType*360+60+40, 100, 30, 15, "纲要"), textfield,
+                WinTool.createLabel(0, posType*360+60+100, 100, 30, 15, "内容"), textArea
+        );
     }
 }
 

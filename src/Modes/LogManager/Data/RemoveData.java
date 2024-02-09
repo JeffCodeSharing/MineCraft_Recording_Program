@@ -93,11 +93,8 @@ public class RemoveData extends Application implements AbstractWindow {
                 areas.remove(index);
 
                 // 更新
-                box.getChildren().remove(index * 6 + 2, index * 6 + 8);
-                for (int i = 2, j = 1; i < box.getChildren().size(); i += 6, j++) {
-                    Label label = WinTool.createLabel(0, 0, 100, 40, 20, "事件点" + j, Color.BLUE);
-                    box.getChildren().set(i, label);
-                }
+                ShowData updater = new ShowData(box, fields, areas);
+                updater.entrance();
             }
 
             global_stage.close();
