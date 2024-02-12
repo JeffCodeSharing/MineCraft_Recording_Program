@@ -6,8 +6,6 @@ import Tools.IOTool;
 import Tools.WinTool;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 
 import java.io.File;
@@ -26,32 +24,22 @@ public class Searcher {
      * @param box 添加控件的VBox
      * @implNote 调用者可以使用此入口点
      */
-    public void entrance(ScrollPane pane, Pane box, String path) {
+    public void entrance(Pane box, String path) {
         box.getChildren().clear();
-        start(pane, box, path + File.separator + "positions");
+        start(box, new File(path, "positions").getPath());
     }
 
     /**
      * @implNote 实际的入口点，仅可由同一类中的方法调用
      */
-    private void start(ScrollPane pane, Pane box, String path) {      // 传入path已经到了positions路径下了
-        HBox hBox = new HBox();
+    private void start(Pane box, String path) {      // 传入path已经到了positions路径下了
         Button create_group = WinTool.createButton(0, 0, 130, 40, 20, "创建坐标组");
         create_group.setOnAction(actionEvent -> {
             CreateGroup creator = new CreateGroup(box, item_num, group_value, group_name, path);
             creator.entrance();
         });
 
-        Button positioning_group = WinTool.createButton(0, 0, 130, 40, 20, "定位坐标组");
-        positioning_group.setOnAction(actionEvent -> {
-            PositioningGroup clazz = new PositioningGroup(pane, group_name, item_num);
-            clazz.entrance();
-        });
-
-        hBox.getChildren().addAll(create_group, positioning_group);
-
-        box.getChildren().addAll(hBox,
-                WinTool.createLabel(0, 0, 0, 30, 0, ""));
+        box.getChildren().addAll(create_group);
 
         addGroup(path, box);
     }
@@ -67,10 +55,11 @@ public class Searcher {
         try {
             String[] list = new File(dir).list();
 
-            for (int i = 0; i < list.length; i++) {
-                String s = list[i];
+            for (int i=0; i<list.length; i++) {
                 try {
-                    String[] temp = IOTool.readFile(dir + File.separator + s);
+                    String s = list[i];
+
+                    String[] temp = IOTool.readFile(new File(dir, s).getPath());
                     List<String[]> piece_value = new ArrayList<>();
 
                     for (String value : temp) {
@@ -80,14 +69,13 @@ public class Searcher {
 
                     item_num.add(piece_value.size());
                     group_value.add(piece_value);
+                    group_name.add(s);
+
+                    // 执行GroupAdder中的add的操作
+                    adder.add(group_value.get(i), group_name.get(i));
                 } catch (Exception e) {
                     WinTool.createAlert(Alert.AlertType.ERROR, "错误", "读取文件错误", "请重新尝试或删除项目重新尝试");
                 }
-
-                group_name.add(s);
-
-                // 执行GroupAdder中的add的操作
-                adder.add(group_value.get(i), group_name.get(i));
             }
         } catch (Exception ignored) {
             // 这里的报错忽略忽略的是当用户没有打开项目时出现的检索错误

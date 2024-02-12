@@ -2,6 +2,7 @@ package Modes.PositionManager.Position;
 
 import Interface.AbstractWindow;
 import Modes.PositionManager.Group.SaveGroup;
+import Modes.PositionManager.GroupAdder;
 import Tools.ColorTool;
 import Tools.WinTool;
 import javafx.application.Application;
@@ -21,7 +22,9 @@ import java.util.List;
 public class SetPositionData extends Application implements AbstractWindow {
     private final Pane box;
     private final List<Integer> item_num;
+    private final List<List<String[]>> group_values;
     private final List<String[]> group_value;
+    private final List<String> group_names;
     private final int group_type;
     private final String group_name;
     private final String group_dir;
@@ -37,11 +40,14 @@ public class SetPositionData extends Application implements AbstractWindow {
      * @param group_dir    分组数据保存的目录
      * @param group_name   分组名称
      */
-    public SetPositionData(Pane box, List<Integer> item_num, List<String[]> group_value, int group_type,
+    public SetPositionData(Pane box, List<Integer> item_num, List<List<String[]>> group_values, List<String > group_names,
+                           List<String[]> group_value, int group_type,
                            String group_dir, String group_name) {
         this.box = box;
         this.item_num = item_num;
+        this.group_values = group_values;
         this.group_value = group_value;
+        this.group_names = group_names;
         this.group_type = group_type;
         this.group_name = group_name;
         this.group_dir = group_dir;
@@ -66,7 +72,7 @@ public class SetPositionData extends Application implements AbstractWindow {
         for (int i = 0; i < listView_in.length; i++) {
             String[] temp = group_value.get(i);
 
-            String array_in = "第" + (i + 1) + "项  X:" + temp[0] + "  Y:" + temp[1] + "  Z:" + temp[2] + "  备注:" + temp[3] + "  颜色:" + temp[4];
+            String array_in = "第" + (i + 1) + "项  X:" + temp[0] + "  Y:" + temp[1] + "  Z:" + temp[2] + "  备注:" + temp[3] + "  颜色:" + ColorTool.englishToChinese(temp[4]);
             listView_in[i] = array_in;
         }
 
@@ -131,7 +137,7 @@ public class SetPositionData extends Application implements AbstractWindow {
                 ColorTool.chineseToEnglish(color_box.getSelectionModel().getSelectedItem()), index
         ));
         delete.setOnAction(actionEvent -> {
-            RemovePosition remover = new RemovePosition(box, index, group_type, item_num, group_value, group_dir, group_name);
+            RemovePosition remover = new RemovePosition(box, index, group_type, item_num, group_values, group_names, group_value, group_dir, group_name);
             remover.entrance();
 
             drawControls(group);     // 回到首页
@@ -161,17 +167,10 @@ public class SetPositionData extends Application implements AbstractWindow {
      * @param index      选中的位置索引
      */
     private void saveEvents(String x, String y, String z, String notes, String color, int index) {
-        int controls_num = 2 + 1 + index;
-        for (int i = 0; i < group_type - 1; i++) {
-            controls_num = controls_num + item_num.get(i) + 2;
-        }
-
         group_value.set(index, new String[]{x, y, z, notes, color});
 
-        String[] values = group_value.get(index);
-        String add_value = group_name + (index + 1) + "  x:" + values[0] + " y:" + values[1] + " z:" + values[2] + " 备注:" + values[3];
-        box.getChildren().set(controls_num, WinTool.createLabel(0, 0, 630, 25, 18, add_value,
-                ColorTool.englishToColor(values[4])));
+        GroupAdder updater = new GroupAdder(box, item_num, group_values, group_names, group_dir);
+        updater.update(false);
 
         WinTool.createAlert(Alert.AlertType.INFORMATION, "成功", "更改成功！！", "");
 

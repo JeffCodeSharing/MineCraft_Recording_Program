@@ -63,9 +63,9 @@ public class CreateGroup extends Application implements AbstractWindow {
                 group_value.add(new ArrayList<>());
                 group_name.add(field.getText());
 
-                // 添加控件
+                // 更新
                 GroupAdder adder = new GroupAdder(box, item_num, group_value, group_name, create_dir);
-                adder.add(new ArrayList<>(), field.getText());
+                adder.update(false);
 
                 item_num.add(0);
             } else {
@@ -104,7 +104,7 @@ public class CreateGroup extends Application implements AbstractWindow {
      * @return 插入成功返回true，否则返回false
      */
     private boolean createFile(String name) {
-        File createFile = new File(create_dir + File.separator + name);
+        File createFile = new File(create_dir, name);
 
         // 检索是否存在一样名字的文件
         if (createFile.exists()) {

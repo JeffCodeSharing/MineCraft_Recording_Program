@@ -1,6 +1,7 @@
 package Modes.PositionManager.Position;
 
 import Modes.PositionManager.Group.SaveGroup;
+import Modes.PositionManager.GroupAdder;
 import Tools.WinTool;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
@@ -18,6 +19,8 @@ public class RemovePosition {
     private final int index;
     private final int group_index;
     private final List<Integer> item_num;
+    private final List<List<String[]>> group_values;
+    private final List<String> group_names;
     private final List<String[]> group_value;
     private final String group_path;
 
@@ -32,14 +35,17 @@ public class RemovePosition {
      * @param group_dir   储存文件所在目录。
      * @param group_name  要删除的组的名称。
      */
-    public RemovePosition(Pane box, int index, int group_index, List<Integer> item_num, List<String[]> group_value,
-                          String group_dir, String group_name) {
+    public RemovePosition(Pane box, int index, int group_index,
+                          List<Integer> item_num, List<List<String[]>> group_values, List<String> group_names,
+                          List<String[]> group_value, String group_dir, String group_name) {
         this.box = box;
         this.index = index;
         this.group_index = group_index;
         this.item_num = item_num;
+        this.group_values = group_values;
+        this.group_names = group_names;
         this.group_value = group_value;
-        this.group_path = group_dir + File.separator + group_name;
+        this.group_path = new File(group_dir, group_name).getPath();
     }
 
     /**
@@ -58,14 +64,11 @@ public class RemovePosition {
                 "删除坐标", "您是否要删除这一个坐标", "删除后坐标将不复存在，\n删除后记得要保存组");
 
         if (type.get() == ButtonType.OK) {
-            int controls_num = 2 + 1 + index;
-            for (int i = 0; i < group_index - 1; i++) {
-                controls_num = controls_num + item_num.get(i) + 2;
-            }
-
-            box.getChildren().remove(controls_num);
             group_value.remove(index);
             item_num.set(group_index - 1, item_num.get(group_index - 1) - 1);
+
+            GroupAdder updater = new GroupAdder(box, item_num, group_values, group_names, new File(group_path).getParent());
+            updater.update(false);
 
             SaveGroup saver = new SaveGroup();
             saver.entrance(group_path, group_value);

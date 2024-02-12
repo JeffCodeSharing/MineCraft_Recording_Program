@@ -2,6 +2,7 @@ package Modes.PositionManager.Position;
 
 import Interface.AbstractWindow;
 import Modes.PositionManager.Group.SaveGroup;
+import Modes.PositionManager.GroupAdder;
 import Tools.WinTool;
 import javafx.application.Application;
 import javafx.scene.Group;
@@ -9,7 +10,6 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.Pane;
-import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 import java.io.File;
@@ -21,9 +21,10 @@ import java.util.List;
 public class CreatePosition extends Application implements AbstractWindow {
     private final Pane box;
     private final List<Integer> item_num;
+    private final List<List<String[]>> group_values;
+    private final List<String> group_names;
     private final List<String[]> group_value;
     private final int group_type;
-    private final String title_str;
     private final Stage global_stage = new Stage();
     private final String group_path;
 
@@ -34,18 +35,19 @@ public class CreatePosition extends Application implements AbstractWindow {
      * @param item_num   每个组的项目数列表
      * @param group_value 存储位置数据的列表
      * @param group_type 组类型
-     * @param title_str  分组名称的字符串
      * @param group_dir  分组数据保存的目录
      * @param group_name 分组名称
      */
-    public CreatePosition(Pane box, List<Integer> item_num, List<String[]> group_value, int group_type, String title_str,
+    public CreatePosition(Pane box, List<Integer> item_num, List<List<String[]>> group_values, List<String> group_names,
+                          List<String[]> group_value, int group_type,
                           String group_dir, String group_name) {
         this.box = box;
         this.item_num = item_num;
+        this.group_values = group_values;
+        this.group_names = group_names;
         this.group_value = group_value;
         this.group_type = group_type;
-        this.title_str = title_str;
-        this.group_path = group_dir + File.separator + group_name;
+        this.group_path = new File(group_dir, group_name).getPath();
     }
 
     @Override
@@ -108,19 +110,11 @@ public class CreatePosition extends Application implements AbstractWindow {
      * @param notes 备注的字符串值
      */
     private void afterConfirm(String x, String y, String z, String notes) {
-        int before_control_num = 2;
-        for (int i = 0; i < group_type; i++) {
-            before_control_num = before_control_num + item_num.get(i) + 2;
-        }
-
-        // 创建控件
-        String add_str = title_str + (item_num.get(group_type - 1) + 1) + "  x:" + x + " y:" + y + " z:" + z + " 备注:" + notes;
-        box.getChildren().add(before_control_num - 1, WinTool.createLabel(20, 0, 610, 25,
-                18, add_str, Color.BLACK));
-
-        // 更改统计信息
         item_num.set(group_type - 1, item_num.get(group_type - 1) + 1);
         group_value.add(new String[]{x, y, z, notes, "BLACK"});
+
+        GroupAdder updater = new GroupAdder(box, item_num, group_values, group_names, new File(group_path).getParent());
+        updater.update(false);
 
         global_stage.close();
 
