@@ -20,11 +20,9 @@ import java.util.List;
  */
 public class CreatePosition extends Application implements AbstractWindow {
     private final Pane box;
-    private final List<Integer> item_num;
     private final List<List<String[]>> group_values;
     private final List<String> group_names;
     private final List<String[]> group_value;
-    private final int group_type;
     private final Stage global_stage = new Stage();
     private final String group_path;
 
@@ -32,21 +30,18 @@ public class CreatePosition extends Application implements AbstractWindow {
      * CreatePosition类的构造方法。
      *
      * @param box        存放位置数据的VBox对象
-     * @param item_num   每个组的项目数列表
      * @param group_value 存储位置数据的列表
-     * @param group_type 组类型
      * @param group_dir  分组数据保存的目录
      * @param group_name 分组名称
      */
-    public CreatePosition(Pane box, List<Integer> item_num, List<List<String[]>> group_values, List<String> group_names,
-                          List<String[]> group_value, int group_type,
+    public CreatePosition(Pane box,
+                          List<List<String[]>> group_values, List<String> group_names,
+                          List<String[]> group_value,
                           String group_dir, String group_name) {
         this.box = box;
-        this.item_num = item_num;
         this.group_values = group_values;
         this.group_names = group_names;
         this.group_value = group_value;
-        this.group_type = group_type;
         this.group_path = new File(group_dir, group_name).getPath();
     }
 
@@ -110,10 +105,9 @@ public class CreatePosition extends Application implements AbstractWindow {
      * @param notes 备注的字符串值
      */
     private void afterConfirm(String x, String y, String z, String notes) {
-        item_num.set(group_type - 1, item_num.get(group_type - 1) + 1);
         group_value.add(new String[]{x, y, z, notes, "BLACK"});
 
-        GroupAdder updater = new GroupAdder(box, item_num, group_values, group_names, new File(group_path).getParent());
+        GroupAdder updater = new GroupAdder(box, group_values, group_names, new File(group_path).getParent());
         updater.update(false);
 
         global_stage.close();

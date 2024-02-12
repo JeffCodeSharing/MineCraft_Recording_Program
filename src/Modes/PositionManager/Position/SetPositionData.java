@@ -21,11 +21,9 @@ import java.util.List;
  */
 public class SetPositionData extends Application implements AbstractWindow {
     private final Pane box;
-    private final List<Integer> item_num;
     private final List<List<String[]>> group_values;
     private final List<String[]> group_value;
     private final List<String> group_names;
-    private final int group_type;
     private final String group_name;
     private final String group_dir;
     private final Stage global_stage = new Stage();
@@ -34,21 +32,17 @@ public class SetPositionData extends Application implements AbstractWindow {
      * ChangePositionData类的构造方法。
      *
      * @param box          存放位置数据的VBox对象
-     * @param item_num     每个组的项目数列表
      * @param group_value  存储位置数据的列表
-     * @param group_type   组类型
      * @param group_dir    分组数据保存的目录
      * @param group_name   分组名称
      */
-    public SetPositionData(Pane box, List<Integer> item_num, List<List<String[]>> group_values, List<String > group_names,
-                           List<String[]> group_value, int group_type,
+    public SetPositionData(Pane box,
+                           List<List<String[]>> group_values, List<String> group_names, List<String[]> group_value,
                            String group_dir, String group_name) {
         this.box = box;
-        this.item_num = item_num;
         this.group_values = group_values;
         this.group_value = group_value;
         this.group_names = group_names;
-        this.group_type = group_type;
         this.group_name = group_name;
         this.group_dir = group_dir;
     }
@@ -137,7 +131,7 @@ public class SetPositionData extends Application implements AbstractWindow {
                 ColorTool.chineseToEnglish(color_box.getSelectionModel().getSelectedItem()), index
         ));
         delete.setOnAction(actionEvent -> {
-            RemovePosition remover = new RemovePosition(box, index, group_type, item_num, group_values, group_names, group_value, group_dir, group_name);
+            RemovePosition remover = new RemovePosition(box, index, group_values, group_names, group_value, group_dir, group_name);
             remover.entrance();
 
             drawControls(group);     // 回到首页
@@ -169,12 +163,12 @@ public class SetPositionData extends Application implements AbstractWindow {
     private void saveEvents(String x, String y, String z, String notes, String color, int index) {
         group_value.set(index, new String[]{x, y, z, notes, color});
 
-        GroupAdder updater = new GroupAdder(box, item_num, group_values, group_names, group_dir);
+        GroupAdder updater = new GroupAdder(box, group_values, group_names, group_dir);
         updater.update(false);
 
         WinTool.createAlert(Alert.AlertType.INFORMATION, "成功", "更改成功！！", "");
 
         SaveGroup saver = new SaveGroup();
-        saver.entrance(group_dir + File.separator + group_name, group_value);
+        saver.entrance(new File(group_dir, group_name).getPath(), group_value);
     }
 }

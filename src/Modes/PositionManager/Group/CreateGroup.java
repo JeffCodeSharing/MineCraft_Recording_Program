@@ -64,7 +64,7 @@ public class CreateGroup extends Application implements AbstractWindow {
                 group_name.add(field.getText());
 
                 // 更新
-                GroupAdder adder = new GroupAdder(box, item_num, group_value, group_name, create_dir);
+                GroupAdder adder = new GroupAdder(box, group_value, group_name, create_dir);
                 adder.update(false);
 
                 item_num.add(0);

@@ -23,7 +23,6 @@ import java.util.List;
 // 注意：本class中，group_values和group_value是不一样的
 public class GroupAdder {
     private final Pane box;
-    private final List<Integer> item_num;
     private final List<List<String[]>> group_values;
     private final String group_dir;
     private final List<String> group_names;
@@ -32,16 +31,14 @@ public class GroupAdder {
     /**
      * 使用指定的参数构造 GroupAdder 对象。
      * @param box 需要添加的VBox容器
-     * @param item_num 每个组中的项目数列表。
      * @param group_values 组值列表。
      * @param group_names 组名列表。
      * @param group_dir 组的目录。
      */
-    public GroupAdder(Pane box, List<Integer> item_num,
+    public GroupAdder(Pane box,
                       List<List<String[]>> group_values, List<String> group_names,
                       String group_dir) {
         this.box = box;
-        this.item_num = item_num;
         this.group_values = group_values;
         this.group_names = group_names;
         this.group_dir = group_dir;
@@ -66,14 +63,13 @@ public class GroupAdder {
 
         Button create_item = WinTool.createButton(390, 70+y_count, 90, 30, 15, "创建坐标");
         create_item.setOnAction(actionEvent -> {
-            CreatePosition creator = new CreatePosition(box, item_num, group_values, group_names, group_value, group_type,
-                    group_dir, title_str);
+            CreatePosition creator = new CreatePosition(box, group_values, group_names, group_value, group_dir, title_str);
             creator.entrance();
         });
 
         Button change = WinTool.createButton(480, 70+y_count, 110, 30, 14, "更改坐标信息");
         change.setOnAction(actionEvent -> {
-            SetPositionData setter = new SetPositionData(box, item_num, group_values, group_names, group_value, group_type, group_dir, title_str);
+            SetPositionData setter = new SetPositionData(box, group_values, group_names, group_value, group_dir, title_str);
             setter.entrance();
         });
 
@@ -108,14 +104,13 @@ public class GroupAdder {
 
         Button create_item = WinTool.createButton(390, 70+y_count, 90, 30, 15, "创建坐标");
         create_item.setOnAction(actionEvent -> {
-            CreatePosition creator = new CreatePosition(box, item_num, group_values, group_names, group_value, group_type,
-                    group_dir, title_str);
+            CreatePosition creator = new CreatePosition(box, group_values, group_names, group_value, group_dir, title_str);
             creator.entrance();
         });
 
         Button change = WinTool.createButton(480, 70+y_count, 110, 30, 14, "更改坐标信息");
         change.setOnAction(actionEvent -> {
-            SetPositionData setter = new SetPositionData(box, item_num, group_values, group_names, group_value, group_type, group_dir, title_str);
+            SetPositionData setter = new SetPositionData(box, group_values, group_names, group_value, group_dir, title_str);
             setter.entrance();
         });
 
@@ -145,9 +140,8 @@ public class GroupAdder {
     public void update(boolean readFiles) {
         box.getChildren().remove(1, box.getChildren().size());
 
-        GroupAdder adder = new GroupAdder(box, item_num, group_values, group_names, group_dir);
+        GroupAdder adder = new GroupAdder(box, group_values, group_names, group_dir);
         if (readFiles) {
-            item_num.clear();
             group_values.clear();
             group_names.clear();
 
@@ -163,7 +157,6 @@ public class GroupAdder {
                         value_group.add(add_array);
                     }
 
-                    item_num.add(value_group.size());
                     group_values.add(value_group);
                 } catch (Exception e) {
                     WinTool.createAlert(Alert.AlertType.ERROR, "错误", "读取文件错误", "请重新尝试或删除项目重新尝试");

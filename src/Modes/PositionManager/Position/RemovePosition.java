@@ -17,8 +17,6 @@ import java.util.Optional;
 public class RemovePosition {
     private final Pane box;
     private final int index;
-    private final int group_index;
-    private final List<Integer> item_num;
     private final List<List<String[]>> group_values;
     private final List<String> group_names;
     private final List<String[]> group_value;
@@ -29,19 +27,15 @@ public class RemovePosition {
      *
      * @param box         包含坐标的 VBox 容器。
      * @param index       要删除的位置的索引。
-     * @param group_index 组的索引。
-     * @param item_num    每个组中的项目数列表。
      * @param group_value 组数据列表。
      * @param group_dir   储存文件所在目录。
      * @param group_name  要删除的组的名称。
      */
-    public RemovePosition(Pane box, int index, int group_index,
-                          List<Integer> item_num, List<List<String[]>> group_values, List<String> group_names,
+    public RemovePosition(Pane box, int index,
+                          List<List<String[]>> group_values, List<String> group_names,
                           List<String[]> group_value, String group_dir, String group_name) {
         this.box = box;
         this.index = index;
-        this.group_index = group_index;
-        this.item_num = item_num;
         this.group_values = group_values;
         this.group_names = group_names;
         this.group_value = group_value;
@@ -65,9 +59,8 @@ public class RemovePosition {
 
         if (type.get() == ButtonType.OK) {
             group_value.remove(index);
-            item_num.set(group_index - 1, item_num.get(group_index - 1) - 1);
 
-            GroupAdder updater = new GroupAdder(box, item_num, group_values, group_names, new File(group_path).getParent());
+            GroupAdder updater = new GroupAdder(box, group_values, group_names, new File(group_path).getParent());
             updater.update(false);
 
             SaveGroup saver = new SaveGroup();

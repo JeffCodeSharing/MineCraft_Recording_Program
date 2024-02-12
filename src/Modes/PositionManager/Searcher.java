@@ -50,7 +50,7 @@ public class Searcher {
      * @param dir 目录的文件类
      */
     private void addGroup(String dir, Pane box) {
-        GroupAdder adder = new GroupAdder(box, item_num, group_value, group_name, dir);
+        GroupAdder adder = new GroupAdder(box, group_value, group_name, dir);
 
         try {
             String[] list = new File(dir).list();

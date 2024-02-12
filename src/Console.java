@@ -40,7 +40,6 @@ public class Console extends Application {
     private String type;
     private Label project_name;
     private Pane detail_pane;
-    private ScrollPane scrollPane;
 
     /**
      * 启动JavaFX应用程序，创建主舞台，检查更新
@@ -113,7 +112,7 @@ public class Console extends Application {
      */
     public void drawControls(Group group) {
         detail_pane = new Pane();
-        scrollPane = WinTool.createScrollPane(150, 30, 630, 720, detail_pane);
+        ScrollPane scrollPane = WinTool.createScrollPane(150, 30, 630, 720, detail_pane);
 
         project_name = WinTool.createLabel(0, 30, 150, 40, 14, "项目名:");
 
@@ -323,7 +322,7 @@ public class Console extends Application {
 
             case "坐标" -> {
                 Searcher searcher = new Searcher();
-                searcher.entrance(scrollPane, detail_pane, path);
+                searcher.entrance(detail_pane, path);
             }
 
             case "计划表及正在做" -> {
