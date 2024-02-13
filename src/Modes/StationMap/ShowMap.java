@@ -17,6 +17,9 @@ public class ShowMap {
         Canvas map = WinTool.createCanvas(0, 0, 630, 630, Color.WHITE);
 
         HBox input_box = new HBox();
+        input_box.setLayoutX(30);
+        input_box.setLayoutY(660);
+
         TextField x_point = WinTool.createTextField(0, 0, 70, 30, 16);
         TextField z_point = WinTool.createTextField(0, 0, 70, 30, 16);
         input_box.getChildren().addAll(
