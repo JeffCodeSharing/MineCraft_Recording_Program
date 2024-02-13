@@ -4,7 +4,6 @@ import Modes.BehaviorManager.Todo.List.ShowLists;
 import Tools.WinTool;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 
@@ -13,16 +12,17 @@ import java.io.File;
 /**
  * SearchFinishList类用于展示已完成任务列表
  */
-public class SearchFinishList {
+public class ShowFinishList {
     private final Pane box;
     private final String path;     // 已包含到finish文件夹的路径
+    private int y_count;
 
     /**
      * 构造函数
      * @param box VBox对象，用于展示UI界面
      * @param path 已完成任务列表所在路径
      */
-    public SearchFinishList(Pane box, String path) {
+    public ShowFinishList(Pane box, String path) {
         this.box = box;
         this.path = path;
     }
@@ -32,13 +32,10 @@ public class SearchFinishList {
      * 也用于刷新
      */
     public void entrance() {
-        // 刷新计划表
+        // 刷新
         String[] list = new File(path).list();
-        list = (list == null) ? new String[0] : list;
-
         box.getChildren().clear();
-
-        HBox hBox = new HBox();
+        y_count = 0;
 
         Button return_to_menu = WinTool.createButton(0, 0, 120, 40, 16, "返回首页");
         return_to_menu.setOnAction(actionEvent -> {
@@ -48,7 +45,7 @@ public class SearchFinishList {
             clazz.entrance();
         });
 
-        Button remove_list = WinTool.createButton(0, 0, 120, 40, 15, "删除计划表");
+        Button remove_list = WinTool.createButton(120, 0, 120, 40, 15, "删除计划表");
 
         final String[] finalList = list;
         remove_list.setOnAction(actionEvent -> {
@@ -59,10 +56,8 @@ public class SearchFinishList {
             entrance();
         });
 
-        hBox.getChildren().addAll(return_to_menu, remove_list);
-
         box.getChildren().addAll(
-                hBox, WinTool.createLabel(0, 0, 0, 10, 0, "")
+                return_to_menu, remove_list
         );
 
         // 绘制列表
@@ -75,13 +70,15 @@ public class SearchFinishList {
      * @param value 传入要打开的计划表
      */
     private void addLabelToBox(String value) {
-        Label label = WinTool.createLabel(0, 0, 530, 30, 25, "> " + value, Color.BLUE);
+        Label label = WinTool.createLabel(0, 40+y_count, -1, 30, 25, "> " + value, Color.BLUE);
         label.hoverProperty().addListener((observableValue, old_value, new_value) ->
                 label.setTextFill(new_value ? Color.PURPLE : Color.BLUE));
         label.setOnMousePressed(mouseEvent -> {
-            SearchFinishValue searcher = new SearchFinishValue(box, path, value);
+            ShowFinishValue searcher = new ShowFinishValue(box, path, value);
             searcher.entrance();
         });
         box.getChildren().add(label);
+
+        y_count += 30;
     }
 }

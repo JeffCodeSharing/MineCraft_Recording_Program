@@ -27,6 +27,7 @@ public class ShowValues {
     private final String path;
     private final String list_name;
     private final DataController controller;
+    private int y_count;
 
     /**
      * 构造方法
@@ -40,7 +41,7 @@ public class ShowValues {
         this.list_name = list_name;
 
         // 准备DataController的基础数据
-        String[] values = IOTool.readFile(path + File.separator + list_name);
+        String[] values = IOTool.readFile(new File(path, list_name).getPath());
 
         // 进行解密
         if (values == null) {
@@ -66,10 +67,10 @@ public class ShowValues {
      * @param is_done 指示计划表是否已完成
      */
     private void start(boolean is_done) {
-        // 清空box
+        // 重置
         box.getChildren().clear();
+        y_count = 0;
 
-        HBox hBox = new HBox();
         Button return_menu = WinTool.createButton(0, 0, 120, 40, 18, "返回首页");
         return_menu.setOnAction(actionEvent -> {
             // 保存程序
@@ -79,17 +80,14 @@ public class ShowValues {
             clazz.entrance();
         });
 
-        Button save = WinTool.createButton(0, 0, 120, 40, 20, "保存");
+        Button save = WinTool.createButton(120, 0, 120, 40, 20, "保存");
         save.setOnAction(actionEvent -> {
             SaveValue saver = new SaveValue();
             saver.entrance(controller, path, list_name);
         });
 
-        hBox.getChildren().addAll(return_menu, save);
-
-        box.getChildren().addAll(hBox, WinTool.createLabel(0, 0, 0, 10, 0, ""));
+        box.getChildren().addAll(return_menu, save);
         addLabelToBox(list_name, Color.BLUE, getDone(), -1);    // 添加列表名，index为-1，用于在末尾添加
-        box.getChildren().add(WinTool.createLabel(0, 0, 0, 10, 0, ""));    // 在列表名和信息之间增加空行
 
         List<String[]> values = controller.getValues();
         for (int i=0; i<values.size(); i++) {
@@ -127,9 +125,11 @@ public class ShowValues {
      * @param index 索引值
      */
     private void addLabelToBox(String label_value, Color color, boolean is_done, int index) {
-        HBox hBox = new HBox();
+        HBox value_box = new HBox();
+        value_box.setLayoutX(0);
+        value_box.setLayoutY(60+y_count);
 
-        Label label = WinTool.createLabelWithNoWidth(0, 0, 30, 25, label_value + " ", color);
+        Label label = WinTool.createLabel(0, 0, -1, 30, 25, label_value + "\t", color);
         label.hoverProperty().addListener((observableValue, old_value, new_value) ->
                 label.setTextFill(new_value ? Color.PURPLE : color));
 
@@ -159,7 +159,7 @@ public class ShowValues {
             start(getDone());   // 刷新
         });
 
-        // 选择性添加控件，tile和item的添加是不一样的
+        // 选择性添加控件，title和item的添加是不一样的
         if (index == -1) {
             menu.getItems().add(create);
         } else {
@@ -167,7 +167,7 @@ public class ShowValues {
         }
         label.setContextMenu(menu);
 
-        hBox.getChildren().add(label);
+        value_box.getChildren().add(label);
 
         // 复选框的加载
         if (color != Color.GREEN) {
@@ -180,11 +180,12 @@ public class ShowValues {
                     }
                     start(getDone());   // 刷新
                 });
-                hBox.getChildren().add(checkBox);
+                value_box.getChildren().add(checkBox);
             }
         }
+        box.getChildren().add(value_box);
 
-        box.getChildren().add(hBox);
+        y_count += 30;
     }
 
     /**
@@ -217,6 +218,6 @@ public class ShowValues {
             write_in_list.add(EDTool.encrypt(strings[0] + "\0" + strings[1]));
         }
 
-        IOTool.overrideFile(path + File.separator + list_name, write_in_list);
+        IOTool.overrideFile(new File(path, list_name).getPath(), write_in_list);
     }
 }

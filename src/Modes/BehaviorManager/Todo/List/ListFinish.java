@@ -37,23 +37,23 @@ public class ListFinish {
      */
     public String entrance(String path, String list_name) {
         // 保存计划表
-        if (!IOTool.overrideFile(path + File.separator + list_name, values)) {    // 保存计划表，要不然转移了以前的计划表
+        if (!IOTool.overrideFile(new File(path, list_name).getPath(), values)) {    // 保存计划表，要不然转移了以前的计划表
             return null;
         }
 
         // 转移文件
-        String start_path = path + File.separator + list_name;
+        String start_path = new File(path, list_name).getPath();
         String end_name_head = path.substring(0, path.length() - 5) + "finish";
         String end_name = list_name;
         int i = 1;
 
         // 检查finish文件夹中是否存在和转移文件同名的文件
-        while (new File(end_name_head + File.separator + end_name).exists()) {
+        while (new File(end_name_head, end_name).exists()) {
             end_name = list_name + "-" + i;
             i++;
         }
 
-        String end_path = end_name_head + File.separator + end_name;
+        String end_path = new File(end_name_head, end_name).getPath();
 
         // 将文件从start_path转移到end_path
         return IOTool.moveFile(start_path, end_path) ? end_name : null;

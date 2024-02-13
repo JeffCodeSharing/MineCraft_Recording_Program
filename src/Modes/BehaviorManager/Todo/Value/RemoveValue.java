@@ -25,7 +25,6 @@ public class RemoveValue {
 
         if (type.get() == ButtonType.OK) {
             controller.remove(index);
-            WinTool.createAlert(Alert.AlertType.INFORMATION, "成功", "删除成功", "");
         }
     }
 }

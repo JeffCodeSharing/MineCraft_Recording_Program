@@ -38,7 +38,7 @@ public class CheckPassword extends Application implements AbstractWindow {
                 String[] file_data = path.replace(File.separator, "/").split("/");
                 this.project_name = file_data[file_data.length - 1];
 
-                String encrypt_password = IOTool.readFile(path + File.separator + "check_item")[2];     // 第三行的数据为密码
+                String encrypt_password = IOTool.readFile(new File(path, "check_item").getPath())[2];     // 第三行的数据为密码
                 this.password = EDTool.decrypt(encrypt_password);
             } catch (Exception e) {
                 WinTool.createAlert(Alert.AlertType.ERROR, "密码读取错误", "本项目不能正常打开", "");

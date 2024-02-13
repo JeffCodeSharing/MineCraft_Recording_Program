@@ -82,19 +82,14 @@ public class RemoveFinishList extends Application implements AbstractWindow {
                         "删除列表", "您是否要删除所有", "删除后列表将不复存在");
 
                 if (type.get() == ButtonType.OK) {
-                    boolean all_done = true;
                     for (String s:list) {
                         File file = new File(path + File.separator + s);
                         if (!file.delete()) {
-                            all_done = false;
                             WinTool.createAlert(Alert.AlertType.ERROR, "错误", "删除" + s + "失败", "请重新尝试");
                         }
                     }
 
                     global_stage.close();
-                    if (all_done) {
-                        WinTool.createAlert(Alert.AlertType.INFORMATION, "成功", "删除成功！", "");
-                    }
                 }
             } else {
                 Optional<ButtonType> type = WinTool.createAlert(Alert.AlertType.CONFIRMATION,

@@ -73,7 +73,7 @@ public class CreateList extends Application implements AbstractWindow {
      * @param field_data 文本框中的输入数据
      */
     private void afterConfirm(String field_data) {
-        File file = new File(path + File.separator + field_data);
+        File file = new File(path, field_data);
         try {
             if (file.exists()) {
                 throw new RuntimeException();

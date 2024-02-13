@@ -1,12 +1,11 @@
 package Modes.BehaviorManager.Todo.List;
 
 import Modes.BehaviorManager.NowDoing.ShowItems;
-import Modes.BehaviorManager.Todo.Finish.SearchFinishList;
+import Modes.BehaviorManager.Todo.Finish.ShowFinishList;
 import Modes.BehaviorManager.Todo.Value.ShowValues;
 import Tools.WinTool;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 
@@ -19,6 +18,7 @@ import java.io.File;
 public class ShowLists {
     private final Pane box;
     private final String path;
+    private int y_count;
 
     /**
      * @param box 用于显示搜索结果的VBox。
@@ -33,20 +33,19 @@ public class ShowLists {
      * 加载所有列表并显示。
      */
     public void entrance() {
-        // 加载所有列表
-        File file = new File(path);
-        String[] list = file.list();
+        // 加载所有计划表
+        String[] list = new File(path).list();
 
-        // 清空VBox
+        // 清空Pane
         box.getChildren().clear();
+        y_count = 0;
 
         // 绘制按钮
-        HBox hBox = new HBox();
         Button create = WinTool.createButton(0, 0, 120, 40, 15, "创建新计划表");
-        Button delete = WinTool.createButton(0, 0, 120, 40, 15, "删除计划表");
-        Button change = WinTool.createButton(0, 0, 120, 40, 15, "更改计划表名");
-        Button see_finish = WinTool.createButton(0, 0, 120, 40, 12, "已完成的计划表");
-        Button now_doing = WinTool.createButton(0, 0, 120, 40, 16, "正在做");
+        Button delete = WinTool.createButton(120, 0, 120, 40, 15, "删除计划表");
+        Button change = WinTool.createButton(240, 0, 120, 40, 15, "更改计划表名");
+        Button see_finish = WinTool.createButton(360, 0, 120, 40, 12, "已完成的计划表");
+        Button now_doing = WinTool.createButton(480, 0, 120, 40, 16, "正在做");
 
         create.setOnAction(actionEvent -> {
             CreateList creator = new CreateList(path);
@@ -69,7 +68,7 @@ public class ShowLists {
         see_finish.setOnAction(actionEvent -> {
             String path_for_finish = path.substring(0, path.length()-5) + "finish";
 
-            SearchFinishList searcher = new SearchFinishList(box, path_for_finish);
+            ShowFinishList searcher = new ShowFinishList(box, path_for_finish);
             searcher.entrance();
         });
         now_doing.setOnAction(actionEvent -> {
@@ -77,8 +76,7 @@ public class ShowLists {
             clazz.entrance();
         });
 
-        hBox.getChildren().addAll(create, delete, change, see_finish, now_doing);
-        box.getChildren().add(hBox);
+        box.getChildren().addAll(create, delete, change, see_finish, now_doing);
 
         // 绘制现有列表
         if (list != null) {
@@ -94,7 +92,7 @@ public class ShowLists {
      * @param list_name 要显示的列表的名称。
      */
     private void addLabelToBox(String list_name) {
-        Label label = WinTool.createLabel(0, 0, 530, 30, 25, "> " + list_name, Color.BLUE);
+        Label label = WinTool.createLabel(0, 40+y_count, -1, 30, 25, "> " + list_name, Color.BLUE);
         label.hoverProperty().addListener((observableValue, old_value, new_value) ->
                 label.setTextFill(new_value ? Color.PURPLE : Color.BLUE));
         label.setOnMousePressed(mouseEvent -> {
@@ -102,5 +100,7 @@ public class ShowLists {
             clazz.entrance();
         });
         box.getChildren().add(label);
+
+        y_count += 30;
     }
 }
