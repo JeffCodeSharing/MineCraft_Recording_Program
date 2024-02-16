@@ -331,7 +331,7 @@ public class Console extends Application {
             }
 
             case "地铁线路" -> {
-                ShowMap showMap = new ShowMap();
+                ShowMap showMap = new ShowMap(path);
                 showMap.entrance(detail_pane);
             }
         }

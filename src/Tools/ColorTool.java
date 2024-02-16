@@ -9,20 +9,33 @@ public class ColorTool {
      * @param s 英文颜色名称
      * @return 对应的颜色对象，如果传入的颜色名称无法识别，则返回 null
      */
-    public static Color englishToColor(String s) {
-        return switch (s.toUpperCase()) {
-            case "BLACK" -> Color.BLACK;
-            case "GREEN" -> Color.GREEN;
-            case "ORANGE" -> Color.ORANGE;
-            case "YELLOW" -> Color.YELLOW;
-            case "RED" -> Color.RED;
-            case "BLUE" -> Color.BLUE;
-            case "PURPLE" -> Color.PURPLE;
-            case "WHITE" -> Color.WHITE;
-            case "GREY", "GRAY" -> Color.GREY;
-            case "BROWN" -> Color.BROWN;
-            default -> null;
-        };
+    public static Color engToColor(String s) {
+        if (!s.startsWith("#")) {
+            return switch (s.toUpperCase()) {
+                case "BLACK" -> Color.BLACK;
+                case "GREEN" -> Color.GREEN;
+                case "ORANGE" -> Color.ORANGE;
+                case "YELLOW" -> Color.YELLOW;
+                case "RED" -> Color.RED;
+                case "BLUE" -> Color.BLUE;
+                case "PURPLE" -> Color.PURPLE;
+                case "WHITE" -> Color.WHITE;
+                case "GREY", "GRAY" -> Color.GREY;
+                case "BROWN" -> Color.BROWN;
+                default -> null;
+            };
+        } else {
+            // 将String的这一个颜色处理成3个double类型
+            try {
+                s = s.substring(1);
+                double v1 = ((double) Integer.parseInt(s.substring(0, 2), 16)) / 255;
+                double v2 = ((double) Integer.parseInt(s.substring(2, 4), 16)) / 255;
+                double v3 = ((double) Integer.parseInt(s.substring(4, 6), 16)) / 255;
+                return Color.color(v1, v2, v3);
+            } catch (Exception e) {
+                return null;
+            }
+        }
     }
 
     /**
@@ -42,7 +55,7 @@ public class ColorTool {
      * @param chinese 中文颜色名称
      * @return 对应的英文颜色名称，如果传入的中文颜色名称无法识别，则返回 null
      */
-    public static String chineseToEnglish(String chinese) {
+    public static String chineseToEng(String chinese) {
         return switch (chinese) {
             case "黑色" -> "BLACK";
             case "绿色" -> "GREEN";
@@ -64,7 +77,7 @@ public class ColorTool {
      * @param english 英文颜色名称
      * @return 对应的中文颜色名称，如果传入的英文颜色名称无法识别，则返回 null
      */
-    public static String englishToChinese(String english) {
+    public static String engToChinese(String english) {
         return switch (english.toUpperCase()) {
             case "BLACK" -> "黑色";
             case "GREEN" -> "绿色";
@@ -78,5 +91,26 @@ public class ColorTool {
             case "BROWN" -> "褐色";
             default -> null;
         };
+    }
+
+    public static String colorToWebCode(Color color) {
+        if (color != null) {
+            int v1 = (int) (color.getRed() * 255);
+            int v2 = (int) (color.getGreen() * 255);
+            int v3 = (int) (color.getBlue() * 255);
+
+            String s1 = Integer.toHexString(v1);
+            String s2 = Integer.toHexString(v2);
+            String s3 = Integer.toHexString(v3);
+
+            // 处理出现00这样的问题
+            if (s1.equals("0")) s1 = "00";
+            if (s2.equals("0")) s2 = "00";
+            if (s3.equals("0")) s3 = "00";
+
+            return "#" + s1 + s2 + s3;
+        } else {
+            return null;
+        }
     }
 }

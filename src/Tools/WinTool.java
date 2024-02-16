@@ -7,6 +7,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 
 import java.util.Optional;
@@ -303,11 +304,36 @@ public class WinTool {
         return canvas;
     }
 
+    public static Rectangle createRectangle(int x, int y, int width, int height, Color color) {
+        Rectangle rectangle = new Rectangle();
+        rectangle.setX(x);
+        rectangle.setY(y);
+        rectangle.setWidth(width);
+        rectangle.setHeight(height);
+        rectangle.setFill(color);
+        return rectangle;
+    }
+
+    public static ColorPicker createColorPicker(int x, int y, int width, int height) {
+        ColorPicker picker = new ColorPicker();
+        picker.setLayoutX(x);
+        picker.setLayoutY(y);
+        picker.setMaxSize(width, height);
+        picker.setMinSize(width, height);
+        return picker;
+    }
+
+    public static ColorPicker createColorPicker(int x, int y, int width, int height, Color original_color) {
+        ColorPicker picker = createColorPicker(x, y, width, height);
+        picker.setValue(original_color);
+        return picker;
+    }
+
     public static Canvas createCanvas(int x, int y, int width, int height, Color back_color) {
         Canvas canvas = createCanvas(x, y, width, height);
         GraphicsContext context = canvas.getGraphicsContext2D();
         context.setFill(back_color);
-        context.fillRect(x, y, width, height);
+        context.fillRect(0, 0, width, height);
         return canvas;
     }
 }

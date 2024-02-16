@@ -66,7 +66,7 @@ public class SetPositionData extends Application implements AbstractWindow {
         for (int i = 0; i < listView_in.length; i++) {
             String[] temp = group_value.get(i);
 
-            String array_in = "第" + (i + 1) + "项  X:" + temp[0] + "  Y:" + temp[1] + "  Z:" + temp[2] + "  备注:" + temp[3] + "  颜色:" + ColorTool.englishToChinese(temp[4]);
+            String array_in = "第" + (i + 1) + "项  X:" + temp[0] + "  Y:" + temp[1] + "  Z:" + temp[2] + "  备注:" + temp[3] + "  颜色:" + ColorTool.engToChinese(temp[4]);
             listView_in[i] = array_in;
         }
 
@@ -120,7 +120,7 @@ public class SetPositionData extends Application implements AbstractWindow {
         TextField z_field = WinTool.createTextField(60, 135, 100, 30, 15, values[2], "");
         TextField notes_field = WinTool.createTextField(60, 175, 300, 30, 15, values[3], "");
         ComboBox<String> color_box = WinTool.createComboBox(60, 215, 100, 30, false,
-                ColorTool.englishToChinese(values[4]), ColorTool.getColorsName());
+                ColorTool.engToChinese(values[4]), ColorTool.getColorsName());
 
         Button change = WinTool.createButton(120, 300, 70, 35, 15, "更改");
         Button delete = WinTool.createButton(200, 300, 70, 35, 15, "删除");
@@ -128,7 +128,7 @@ public class SetPositionData extends Application implements AbstractWindow {
 
         change.setOnAction(actionEvent -> saveEvents(
                 x_field.getText(), y_field.getText(), z_field.getText(), notes_field.getText(),
-                ColorTool.chineseToEnglish(color_box.getSelectionModel().getSelectedItem()), index
+                ColorTool.chineseToEng(color_box.getSelectionModel().getSelectedItem()), index
         ));
         delete.setOnAction(actionEvent -> {
             RemovePosition remover = new RemovePosition(box, index, group_values, group_names, group_value, group_dir, group_name);

@@ -45,7 +45,7 @@ public class CreateProject extends Application implements AbstractWindow {
         TextField project_name = WinTool.createTextField(160, 75, 200, 30, 15, "untitled", "");
         TextField project_path = WinTool.createTextField(160, 135, 390, 30, 15,
                 "C:" + File.separator + "Users" + File.separator
-                        + System.getenv("USERNAME") + File.separator +  "Desktop" + File.separator, "");
+                        + System.getenv("USERNAME") + File.separator + "Desktop" + File.separator, "");
 
         project_name.textProperty().addListener((observableValue, aBoolean, t1) -> updateLabels(warning, create_path, project_path, project_name));
         project_path.textProperty().addListener((observableValue, aBoolean, t1) -> updateLabels(warning, create_path, project_path, project_name));
@@ -144,16 +144,15 @@ public class CreateProject extends Application implements AbstractWindow {
                 return false;
             }
 
-            File behavior_dir = new File(path + File.separator + "behavior");
-            File todo_finish_dir = new File(path + File.separator + "behavior" + File.separator + "finish");
-            File todo_doing_dir = new File(path + File.separator + "behavior" + File.separator + "doing");
-            File now_doing_file = new File(path + File.separator + "behavior" + File.separator + "now_doing");
-            if (!behavior_dir.mkdirs() || !todo_finish_dir.mkdirs() || !todo_doing_dir.mkdirs() || !now_doing_file.createNewFile()) {
-                return false;
-            }
-
-            File backup_dir = new File(path + File.separator + "backup");
-            if (!backup_dir.mkdirs()) {
+            File behavior_dir = new File(path, "behavior");
+            File todo_finish_dir = new File(behavior_dir, "finish");
+            File todo_doing_dir = new File(behavior_dir, "doing");
+            File now_doing_file = new File(behavior_dir, "now_doing");
+            File map_dir = new File(path, "map");
+            File map_file = new File(map_dir.getPath(), "map_data");
+            File backup_dir = new File(path, "backup");
+            if (!behavior_dir.mkdirs() || !todo_finish_dir.mkdirs() || !todo_doing_dir.mkdirs() || !map_dir.mkdirs() || !backup_dir.mkdirs()
+                || !now_doing_file.createNewFile() || !map_file.createNewFile()) {
                 return false;
             }
 
@@ -174,7 +173,7 @@ public class CreateProject extends Application implements AbstractWindow {
      * @param project_name  用于输入项目名称的 textField
      */
     private void updateLabels(Label warning, Label create_path, TextField project_path, TextField project_name) {
-        File file = new File(project_path.getText() + File.separator + project_name.getText());
+        File file = new File(project_path.getText(), project_name.getText());
         warning.setText(file.exists() ? "文件夹已存在" : "");
         create_path.setText(file.getPath());
     }

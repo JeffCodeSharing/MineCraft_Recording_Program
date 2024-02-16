@@ -92,7 +92,7 @@ public class ShowValues {
         List<String[]> values = controller.getValues();
         for (int i=0; i<values.size(); i++) {
             String[] temp = values.get(i);
-            addLabelToBox(temp[0], ColorTool.englishToColor(temp[1]), temp[1].equals("GREEN"), i);
+            addLabelToBox(temp[0], ColorTool.engToColor(temp[1]), temp[1].equals("GREEN"), i);
         }
 
         // 当is_done为true时，弹出弹窗，问使用者是否转入finish中
