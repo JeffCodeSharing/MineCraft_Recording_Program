@@ -4,7 +4,6 @@ import Tools.ColorTool;
 import Tools.WinTool;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
@@ -46,9 +45,7 @@ public class ShowMap {
         }
         this.data = data_temp;
 
-        final AtomicReferenceArray<Integer> lastStationPos = new AtomicReferenceArray<>(new Integer[]{0, 0});
-        final AtomicBoolean isFistStation = new AtomicBoolean(true);
-
+        Integer[] lastStationPos = new Integer[2];
         for (Map.Entry<String, LineData> entry:this.data.entrySet()) {
             LineData lineData = entry.getValue();
             Set<Map.Entry<String, Integer[]>> stationSet = lineData.getStations().entrySet();
@@ -56,9 +53,12 @@ public class ShowMap {
             for (int i=0; i< stationList.size(); i++) {
                 Integer[] stationPosition = stationList.get(i).getValue();
                 String key = stationPosition[0] + "/" + stationPosition[1];
-                Integer[] passedTrend = linePassed.get(key);
-                if (!isFistStation.get()) {
-                    boolean trend = getStationTrend(new Integer[]{lastStationPos.get(0), lastStationPos.get(1)}, stationPosition);
+                int trendTemp = -1;    // -1:没有赋值, 0: 东西走向, 1：南北走向
+
+                if (!(i == 0)) {    // 如果不是第一个站，考虑进进站问题
+                    boolean trend = getStationTrend(new Integer[]{lastStationPos[0], lastStationPos[1]}, stationPosition);
+                    Integer[] passedTrend = linePassed.get(key);
+                    trendTemp = trend ? 0 : 1;
                     if (passedTrend == null) {
                         if (trend) {
                             linePassed.put(key, new Integer[]{1, 0});
@@ -72,25 +72,15 @@ public class ShowMap {
                             passedTrend[1] += 1;
                         }
                     }
-                } else {
-                    if (stationList.size() != 1) {      // 如果stationList中的内容不止一个
-                        // 判断trend（这一个trend指的是出站的方向），true:东西方向，false：南北方向
-                        boolean trend;
-                        Integer[] nextStationPos = stationList.get(i+1).getValue();
+                }
 
-                        int xDistance = Math.abs(stationPosition[0] - nextStationPos[0]);
-                        int zDistance = Math.abs(stationPosition[1] - nextStationPos[1]);
+                if (stationList.size() != i+1) {      // 如果不是最后一个站，考虑出站问题
+                    // 判断trend（这一个trend指的是出站的方向），true:东西方向，false：南北方向
+                    Integer[] passedTrend = linePassed.get(key);
+                    Integer[] nextStationPos = stationList.get(i+1).getValue();
+                    boolean trend = getStationForward(stationPosition, nextStationPos);
 
-                        if (xDistance == 0) {    // x坐标相等
-                            trend = false;
-                        } else if (zDistance == 0) {     // z坐标相等
-                            trend = true;
-                        } else {
-                            if (xDistance == zDistance) {     // xz轴相对居里都相等
-                                trend = true;
-                            } else trend = xDistance > zDistance;
-                        }
-
+                    if ((trend ? 0 : 1) != trendTemp) {
                         if (passedTrend == null) {
                             if (trend) {
                                 linePassed.put(key, new Integer[]{1, 0});
@@ -104,16 +94,13 @@ public class ShowMap {
                                 passedTrend[1] += 1;
                             }
                         }
-                    } else {       // 如果stationList的内容只有一个
-                        if (passedTrend == null) {      // 如果这个站点没有被创建过
-                            linePassed.put(key, new Integer[]{0, 0});
-                        }
                     }
+                } else {       // 如果stationList的内容只有一个
+                    // 如果这个站点没有被创建过，则创建
+                    linePassed.computeIfAbsent(key, k -> new Integer[]{0, 0});
                 }
 
-                lastStationPos.set(0, stationPosition[0]);
-                lastStationPos.set(1, stationPosition[1]);
-                isFistStation.set(false);
+                lastStationPos = stationPosition;
             }
         }
     }
@@ -144,12 +131,16 @@ public class ShowMap {
             this.nowUsingLine = chooser.entrance()[0];
         });
         create_station.setOnAction(actionEvent -> {
+            if (nowUsingLine == null) {
+                LineChooser chooser = new LineChooser(data);
+                this.nowUsingLine = chooser.entrance()[0];
+            }
+
+            // 如果上一步用户直接点击叉叉关掉的话，下方代码不执行
             if (nowUsingLine != null) {
                 CreateStation creator = new CreateStation(data, linePassed, nowUsingLine);
                 creator.entrance();
                 drawPoints();
-            } else {
-                WinTool.createAlert(Alert.AlertType.ERROR, "错误", "还未选择线路", "请选择线路");
             }
         });
         create_line.setOnAction(actionEvent -> {
@@ -197,7 +188,6 @@ public class ShowMap {
         });
 
         // 划线连接站点
-        // todo 这里只是做测试还要改
         data.forEach((lineName, lineData) -> {
             Map<String, Integer[]> stations = lineData.getStations();
             final AtomicBoolean isFirstStation = new AtomicBoolean(true);
@@ -277,5 +267,24 @@ public class ShowMap {
         if (xDistance == zDistance) {
             return false;
         } else return xDistance < zDistance;
+    }
+
+    /**
+     * @implNote 与getStationTrend功能类似，不过get
+     * @return true: 横向出站, false: 纵向出站
+     */
+    public static boolean getStationForward(Integer[] nowPos, Integer[] nextPos) {
+        int xDistance = Math.abs(nowPos[0] - nextPos[0]);
+        int zDistance = Math.abs(nowPos[1] - nextPos[1]);
+
+        if (xDistance == 0) {    // x坐标相等
+            return false;
+        } else if (zDistance == 0) {     // z坐标相等
+            return true;
+        } else {
+            if (xDistance == zDistance) {     // xz轴相对居里都相等
+                return true;
+            } else return xDistance > zDistance;
+        }
     }
 }

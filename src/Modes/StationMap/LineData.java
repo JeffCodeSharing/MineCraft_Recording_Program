@@ -20,24 +20,6 @@ public class LineData implements Serializable {
         return stations.get(stationName);
     }
 
-    public boolean setStationName(String oldName, String newName) {
-        Integer[] value = stations.get(oldName);
-        try {
-            stations.remove(oldName);
-            // 如果不存在才put
-            if (stations.get(newName) == null) {
-                stations.put(newName, value);
-                return true;
-            } else {
-                // 当做错误处理
-                throw new RuntimeException();
-            }
-        } catch (Exception e) {
-            stations.put(oldName, value);
-            return false;
-        }
-    }
-
     public String getColor() {
         return color;
     }
