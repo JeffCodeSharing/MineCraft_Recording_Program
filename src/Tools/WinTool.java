@@ -138,9 +138,11 @@ public class WinTool {
      * @param height 列表控件的高度
      * @param args   列表控件中的所有项目
      * @return 返回创建的列表控件
+     * @implNote 使用泛型T，可以创建所有类型的ListView
      */
-    public static ListView<String> createListView(int x, int y, int width, int height, String... args) {
-        ListView<String> listView = new ListView<>();
+    @SafeVarargs
+    public static <T> ListView<T> createListView(int x, int y, int width, int height, T... args) {
+        ListView<T> listView = new ListView<>();
         listView.setLayoutX(x);
         listView.setLayoutY(y);
         listView.setMaxSize(width, height);
@@ -181,19 +183,20 @@ public class WinTool {
      * @param width     下拉列表控件的宽度
      * @param height    下拉列表控件的高度
      * @param editable  是否可以编辑下拉列表的选项
-     * @param default_str 默认显示的选项
+     * @param defaultValue 默认显示的选项
      * @param values    下拉列表中的选项
      * @return 返回设置完所有属性的下拉列表控件
      */
-    public static ComboBox<String> createComboBox(int x, int y, int width, int height, boolean editable,
-                                                  String default_str, String... values) {
-        ComboBox<String> comboBox = new ComboBox<>();
+    @SafeVarargs
+    public static <T> ComboBox<T> createComboBox(int x, int y, int width, int height, boolean editable,
+                                                 T defaultValue, T... values) {
+        ComboBox<T> comboBox = new ComboBox<>();
         comboBox.setLayoutX(x);
         comboBox.setLayoutY(y);
         comboBox.setMaxSize(width, height);
         comboBox.setMinSize(width, height);
         comboBox.setEditable(editable);
-        comboBox.getSelectionModel().select(default_str);
+        comboBox.getSelectionModel().select(defaultValue);
         comboBox.getItems().addAll(values);
         return comboBox;
     }

@@ -14,7 +14,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class CreateLine extends Application implements AbstractWindow {
@@ -33,12 +33,17 @@ public class CreateLine extends Application implements AbstractWindow {
 
     @Override
     public void drawControls(Group group) {
-        TextField line_name = WinTool.createTextField(110, 50, 150, 30, 16);
+        TextField line_name = WinTool.createTextField(110, 50, 100, 30, 16);
         TextField color_field = WinTool.createTextField(110, 90, 100, 30, 16);
         Rectangle color_rect = WinTool.createRectangle(220, 95, 20, 20, Color.WHITE);
         Button color_choose = WinTool.createButton(260, 90, 100, 30, 16, "选择颜色");
         Button confirm = WinTool.createButton(250, 250, 100, 30, 16, "确定");
 
+        line_name.textProperty().addListener((observableValue, oldValue, newValue) -> {
+            if (newValue.length() > 3) {
+                line_name.setText(newValue.substring(0, 3));
+            }
+        });
         color_field.textProperty().addListener((observableValue, oldValue, newValue) ->
                 setRectColor(color_rect, color_field)
         );
@@ -56,7 +61,7 @@ public class CreateLine extends Application implements AbstractWindow {
             // 检测lineName以及lineColor是否都已经填写并且填写正确
             if ((lineName != null) && (!lineName.equals("")) &&
                     (ColorTool.engToColor(lineColor) != null)) {
-                lines.put(lineName, new LineData(new HashMap<>(), lineColor));
+                lines.put(lineName, new LineData(new LinkedHashMap<>(), lineColor));
                 global_stage.close();
                 WinTool.createAlert(Alert.AlertType.INFORMATION, "成功", "创建线路成功", "线路名称" + lineName);
             } else {
@@ -66,7 +71,7 @@ public class CreateLine extends Application implements AbstractWindow {
 
         group.getChildren().addAll(
                 WinTool.createLabel(0, 0, 200, 35, 30, "创建新线路", Color.BLUE),
-                WinTool.createLabel(10, 50, 100, 30, 16, "线路名称:"), line_name,
+                WinTool.createLabel(10, 50, 100, 30, 16, "线路名称:"), line_name, WinTool.createLabel(230, 50, 100, 30, 16, "3个字符内", Color.ORANGE),
                 WinTool.createLabel(10, 90, 100, 30, 16, "线路颜色:"), color_field, color_rect, color_choose,
                 WinTool.createLabel(10, 130, 300, 60, 16, "线路颜色建议使用“选择颜色获取”\n若手动填写，请在16进制颜色前加“#”号", Color.ORANGE),
                 confirm

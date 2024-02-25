@@ -6,21 +6,23 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.TextField;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.ArcType;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.ObjectInputStream;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReferenceArray;
 
 public class ShowMap {
     private Canvas map;
     private GraphicsContext context;
-    private final Map<String, LineData> data;
+    private final LinkedHashMap<String, LineData> data;
+    // 每一个站点经过的线路，用于换乘的站点用。Key为站的x和z轴，用"/"分割，Value是线路从横向来和从纵向来的个数（记录先横后纵）
+    private final HashMap<String, Integer[]> linePassed = new HashMap<>();
     private final String path;
     private String nowUsingLine;
 
@@ -30,20 +32,90 @@ public class ShowMap {
     public ShowMap(String path) {
         this.path = path;
 
-        Map<String, LineData> data_temp;
+        LinkedHashMap<String, LineData> data_temp;
         try {
             ObjectInputStream inputStream = new ObjectInputStream(
                     new FileInputStream(path + File.separator + "map" + File.separator + "map_data")
             );
 
-            data_temp = (HashMap<String, LineData>) inputStream.readObject();
+            data_temp = (LinkedHashMap<String, LineData>) inputStream.readObject();
 
             inputStream.close();
         } catch (Exception ignored) {
-            data_temp = new HashMap<>();
-            WinTool.createAlert(Alert.AlertType.ERROR, "错误", "加载地图失败", "");
+            data_temp = new LinkedHashMap<>();
         }
         this.data = data_temp;
+
+        final AtomicReferenceArray<Integer> lastStationPos = new AtomicReferenceArray<>(new Integer[]{0, 0});
+        final AtomicBoolean isFistStation = new AtomicBoolean(true);
+
+        for (Map.Entry<String, LineData> entry:this.data.entrySet()) {
+            LineData lineData = entry.getValue();
+            Set<Map.Entry<String, Integer[]>> stationSet = lineData.getStations().entrySet();
+            List<Map.Entry<String, Integer[]>> stationList = new ArrayList<>(stationSet);
+            for (int i=0; i< stationList.size(); i++) {
+                Integer[] stationPosition = stationList.get(i).getValue();
+                String key = stationPosition[0] + "/" + stationPosition[1];
+                Integer[] passedTrend = linePassed.get(key);
+                if (!isFistStation.get()) {
+                    boolean trend = getStationTrend(new Integer[]{lastStationPos.get(0), lastStationPos.get(1)}, stationPosition);
+                    if (passedTrend == null) {
+                        if (trend) {
+                            linePassed.put(key, new Integer[]{1, 0});
+                        } else {
+                            linePassed.put(key, new Integer[]{0, 1});
+                        }
+                    } else {
+                        if (trend) {
+                            passedTrend[0] += 1;
+                        } else {
+                            passedTrend[1] += 1;
+                        }
+                    }
+                } else {
+                    if (stationList.size() != 1) {      // 如果stationList中的内容不止一个
+                        // 判断trend（这一个trend指的是出站的方向），true:东西方向，false：南北方向
+                        boolean trend;
+                        Integer[] nextStationPos = stationList.get(i+1).getValue();
+
+                        int xDistance = Math.abs(stationPosition[0] - nextStationPos[0]);
+                        int zDistance = Math.abs(stationPosition[1] - nextStationPos[1]);
+
+                        if (xDistance == 0) {    // x坐标相等
+                            trend = false;
+                        } else if (zDistance == 0) {     // z坐标相等
+                            trend = true;
+                        } else {
+                            if (xDistance == zDistance) {     // xz轴相对居里都相等
+                                trend = true;
+                            } else trend = xDistance > zDistance;
+                        }
+
+                        if (passedTrend == null) {
+                            if (trend) {
+                                linePassed.put(key, new Integer[]{1, 0});
+                            } else {
+                                linePassed.put(key, new Integer[]{0, 1});
+                            }
+                        } else {
+                            if (trend) {
+                                passedTrend[0] += 1;
+                            } else {
+                                passedTrend[1] += 1;
+                            }
+                        }
+                    } else {       // 如果stationList的内容只有一个
+                        if (passedTrend == null) {      // 如果这个站点没有被创建过
+                            linePassed.put(key, new Integer[]{0, 0});
+                        }
+                    }
+                }
+
+                lastStationPos.set(0, stationPosition[0]);
+                lastStationPos.set(1, stationPosition[1]);
+                isFistStation.set(false);
+            }
+        }
     }
 
     public void entrance(Pane box) {
@@ -63,19 +135,23 @@ public class ShowMap {
 
         drawPoints();
 
-        TextField x_point = WinTool.createTextField(30, 45, 70, 30, 16);
-        TextField z_point = WinTool.createTextField(150, 45, 70, 30, 16);
-        Button choose_line = WinTool.createButton(240, 45, 120, 30, 16, "选择线路");
-        Button create_station = WinTool.createButton(360, 45, 120, 30, 16, "创建站点");
-        Button create_line = WinTool.createButton(480, 45, 120, 30, 16, "创建线路");
+        Button choose_line = WinTool.createButton(0, 45, 120, 30, 16, "选择线路");
+        Button create_station = WinTool.createButton(120, 45, 120, 30, 16, "创建站点");
+        Button create_line = WinTool.createButton(240, 45, 120, 30, 16, "创建线路");
 
         choose_line.setOnAction(actionEvent -> {
             LineChooser chooser = new LineChooser(data);
             this.nowUsingLine = chooser.entrance()[0];
         });
-        create_station.setOnAction(actionEvent ->
-                CreateStation.create(context, data, nowUsingLine, x_point, z_point, ColorTool.engToColor(data.get(nowUsingLine).getColor()))
-        );
+        create_station.setOnAction(actionEvent -> {
+            if (nowUsingLine != null) {
+                CreateStation creator = new CreateStation(data, linePassed, nowUsingLine);
+                creator.entrance();
+                drawPoints();
+            } else {
+                WinTool.createAlert(Alert.AlertType.ERROR, "错误", "还未选择线路", "请选择线路");
+            }
+        });
         create_line.setOnAction(actionEvent -> {
             CreateLine creator = new CreateLine(data);
             creator.entrance();
@@ -84,30 +160,122 @@ public class ShowMap {
         box.getChildren().addAll(
                 map_output, save_map,
                 map,
-                WinTool.createLabel(0, 45, 40, 30, 25, "x:"), x_point,
-                WinTool.createLabel(120, 45, 40, 30, 25, "z:"), z_point,
                 choose_line, create_station, create_line
         );
     }
 
     private void drawPoints() {
+        // 清空画布
+        context.setFill(Color.WHITE);
+        context.fillRect(0, 0, 630, 630);
+
+        // 添加站点
+        linePassed.forEach((s, passedTrend) -> {
+            // stationType的内容规则”x/z“，x和z指代两个坐标，所以使用"/"来进行划分
+            String[] stationPositionTemp = s.split("/");
+            double[] stationPosition = new double[]{Double.parseDouble(stationPositionTemp[0]), Double.parseDouble(stationPositionTemp[1])};
+
+            context.setLineWidth(2);
+            context.setStroke(Color.BLACK);
+
+            context.strokeArc(stationPosition[0] - ((double) passedTrend[1]) * 2.5 - 2.5, stationPosition[1] - ((double) passedTrend[0]) * 2.5 - 2.5,
+                    5, 5, 90, 90, ArcType.OPEN);
+            context.strokeLine(stationPosition[0] - ((double) passedTrend[1]) * 2.5, stationPosition[1] - ((double) passedTrend[0]) * 2.5 - 2.5,
+                   stationPosition[0] + ((double) passedTrend[1]) * 2.5, stationPosition[1] - ((double) passedTrend[0]) * 2.5 - 2.5);
+            context.strokeArc(stationPosition[0] + ((double) passedTrend[1]) * 2.5-2.5, stationPosition[1] - ((double) passedTrend[0]) * 2.5-2.5,
+                    5, 5, 0, 90, ArcType.OPEN);
+            context.strokeLine(stationPosition[0] + ((double) passedTrend[1]) * 2.5 + 2.5, stationPosition[1] - ((double) passedTrend[0]) * 2.5,
+                    stationPosition[0] + ((double) passedTrend[1]) * 2.5 + 2.5, stationPosition[1] + ((double) passedTrend[0]) * 2.5);
+            context.strokeArc(stationPosition[0] + ((double) passedTrend[1]) * 2.5-2.5, stationPosition[1] + ((double) passedTrend[0]) * 2.5-2.5,
+                    5, 5, 270, 90, ArcType.OPEN);
+            context.strokeLine(stationPosition[0] + ((double) passedTrend[1]) * 2.5, stationPosition[1] + ((double) passedTrend[0]) * 2.5 + 2.5,
+                    stationPosition[0] - ((double) passedTrend[1]) * 2.5, stationPosition[1] + ((double) passedTrend[0]) * 2.5 + 2.5);
+            context.strokeArc(stationPosition[0] - ((double) passedTrend[1]) * 2.5 - 2.5, stationPosition[1] + ((double) passedTrend[0]) * 2.5-2.5,
+                    5, 5, 180, 90, ArcType.OPEN);
+            context.strokeLine(stationPosition[0] - ((double) passedTrend[1]) * 2.5-2.5, stationPosition[1] + ((double) passedTrend[0]) * 2.5,
+                    stationPosition[0] - ((double) passedTrend[1]) * 2.5-2.5, stationPosition[1] - ((double) passedTrend[0]) * 2.5);
+        });
+
+        // 划线连接站点
+        // todo 这里只是做测试还要改
         data.forEach((lineName, lineData) -> {
-            Map<Integer, Integer[]> stations = lineData.getStations();
-            AtomicReferenceArray<Integer> last_position = null;
+            Map<String, Integer[]> stations = lineData.getStations();
+            final AtomicBoolean isFirstStation = new AtomicBoolean(true);
+            final AtomicReferenceArray<Integer> last_position = new AtomicReferenceArray<>(2);
 
-            for (int i=0; i<stations.size(); i++) {
-                Integer[] stationPosition = stations.get(i);
+            // 因为存储时使用的是LinkedHashMap，所以直接使用遍历
+            stations.forEach((stationName, stationPosition) -> {
+                if (!isFirstStation.get()) {
+                    // -1: 不往那个方向, 0: 往那个方向，但是是在拐弯后的, 1: 往那个方向，并且在拐弯前的
+                    int leftSide = -1;
+                    int rightSide = -1;
+                    int upSide = -1;
+                    int downSide = -1;
 
-                context.setFill(ColorTool.engToColor(lineData.getColor()));
-                context.fillOval(stationPosition[0]-5, stationPosition[1]-5, 10, 10);
+                    if (Objects.equals(last_position.get(0), stationPosition[0])) {    // x轴相等，考虑Z轴
+                        if (last_position.get(1) > stationPosition[1]) upSide = 1;
+                        else downSide = 1;
+                    } else if (Objects.equals(last_position.get(1), stationPosition[1])) {    // Z轴相等，考虑X轴
+                        if (last_position.get(0) > stationPosition[0]) leftSide = 1;
+                        else rightSide = 1;
+                    } else {   // X轴和Z轴都不相等，考虑拐弯情况
+                        if (Math.abs(last_position.get(0) - stationPosition[0]) > Math.abs(last_position.get(1) - stationPosition[1])) {
+                            if (last_position.get(0) > stationPosition[0]) leftSide = 1;
+                            else rightSide = 1;
 
-                if (last_position != null) {
+                            if (last_position.get(1) > stationPosition[1]) upSide = 0;
+                            else downSide = 0;
+                        } else if (Math.abs(last_position.get(1) - stationPosition[1]) > Math.abs(last_position.get(0) - stationPosition[0])) {
+                            if (last_position.get(1) > stationPosition[1]) upSide = 1;
+                            else downSide = 1;
+
+                            if (last_position.get(0) > stationPosition[0]) leftSide = 0;
+                            else rightSide = 0;
+                        } else {
+                            if (last_position.get(0) > stationPosition[0]) leftSide = 1;
+                            else rightSide = 1;
+
+                            if (last_position.get(1) > stationPosition[1]) upSide = 0;
+                            else downSide = 0;
+                        }
+                    }
+
+                    // 对应不同side划线
                     context.setLineWidth(5);
                     context.setStroke(ColorTool.engToColor(lineData.getColor()));
-                    context.strokeLine(last_position.get(0), last_position.get(1), stationPosition[0], stationPosition[1]);
+
+                    // 这里的所有划线都考虑了同时包含转弯的情况
+                    if (leftSide == 1) context.strokeLine(last_position.get(0)-5, last_position.get(1), stationPosition[0]+5, last_position.get(1));
+                    else if (leftSide == 0) context.strokeLine(last_position.get(0), stationPosition[1], stationPosition[0]+5, stationPosition[1]);
+
+                    if (rightSide == 1) context.strokeLine(last_position.get(0)+5, last_position.get(1), stationPosition[0]-5, last_position.get(1));
+                    else if (rightSide == 0) context.strokeLine(last_position.get(0), stationPosition[1], stationPosition[0]-5, stationPosition[1]);
+
+                    if (upSide == 1) context.strokeLine(last_position.get(0), last_position.get(1)-5, last_position.get(0), stationPosition[1]+5);
+                    else if (upSide == 0) context.strokeLine(stationPosition[0], last_position.get(1), stationPosition[0], stationPosition[1]+5);
+
+                    if (downSide == 1) context.strokeLine(last_position.get(0), last_position.get(1)+5, last_position.get(0), stationPosition[1]-5);
+                    else if (downSide == 0) context.strokeLine(stationPosition[0], last_position.get(1), stationPosition[0], stationPosition[1]-5);
                 }
-                last_position = new AtomicReferenceArray<>(stationPosition);
-            }
+
+                last_position.set(0, stationPosition[0]);
+                last_position.set(1, stationPosition[1]);
+
+                isFirstStation.set(false);
+            });
         });
+    }
+
+    /**
+     * @implNote 设置成static的原因是这里的函数在CreateStation中也要调用，获得线路的走向
+     * @return true:横向, false:纵向
+     */
+    public static boolean getStationTrend(Integer[] lastPos, Integer[] nowPos) {
+        int xDistance = Math.abs(lastPos[0]-nowPos[0]);
+        int zDistance = Math.abs(lastPos[1]-nowPos[1]);
+        // 如果xz轴一样，竖着进站，如果不一样，短的进站
+        if (xDistance == zDistance) {
+            return false;
+        } else return xDistance < zDistance;
     }
 }

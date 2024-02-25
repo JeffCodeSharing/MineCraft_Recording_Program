@@ -1,7 +1,7 @@
 package Modes.StationMap;
 
 import java.io.Serializable;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -9,25 +9,31 @@ import java.util.Map;
  */
 public class LineData implements Serializable {
     private String color;
-    private final Map<Integer, Integer[]> stations;      // 第一项为站的编号，第二项为xz轴的坐标
+    private final Map<String, Integer[]> stations;      // 第一项为站名，第二项为xz轴的坐标
 
-    public LineData(HashMap<Integer, Integer[]> stations, String color) {
+    public LineData(LinkedHashMap<String, Integer[]> stations, String color) {
         this.stations = stations;
         this.color = color;
     }
 
-    public Integer[] get(Integer stationType) {
-        return stations.get(stationType);
+    public Integer[] get(String stationName) {
+        return stations.get(stationName);
     }
 
-    public boolean setStationType(Integer old_type, Integer new_type) {
-        Integer[] value = stations.get(old_type);
+    public boolean setStationName(String oldName, String newName) {
+        Integer[] value = stations.get(oldName);
         try {
-            stations.remove(old_type);
-            stations.put(new_type, value);
-            return true;
+            stations.remove(oldName);
+            // 如果不存在才put
+            if (stations.get(newName) == null) {
+                stations.put(newName, value);
+                return true;
+            } else {
+                // 当做错误处理
+                throw new RuntimeException();
+            }
         } catch (Exception e) {
-            stations.put(old_type, value);
+            stations.put(oldName, value);
             return false;
         }
     }
@@ -40,15 +46,11 @@ public class LineData implements Serializable {
         this.color = color;
     }
 
-    public void addStation(Integer type, Integer[] position) {
-        stations.put(type, position);
+    public void addStation(String stationName, Integer[] position) {
+        stations.put(stationName, position);
     }
 
-    public void setStationPosition(Integer station_type, Integer[] position) {
-        stations.replace(station_type, position);
-    }
-
-    public Map<Integer, Integer[]> getStations() {
+    public Map<String, Integer[]> getStations() {
         return stations;
     }
 }
