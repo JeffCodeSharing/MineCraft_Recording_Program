@@ -77,7 +77,7 @@ public class ShowMap {
 
             // 如果上一步用户直接点击叉叉关掉的话，下方代码不执行
             if (this.nowUsingLine != null) {
-                CreateStation creator = new CreateStation(data, linePassed, this.nowUsingLine);
+                CreateStation creator = new CreateStation(data, this.nowUsingLine);
                 creator.entrance();
                 drawPoints();
             }

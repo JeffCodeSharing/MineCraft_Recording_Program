@@ -17,13 +17,11 @@ import java.util.Map;
 public class CreateStation extends Application implements AbstractWindow {
     private final Stage global_stage = new Stage();
     private final Map<String, LineData> data;
-    private final Map<String, Integer[]> linePassed;
     private final String lineName;
     private String typeBoxDefault = "坐标创建";
 
-    public CreateStation(Map<String, LineData> data, Map<String, Integer[]> linePassed, String lineName) {
+    public CreateStation(Map<String, LineData> data, String lineName) {
         this.data = data;
-        this.linePassed = linePassed;
         this.lineName = lineName;
     }
 
