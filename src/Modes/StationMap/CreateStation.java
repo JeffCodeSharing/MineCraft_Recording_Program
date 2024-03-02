@@ -136,24 +136,8 @@ public class CreateStation extends Application implements AbstractWindow {
             }
 
             LineData lineData = data.get(lineName);
-            Map<String, Integer[]> stations = lineData.getStations();
-            String key = x + "/" + z;
-
-            if (stations.size() != 0) {
-                Integer[] lastStationPos = stations.get(stations.keySet().toArray()[stations.size() - 1]);     // 获取LinkedHashMap的最后一项
-
-                Integer[] putList = new Integer[]{0, 0};     // 初始化
-                if (ShowMap.getStationTrend(lastStationPos, new Integer[]{x, z})) {
-                    putList[0] += 1;
-                } else {
-                    putList[1] += 1;
-                }
-                linePassed.put(key, putList);
-            } else {
-                linePassed.put(key, new Integer[]{0, 0});
-            }
-
             lineData.addStation(stationName, new Integer[]{x, z});
+
             return true;
         } catch (Exception e) {
             e.printStackTrace();
@@ -166,28 +150,12 @@ public class CreateStation extends Application implements AbstractWindow {
         try {
             for (Map.Entry<String, LineData> entry : data.entrySet()) {
                 LineData lineData = entry.getValue();
-                Integer[] lastStationPos = new Integer[]{0, 0};
-                boolean is_first = true;
                 for (Map.Entry<String, Integer[]> stationEntry : lineData.getStations().entrySet()) {
                     String compareName = stationEntry.getKey();
                     if (stationName.equals(compareName)) {
                         data.get(lineName).addStation(stationName, stationEntry.getValue());
-
-                        if (!is_first) {
-                            Integer[] position = stationEntry.getValue();
-                            String key = position[0] + "/" + position[1];
-                            Integer[] putList = linePassed.get(key);
-                            if (ShowMap.getStationTrend(lastStationPos, position)) {
-                                putList[0] += 1;
-                            } else {
-                                putList[1] += 1;
-                            }
-                        }
-
                         return true;
                     }
-                    is_first = false;
-                    lastStationPos = stationEntry.getValue();
                 }
             }
 

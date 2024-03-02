@@ -13,8 +13,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.ObjectInputStream;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReferenceArray;
 
 public class ShowMap {
     private Canvas map;
@@ -43,66 +41,7 @@ public class ShowMap {
         } catch (Exception ignored) {
             data_temp = new LinkedHashMap<>();
         }
-        this.data = data_temp;
-
-        Integer[] lastStationPos = new Integer[2];
-        for (Map.Entry<String, LineData> entry:this.data.entrySet()) {
-            LineData lineData = entry.getValue();
-            Set<Map.Entry<String, Integer[]>> stationSet = lineData.getStations().entrySet();
-            List<Map.Entry<String, Integer[]>> stationList = new ArrayList<>(stationSet);
-            for (int i=0; i< stationList.size(); i++) {
-                Integer[] stationPosition = stationList.get(i).getValue();
-                String key = stationPosition[0] + "/" + stationPosition[1];
-                int trendTemp = -1;    // -1:没有赋值, 0: 东西走向, 1：南北走向
-
-                if (!(i == 0)) {    // 如果不是第一个站，考虑进进站问题
-                    boolean trend = getStationTrend(new Integer[]{lastStationPos[0], lastStationPos[1]}, stationPosition);
-                    Integer[] passedTrend = linePassed.get(key);
-                    trendTemp = trend ? 0 : 1;
-                    if (passedTrend == null) {
-                        if (trend) {
-                            linePassed.put(key, new Integer[]{1, 0});
-                        } else {
-                            linePassed.put(key, new Integer[]{0, 1});
-                        }
-                    } else {
-                        if (trend) {
-                            passedTrend[0] += 1;
-                        } else {
-                            passedTrend[1] += 1;
-                        }
-                    }
-                }
-
-                if (stationList.size() != i+1) {      // 如果不是最后一个站，考虑出站问题
-                    // 判断trend（这一个trend指的是出站的方向），true:东西方向，false：南北方向
-                    Integer[] passedTrend = linePassed.get(key);
-                    Integer[] nextStationPos = stationList.get(i+1).getValue();
-                    boolean trend = getStationForward(stationPosition, nextStationPos);
-
-                    if ((trend ? 0 : 1) != trendTemp) {
-                        if (passedTrend == null) {
-                            if (trend) {
-                                linePassed.put(key, new Integer[]{1, 0});
-                            } else {
-                                linePassed.put(key, new Integer[]{0, 1});
-                            }
-                        } else {
-                            if (trend) {
-                                passedTrend[0] += 1;
-                            } else {
-                                passedTrend[1] += 1;
-                            }
-                        }
-                    }
-                } else {       // 如果stationList的内容只有一个
-                    // 如果这个站点没有被创建过，则创建
-                    linePassed.computeIfAbsent(key, k -> new Integer[]{0, 0});
-                }
-
-                lastStationPos = stationPosition;
-            }
-        }
+        data = data_temp;
     }
 
     public void entrance(Pane box) {
@@ -137,8 +76,8 @@ public class ShowMap {
             }
 
             // 如果上一步用户直接点击叉叉关掉的话，下方代码不执行
-            if (nowUsingLine != null) {
-                CreateStation creator = new CreateStation(data, linePassed, nowUsingLine);
+            if (this.nowUsingLine != null) {
+                CreateStation creator = new CreateStation(data, linePassed, this.nowUsingLine);
                 creator.entrance();
                 drawPoints();
             }
@@ -156,6 +95,9 @@ public class ShowMap {
     }
 
     private void drawPoints() {
+        // 刷新PassedTrend
+        updateLineTrend();
+
         // 清空画布
         context.setFill(Color.WHITE);
         context.fillRect(0, 0, 630, 630);
@@ -163,69 +105,79 @@ public class ShowMap {
         // 添加站点
         linePassed.forEach((s, passedTrend) -> {
             // stationType的内容规则”x/z“，x和z指代两个坐标，所以使用"/"来进行划分
-            String[] stationPositionTemp = s.split("/");
-            double[] stationPosition = new double[]{Double.parseDouble(stationPositionTemp[0]), Double.parseDouble(stationPositionTemp[1])};
+            String[] stationPosTemp = s.split("/");
+            double[] stationPos = new double[]{Double.parseDouble(stationPosTemp[0]), Double.parseDouble(stationPosTemp[1])};
 
             context.setLineWidth(2);
             context.setStroke(Color.BLACK);
 
-            context.strokeArc(stationPosition[0] - ((double) passedTrend[1]) * 2.5 - 2.5, stationPosition[1] - ((double) passedTrend[0]) * 2.5 - 2.5,
+            context.strokeArc(stationPos[0] - ((double) passedTrend[1]) * 2.5 - 2.5, stationPos[1] - ((double) passedTrend[0]) * 2.5 - 2.5,
                     5, 5, 90, 90, ArcType.OPEN);
-            context.strokeLine(stationPosition[0] - ((double) passedTrend[1]) * 2.5, stationPosition[1] - ((double) passedTrend[0]) * 2.5 - 2.5,
-                   stationPosition[0] + ((double) passedTrend[1]) * 2.5, stationPosition[1] - ((double) passedTrend[0]) * 2.5 - 2.5);
-            context.strokeArc(stationPosition[0] + ((double) passedTrend[1]) * 2.5-2.5, stationPosition[1] - ((double) passedTrend[0]) * 2.5-2.5,
+            context.strokeLine(stationPos[0] - ((double) passedTrend[1]) * 2.5, stationPos[1] - ((double) passedTrend[0]) * 2.5 - 2.5,
+                   stationPos[0] + ((double) passedTrend[1]) * 2.5, stationPos[1] - ((double) passedTrend[0]) * 2.5 - 2.5);
+            context.strokeArc(stationPos[0] + ((double) passedTrend[1]) * 2.5-2.5, stationPos[1] - ((double) passedTrend[0]) * 2.5-2.5,
                     5, 5, 0, 90, ArcType.OPEN);
-            context.strokeLine(stationPosition[0] + ((double) passedTrend[1]) * 2.5 + 2.5, stationPosition[1] - ((double) passedTrend[0]) * 2.5,
-                    stationPosition[0] + ((double) passedTrend[1]) * 2.5 + 2.5, stationPosition[1] + ((double) passedTrend[0]) * 2.5);
-            context.strokeArc(stationPosition[0] + ((double) passedTrend[1]) * 2.5-2.5, stationPosition[1] + ((double) passedTrend[0]) * 2.5-2.5,
+            context.strokeLine(stationPos[0] + ((double) passedTrend[1]) * 2.5 + 2.5, stationPos[1] - ((double) passedTrend[0]) * 2.5,
+                    stationPos[0] + ((double) passedTrend[1]) * 2.5 + 2.5, stationPos[1] + ((double) passedTrend[0]) * 2.5);
+            context.strokeArc(stationPos[0] + ((double) passedTrend[1]) * 2.5-2.5, stationPos[1] + ((double) passedTrend[0]) * 2.5-2.5,
                     5, 5, 270, 90, ArcType.OPEN);
-            context.strokeLine(stationPosition[0] + ((double) passedTrend[1]) * 2.5, stationPosition[1] + ((double) passedTrend[0]) * 2.5 + 2.5,
-                    stationPosition[0] - ((double) passedTrend[1]) * 2.5, stationPosition[1] + ((double) passedTrend[0]) * 2.5 + 2.5);
-            context.strokeArc(stationPosition[0] - ((double) passedTrend[1]) * 2.5 - 2.5, stationPosition[1] + ((double) passedTrend[0]) * 2.5-2.5,
+            context.strokeLine(stationPos[0] + ((double) passedTrend[1]) * 2.5, stationPos[1] + ((double) passedTrend[0]) * 2.5 + 2.5,
+                    stationPos[0] - ((double) passedTrend[1]) * 2.5, stationPos[1] + ((double) passedTrend[0]) * 2.5 + 2.5);
+            context.strokeArc(stationPos[0] - ((double) passedTrend[1]) * 2.5 - 2.5, stationPos[1] + ((double) passedTrend[0]) * 2.5-2.5,
                     5, 5, 180, 90, ArcType.OPEN);
-            context.strokeLine(stationPosition[0] - ((double) passedTrend[1]) * 2.5-2.5, stationPosition[1] + ((double) passedTrend[0]) * 2.5,
-                    stationPosition[0] - ((double) passedTrend[1]) * 2.5-2.5, stationPosition[1] - ((double) passedTrend[0]) * 2.5);
+            context.strokeLine(stationPos[0] - ((double) passedTrend[1]) * 2.5-2.5, stationPos[1] + ((double) passedTrend[0]) * 2.5,
+                    stationPos[0] - ((double) passedTrend[1]) * 2.5-2.5, stationPos[1] - ((double) passedTrend[0]) * 2.5);
         });
 
         // 划线连接站点
         data.forEach((lineName, lineData) -> {
-            Map<String, Integer[]> stations = lineData.getStations();
-            final AtomicBoolean isFirstStation = new AtomicBoolean(true);
-            final AtomicReferenceArray<Integer> last_position = new AtomicReferenceArray<>(2);
+            List<Map.Entry<String, Integer[]>> stations = new ArrayList<>(lineData.getStations().entrySet());
 
             // 因为存储时使用的是LinkedHashMap，所以直接使用遍历
-            stations.forEach((stationName, stationPosition) -> {
-                if (!isFirstStation.get()) {
+            for (int i=0; i< stations.size(); i++) {
+                // 获取lastPos和nowPos
+                Integer[] lastPos = (i == 0) ? new Integer[2] : stations.get(i-1).getValue();
+                Integer[] nowPos = stations.get(i).getValue();
+
+                // 获取前后站的PassedTrend
+                Integer[] lastTrend = linePassed.get(lastPos[0] + "/" + lastPos[1]);
+                Integer[] nowTrend = linePassed.get(nowPos[0] + "/" + nowPos[1]);
+
+                // 如果 i!=1，那么就不是第一个站，就执行
+                if (i != 0) {
                     // -1: 不往那个方向, 0: 往那个方向，但是是在拐弯后的, 1: 往那个方向，并且在拐弯前的
                     int leftSide = -1;
                     int rightSide = -1;
                     int upSide = -1;
                     int downSide = -1;
 
-                    if (Objects.equals(last_position.get(0), stationPosition[0])) {    // x轴相等，考虑Z轴
-                        if (last_position.get(1) > stationPosition[1]) upSide = 1;
+                    int xDistance = Math.abs(lastPos[0] - nowPos[0]);
+                    int zDistance = Math.abs(lastPos[1] - nowPos[1]);
+
+                    if (Objects.equals(lastPos[0], nowPos[0])) {    // x轴相等，考虑Z轴
+                        if (lastPos[1] > nowPos[1]) upSide = 1;
                         else downSide = 1;
-                    } else if (Objects.equals(last_position.get(1), stationPosition[1])) {    // Z轴相等，考虑X轴
-                        if (last_position.get(0) > stationPosition[0]) leftSide = 1;
+                    } else if (Objects.equals(lastPos[1], nowPos[1])) {    // Z轴相等，考虑X轴
+                        if (lastPos[0] > nowPos[0]) leftSide = 1;
                         else rightSide = 1;
                     } else {   // X轴和Z轴都不相等，考虑拐弯情况
-                        if (Math.abs(last_position.get(0) - stationPosition[0]) > Math.abs(last_position.get(1) - stationPosition[1])) {
-                            if (last_position.get(0) > stationPosition[0]) leftSide = 1;
+                        if (xDistance > zDistance) {
+                            if (lastPos[0] > nowPos[0]) leftSide = 1;
                             else rightSide = 1;
 
-                            if (last_position.get(1) > stationPosition[1]) upSide = 0;
+                            if (lastPos[1] > nowPos[1]) upSide = 0;
                             else downSide = 0;
-                        } else if (Math.abs(last_position.get(1) - stationPosition[1]) > Math.abs(last_position.get(0) - stationPosition[0])) {
-                            if (last_position.get(1) > stationPosition[1]) upSide = 1;
+                        } else if (zDistance > xDistance) {
+                            if (lastPos[1] > nowPos[1]) upSide = 1;
                             else downSide = 1;
 
-                            if (last_position.get(0) > stationPosition[0]) leftSide = 0;
+                            if (lastPos[0] > nowPos[0]) leftSide = 0;
                             else rightSide = 0;
                         } else {
-                            if (last_position.get(0) > stationPosition[0]) leftSide = 1;
+                            if (lastPos[0] > nowPos[0]) leftSide = 1;
                             else rightSide = 1;
 
-                            if (last_position.get(1) > stationPosition[1]) upSide = 0;
+                            if (lastPos[1] > nowPos[1]) upSide = 0;
                             else downSide = 0;
                         }
                     }
@@ -235,24 +187,39 @@ public class ShowMap {
                     context.setStroke(ColorTool.engToColor(lineData.getColor()));
 
                     // 这里的所有划线都考虑了同时包含转弯的情况
-                    if (leftSide == 1) context.strokeLine(last_position.get(0)-5, last_position.get(1), stationPosition[0]+5, last_position.get(1));
-                    else if (leftSide == 0) context.strokeLine(last_position.get(0), stationPosition[1], stationPosition[0]+5, stationPosition[1]);
+                    if (leftSide == 1) {
+                        context.strokeLine(lastPos[0]-5-lastTrend[1]*2.5, lastPos[1],
+                                nowPos[0]+5, lastPos[1]);
+                    } else if (leftSide == 0) {
+                        context.strokeLine(lastPos[0], nowPos[1],
+                                nowPos[0]+5+lastTrend[1]*2.5, nowPos[1]);
+                    }
 
-                    if (rightSide == 1) context.strokeLine(last_position.get(0)+5, last_position.get(1), stationPosition[0]-5, last_position.get(1));
-                    else if (rightSide == 0) context.strokeLine(last_position.get(0), stationPosition[1], stationPosition[0]-5, stationPosition[1]);
+                    if (rightSide == 1) {
+                        context.strokeLine(lastPos[0]+5+lastTrend[1]*2.5, lastPos[1],
+                                nowPos[0]-5, lastPos[1]);
+                    } else if (rightSide == 0) {
+                        context.strokeLine(lastPos[0], nowPos[1],
+                                nowPos[0]-5-nowTrend[1]*2.5, nowPos[1]);
+                    }
 
-                    if (upSide == 1) context.strokeLine(last_position.get(0), last_position.get(1)-5, last_position.get(0), stationPosition[1]+5);
-                    else if (upSide == 0) context.strokeLine(stationPosition[0], last_position.get(1), stationPosition[0], stationPosition[1]+5);
+                    if (upSide == 1) {
+                        context.strokeLine(lastPos[0], lastPos[1]-5-lastTrend[0]*2.5,
+                                lastPos[0], nowPos[1]+5);
+                    } else if (upSide == 0) {
+                        context.strokeLine(nowPos[0], lastPos[1],
+                                nowPos[0], nowPos[1]+5+nowTrend[0]*2.5);
+                    }
 
-                    if (downSide == 1) context.strokeLine(last_position.get(0), last_position.get(1)+5, last_position.get(0), stationPosition[1]-5);
-                    else if (downSide == 0) context.strokeLine(stationPosition[0], last_position.get(1), stationPosition[0], stationPosition[1]-5);
+                    if (downSide == 1) {
+                        context.strokeLine(lastPos[0], lastPos[1]+5+lastTrend[0]*2.5,
+                                lastPos[0], nowPos[1]-5);
+                    } else if (downSide == 0) {
+                        context.strokeLine(nowPos[0], lastPos[1],
+                                nowPos[0], nowPos[1]-5-nowTrend[0]*2.5);
+                    }
                 }
-
-                last_position.set(0, stationPosition[0]);
-                last_position.set(1, stationPosition[1]);
-
-                isFirstStation.set(false);
-            });
+            }
         });
     }
 
@@ -260,31 +227,100 @@ public class ShowMap {
      * @implNote 设置成static的原因是这里的函数在CreateStation中也要调用，获得线路的走向
      * @return true:横向, false:纵向
      */
-    public static boolean getStationTrend(Integer[] lastPos, Integer[] nowPos) {
+    public boolean getStationTrend(Integer[] lastPos, Integer[] nowPos) {
         int xDistance = Math.abs(lastPos[0]-nowPos[0]);
         int zDistance = Math.abs(lastPos[1]-nowPos[1]);
+
         // 如果xz轴一样，竖着进站，如果不一样，短的进站
         if (xDistance == zDistance) {
             return false;
-        } else return xDistance < zDistance;
+        } else if (xDistance == 0) {
+            return false;
+        } else if (zDistance == 0) {
+            return true;
+        } else {
+            return xDistance < zDistance;
+        }
     }
 
     /**
      * @implNote 与getStationTrend功能类似，不过get
      * @return true: 横向出站, false: 纵向出站
      */
-    public static boolean getStationForward(Integer[] nowPos, Integer[] nextPos) {
+    public boolean getStationForward(Integer[] nowPos, Integer[] nextPos) {
         int xDistance = Math.abs(nowPos[0] - nextPos[0]);
         int zDistance = Math.abs(nowPos[1] - nextPos[1]);
 
-        if (xDistance == 0) {    // x坐标相等
+        if (xDistance == zDistance) {     // xz轴相对距离都相等
+            return true;
+        } else if (xDistance == 0) {     // x坐标相等
             return false;
         } else if (zDistance == 0) {     // z坐标相等
             return true;
         } else {
-            if (xDistance == zDistance) {     // xz轴相对居里都相等
-                return true;
-            } else return xDistance > zDistance;
+             return xDistance > zDistance;
+        }
+    }
+
+    public void updateLineTrend() {
+        // 清空linePassed
+        linePassed.clear();
+
+        // 设置LinePassed
+        for (Map.Entry<String, LineData> entry:data.entrySet()) {
+            LineData lineData = entry.getValue();
+            List<Map.Entry<String, Integer[]>> stations = new ArrayList<>(lineData.getStations().entrySet());
+            for (int i = 0; i< stations.size(); i++) {
+                Integer[] lastPos = (i == 0) ? new Integer[2] : stations.get(i-1).getValue();
+                Integer[] nowPos = stations.get(i).getValue();
+                String key = nowPos[0] + "/" + nowPos[1];
+                int trendTemp = -1;    // -1:没有赋值, 0: 东西走向, 1：南北走向
+
+                if (i != 0) {    // 如果不是第一个站，考虑进进站问题
+                    boolean trend = getStationTrend(new Integer[]{lastPos[0], lastPos[1]}, nowPos);
+                    Integer[] passedTrend = linePassed.get(key);
+                    trendTemp = trend ? 0 : 1;
+                    if (passedTrend == null) {
+                        if (trend) {
+                            linePassed.put(key, new Integer[]{1, 0});
+                        } else {
+                            linePassed.put(key, new Integer[]{0, 1});
+                        }
+                    } else {
+                        if (trend) {
+                            passedTrend[0] += 1;
+                        } else {
+                            passedTrend[1] += 1;
+                        }
+                    }
+                }
+
+                if (stations.size() != i+1) {      // 如果不是最后一个站，考虑出站问题
+                    // 判断trend（这一个trend指的是出站的方向），true:东西方向，false：南北方向
+                    Integer[] passedTrend = linePassed.get(key);
+                    Integer[] nextPos = stations.get(i+1).getValue();
+                    boolean trend = getStationForward(nowPos, nextPos);
+
+                    if ((trend ? 0 : 1) != trendTemp) {
+                        if (passedTrend == null) {
+                            if (trend) {
+                                linePassed.put(key, new Integer[]{1, 0});
+                            } else {
+                                linePassed.put(key, new Integer[]{0, 1});
+                            }
+                        } else {
+                            if (trend) {
+                                passedTrend[0] += 1;
+                            } else {
+                                passedTrend[1] += 1;
+                            }
+                        }
+                    }
+                } else {       // 如果stationList的内容只有一个
+                    // 如果这个站点没有被创建过，则创建
+                    linePassed.computeIfAbsent(key, k -> new Integer[]{0, 0});
+                }
+            }
         }
     }
 }
