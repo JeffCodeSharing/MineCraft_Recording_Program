@@ -1,27 +1,37 @@
 package Modes.StationMap;
 
 import java.io.Serializable;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.List;
 
 /**
  * @implNote 因为javafx.scene.paint.Color不能被序列化，所以改用String来储存
  */
 public class LineData implements Serializable {
+    private final String lineName;
     private String color;
-    private final Map<String, Integer[]> stations;      // 第一项为站名，第二项为xz轴的坐标
+    private final List<StationData> stations;      // 第一项为站名，第二项为xz轴的坐标
 
-    public LineData(LinkedHashMap<String, Integer[]> stations, String color) {
+    public LineData(String lineName, List<StationData> stations, String color) {
+        this.lineName = lineName;
         this.stations = stations;
         this.color = color;
     }
 
-    public Integer[] get(String stationName) {
-        return stations.get(stationName);
+    public Integer[] getPosition(String stationName) {
+        for (StationData station:this.stations) {
+            if (station.getName().equals(stationName)) {
+                return station.getPosition();
+            }
+        }
+        return null;
     }
 
     public String getColor() {
-        return color;
+        return this.color;
+    }
+
+    public String getLineName() {
+        return this.lineName;
     }
 
     public void setColor(String color) {
@@ -29,10 +39,35 @@ public class LineData implements Serializable {
     }
 
     public void addStation(String stationName, Integer[] position) {
-        stations.put(stationName, position);
+        this.stations.add(new StationData(stationName, position));
     }
 
-    public Map<String, Integer[]> getStations() {
+    public List<StationData> getStations() {
         return stations;
+    }
+
+    /**
+     * @implNote 用作记录每一个Station的数据，辅助LineData
+     */
+    public static class StationData implements Serializable {
+        private String name;
+        private final Integer[] position;     // 位置不准改变
+
+        public StationData(String name, Integer[] position) {
+            this.name = name;
+            this.position = position;
+        }
+
+        public String getName() {
+            return this.name;
+        }
+
+        public Integer[] getPosition() {
+            return this.position;
+        }
+
+        public void setName(String newName) {
+            this.name = newName;
+        }
     }
 }

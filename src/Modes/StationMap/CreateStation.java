@@ -12,17 +12,28 @@ import javafx.scene.control.TextField;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
-import java.util.Map;
+import java.util.List;
 
 public class CreateStation extends Application implements AbstractWindow {
     private final Stage global_stage = new Stage();
-    private final Map<String, LineData> data;
-    private final String lineName;
+    private final List<LineData> data;
+    private int lineIndex;
     private String typeBoxDefault = "坐标创建";
 
-    public CreateStation(Map<String, LineData> data, String lineName) {
+    /**
+     * @param data      所有线路的信息
+     * @param lineName  创建站点归属的线路的列表序号
+     */
+    public CreateStation(List<LineData> data, String lineName) {
         this.data = data;
-        this.lineName = lineName;
+
+        for (int i=0; i<this.data.size(); i++) {
+            // 比较线路名
+            if (this.data.get(i).getLineName().equals(lineName)) {
+                this.lineIndex = i;
+                break;
+            }
+        }
     }
 
     @Override
@@ -112,16 +123,15 @@ public class CreateStation extends Application implements AbstractWindow {
 
             // 检查站点名唯一性和是否有重复的xz轴（如果有重复也算有错）
             boolean canContinue = true;
-            for (Map.Entry<String, LineData> entry : data.entrySet()) {
-                LineData lineData = entry.getValue();
-                for (Map.Entry<String, Integer[]> stationEntry : lineData.getStations().entrySet()) {
-                    String compareName = stationEntry.getKey();
+            for (LineData lineData : data) {
+                for (LineData.StationData stationData : lineData.getStations()) {
+                    String compareName = stationData.getName();
                     if (stationName.equals(compareName)) {
                         canContinue = false;
                         break;
                     }
 
-                    Integer[] comparePosition = stationEntry.getValue();
+                    Integer[] comparePosition = stationData.getPosition();
                     if ((comparePosition[0] == x) && (comparePosition[1] == z)) {
                         canContinue = false;
                         break;
@@ -133,7 +143,7 @@ public class CreateStation extends Application implements AbstractWindow {
                 }
             }
 
-            LineData lineData = data.get(lineName);
+            LineData lineData = data.get(lineIndex);
             lineData.addStation(stationName, new Integer[]{x, z});
 
             return true;
@@ -146,12 +156,11 @@ public class CreateStation extends Application implements AbstractWindow {
 
     public boolean create(String stationName) {
         try {
-            for (Map.Entry<String, LineData> entry : data.entrySet()) {
-                LineData lineData = entry.getValue();
-                for (Map.Entry<String, Integer[]> stationEntry : lineData.getStations().entrySet()) {
-                    String compareName = stationEntry.getKey();
+            for (LineData lineData : data) {
+                for (LineData.StationData stationData : lineData.getStations()) {
+                    String compareName = stationData.getName();
                     if (stationName.equals(compareName)) {
-                        data.get(lineName).addStation(stationName, stationEntry.getValue());
+                        data.get(lineIndex).addStation(stationName, stationData.getPosition());
                         return true;
                     }
                 }

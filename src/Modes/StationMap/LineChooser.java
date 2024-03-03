@@ -10,15 +10,20 @@ import javafx.scene.control.ListView;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 public class LineChooser extends Application implements AbstractWindow {
     private static String choose_line = null;
     private final Stage global_stage = new Stage();
     private final String[] lines;
 
-    public LineChooser(Map<String, LineData> data) {
-        this.lines = data.keySet().toArray(new String[0]);
+    public LineChooser(List<LineData> data) {
+        List<String> linesTemp = new ArrayList<>();
+        for (LineData dataPiece:data) {
+            linesTemp.add(dataPiece.getLineName());
+        }
+        this.lines = linesTemp.toArray(new String[0]);
     }
 
     @Override

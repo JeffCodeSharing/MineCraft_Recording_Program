@@ -14,14 +14,14 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 public class CreateLine extends Application implements AbstractWindow {
     private final Stage global_stage = new Stage();
-    private final Map<String, LineData> lines;
+    private final List<LineData> lines;
 
-    public CreateLine(Map<String, LineData> lines) {
+    public CreateLine(List<LineData> lines) {
         this.lines = lines;
     }
 
@@ -61,7 +61,7 @@ public class CreateLine extends Application implements AbstractWindow {
             // 检测lineName以及lineColor是否都已经填写并且填写正确
             if ((lineName != null) && (!lineName.equals("")) &&
                     (ColorTool.engToColor(lineColor) != null)) {
-                lines.put(lineName, new LineData(new LinkedHashMap<>(), lineColor));
+                lines.add(new LineData(lineName, new ArrayList<>(), lineColor));
                 global_stage.close();
                 WinTool.createAlert(Alert.AlertType.INFORMATION, "成功", "创建线路成功", "线路名称" + lineName);
             } else {
