@@ -2,17 +2,23 @@ package Modes.StationMap;
 
 import Tools.ColorTool;
 import Tools.WinTool;
+import javafx.geometry.Bounds;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.ArcType;
+import javafx.scene.text.Font;
+import javafx.scene.text.Text;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.ObjectInputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Objects;
 
 public class ShowMap {
     private Canvas map;
@@ -244,6 +250,28 @@ public class ShowMap {
                                 nowPos[0], nowPos[1]-5-nowTrend[0]*2.5);
                     }
                 }
+            }
+        }
+
+        // 写上站台名字
+        final int FONT_SIZE = 16;
+        Font font = Font.font(FONT_SIZE);
+        context.setFont(font);
+        context.setFill(Color.BLACK);
+        for (LineData lineData : data) {
+            for (LineData.StationData stationData : lineData.getStations()) {
+                Integer[] position = stationData.getPosition();
+                String name = stationData.getName();
+                Integer[] trend = linePassed.get(position[0] + "/" + position[1]);
+
+                Text testText = new Text(name);
+                testText.setFont(Font.font(FONT_SIZE));
+                Bounds textBounds = testText.getLayoutBounds();
+
+                context.fillText(
+                        name,
+                        position[0]-textBounds.getWidth()/2, position[1]+trend[0]*2.5+20
+                );
             }
         }
     }
