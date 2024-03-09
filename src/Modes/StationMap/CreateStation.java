@@ -148,7 +148,6 @@ public class CreateStation extends Application implements AbstractWindow {
 
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
             WinTool.createAlert(Alert.AlertType.ERROR, "失败", "输入数据有错误", "");
             return false;
         }
