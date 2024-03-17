@@ -61,7 +61,7 @@ public class CreateLine extends Application implements AbstractWindow {
             // 检测lineName以及lineColor是否都已经填写并且填写正确
             if ((lineName != null) && (!lineName.equals("")) &&
                     (ColorTool.engToColor(lineColor) != null)) {
-                lines.add(new LineData(lineName, new ArrayList<>(), lineColor));
+                lines.add(new LineData(lineName, new ArrayList<>(), new ArrayList<>(), lineColor));
                 global_stage.close();
                 WinTool.createAlert(Alert.AlertType.INFORMATION, "成功", "创建线路成功", "线路名称" + lineName);
             } else {

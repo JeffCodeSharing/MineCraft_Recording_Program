@@ -10,10 +10,12 @@ public class LineData implements Serializable {
     private final String lineName;
     private String color;
     private final List<StationData> stations;      // 第一项为站名，第二项为xz轴的坐标
+    private final List<Integer[]> directions;      // 站点之间线路的走向
 
-    public LineData(String lineName, List<StationData> stations, String color) {
+    public LineData(String lineName, List<StationData> stations, List<Integer[]> directions, String color) {
         this.lineName = lineName;
         this.stations = stations;
+        this.directions = directions;
         this.color = color;
     }
 
@@ -44,6 +46,10 @@ public class LineData implements Serializable {
 
     public List<StationData> getStations() {
         return stations;
+    }
+
+    public List<Integer[]> getDirections() {
+        return directions;
     }
 
     /**

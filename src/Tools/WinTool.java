@@ -208,16 +208,16 @@ public class WinTool {
      * @param y            面板控件的 y 坐标
      * @param width        面板控件的宽度
      * @param height       面板控件的高度
-     * @param content_box  面板控件的内部内容
+     * @param contentBox   面板控件的内部内容
      * @return 返回设置完所有属性的带有滚动条的面板控件
      */
-    public static ScrollPane createScrollPane(int x, int y, int width, int height, Pane content_box) {
+    public static ScrollPane createScrollPane(int x, int y, int width, int height, Pane contentBox) {
         ScrollPane scrollPane = new ScrollPane();
         scrollPane.setLayoutX(x);
         scrollPane.setLayoutY(y);
         scrollPane.setMaxSize(width, height);
         scrollPane.setMinSize(width, height);
-        scrollPane.setContent(content_box);
+        scrollPane.setContent(contentBox);
         return scrollPane;
     }
 
@@ -338,6 +338,16 @@ public class WinTool {
         context.setFill(back_color);
         context.fillRect(0, 0, width, height);
         return canvas;
+    }
+
+    public static RadioButton createRadioButton(int x, int y, int width, int height, Image image) {
+        RadioButton rb = new RadioButton();
+        rb.setLayoutX(x);
+        rb.setLayoutY(y);
+        rb.setMaxSize(width, height);
+        rb.setMinSize(width, height);
+        rb.setGraphic(new ImageView(image));
+        return rb;
     }
 }
 
