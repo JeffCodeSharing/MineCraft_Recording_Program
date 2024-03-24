@@ -302,8 +302,8 @@ public class WinTool {
         Canvas canvas = new Canvas();
         canvas.setLayoutX(x);
         canvas.setLayoutY(y);
-        canvas.setWidth(width);
-        canvas.setHeight(height);
+        if (width != -1) canvas.setWidth(width);
+        if (height != -1) canvas.setHeight(height);
         return canvas;
     }
 

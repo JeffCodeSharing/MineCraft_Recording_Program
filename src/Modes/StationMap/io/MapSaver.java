@@ -1,5 +1,6 @@
-package Modes.StationMap;
+package Modes.StationMap.io;
 
+import Modes.StationMap.LineData;
 import Tools.WinTool;
 import javafx.scene.control.Alert;
 

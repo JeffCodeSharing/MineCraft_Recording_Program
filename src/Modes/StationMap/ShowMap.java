@@ -1,11 +1,16 @@
 package Modes.StationMap;
 
+import Modes.StationMap.io.MapOutput;
+import Modes.StationMap.io.MapSaver;
 import Tools.ColorTool;
 import Tools.WinTool;
 import javafx.geometry.Bounds;
+import javafx.scene.SnapshotParameters;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
+import javafx.scene.image.ImageView;
+import javafx.scene.image.WritableImage;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.ArcType;
@@ -20,6 +25,8 @@ import java.util.*;
 public class ShowMap {
     private Canvas map;
     private GraphicsContext context;
+    private Canvas showingMap;
+    private GraphicsContext showingContext;
     private final List<LineData> data;
     // 每一个站点经过的线路，用于换乘的站点用。Key为站的x和z轴，用"/"分割，Value是线路分别按照左，右，上，下的进出站路线数量
     private final HashMap<String, Integer[]> linePassed = new HashMap<>();
@@ -59,8 +66,10 @@ public class ShowMap {
         Button save_map = WinTool.createButton(120, 0, 120, 40, 20, "保存地图");
         save_map.setOnAction(actionEvent -> MapSaver.save(data, path));
 
-        map = WinTool.createCanvas(0, 80, 630, 630, Color.WHITE);
+        map = WinTool.createCanvas(0, 0, -1, -1, Color.WHITE);
         context = map.getGraphicsContext2D();
+        showingMap = WinTool.createCanvas(0, 80, 630, 630, Color.WHITE);
+        showingContext = showingMap.getGraphicsContext2D();
 
         drawPoints();
 
@@ -92,7 +101,7 @@ public class ShowMap {
 
         box.getChildren().addAll(
                 map_output, save_map,
-                map,
+                showingMap,
                 choose_line, create_station, create_line
         );
     }
@@ -112,9 +121,32 @@ public class ShowMap {
             drawTemp.put(key, copyValue);
         }
 
-        // 清空画布
+        // 获取到X和Z轴的最大最小值
+        int minX = 0;
+        int maxX = 0;
+        int minZ = 0;
+        int maxZ = 0;
+        for (LineData lineData : data) {
+            for (LineData.StationData stationData : lineData.getStations()) {
+                Integer[] value = stationData.getPosition();
+                if (value[0] > maxX) maxX = value[0];
+                else if (value[0] < minX) minX = value[0];
+
+                if (value[1] > maxZ) maxZ = value[1];
+                else if (value[0] < minZ) minZ = value[1];
+            }
+        }
+
+        // 处理4个极限值并清空画布
+        // moveX与moveZ用于在绘制的时候进行偏移，正常的各偏移20px
+        int moveX = (minX<0) ? Math.abs(minX)+20 : 20;
+        int moveZ = (minZ<0) ? Math.abs(minZ)+20 : 20;
+
+        // 清空画布（+100是为了保证正常绘制，是大部分情况）
+        map.setWidth(maxX+moveX+100);
+        map.setHeight(maxZ+moveZ+100);
         context.setFill(Color.WHITE);
-        context.fillRect(0, 0, 630, 630);
+        context.fillRect(0, 0, maxX+moveX+100, maxZ+moveZ+100);
 
         // 添加站点
         linePassed.forEach((s, passedTrend) -> {
@@ -126,22 +158,22 @@ public class ShowMap {
             context.setLineWidth(2);
             context.setStroke(Color.BLACK);
 
-            context.strokeArc(stationPos[0] - (usingPassedTrend[1]) * 2.5 - 2.5, stationPos[1] - (usingPassedTrend[0]) * 2.5 - 2.5,
+            context.strokeArc(stationPos[0]-usingPassedTrend[1]*2.5-2.5+moveX, stationPos[1]-usingPassedTrend[0]*2.5-2.5+moveZ,
                     5, 5, 90, 90, ArcType.OPEN);
-            context.strokeLine(stationPos[0] - (usingPassedTrend[1]) * 2.5, stationPos[1] - (usingPassedTrend[0]) * 2.5 - 2.5,
-                   stationPos[0] + (usingPassedTrend[1]) * 2.5, stationPos[1] - (usingPassedTrend[0]) * 2.5 - 2.5);
-            context.strokeArc(stationPos[0] + (usingPassedTrend[1]) * 2.5-2.5, stationPos[1] - (usingPassedTrend[0]) * 2.5-2.5,
+            context.strokeLine(stationPos[0]-usingPassedTrend[1]*2.5+moveX, stationPos[1]-usingPassedTrend[0]*2.5-2.5+moveZ,
+                   stationPos[0]+usingPassedTrend[1]*2.5+moveX, stationPos[1]-usingPassedTrend[0]*2.5-2.5+moveZ);
+            context.strokeArc(stationPos[0]+usingPassedTrend[1]*2.5-2.5+moveX, stationPos[1]-usingPassedTrend[0]*2.5-2.5+moveZ,
                     5, 5, 0, 90, ArcType.OPEN);
-            context.strokeLine(stationPos[0] + (usingPassedTrend[1]) * 2.5 + 2.5, stationPos[1] - (usingPassedTrend[0]) * 2.5,
-                    stationPos[0] + (usingPassedTrend[1]) * 2.5 + 2.5, stationPos[1] + (usingPassedTrend[0]) * 2.5);
-            context.strokeArc(stationPos[0] + (usingPassedTrend[1]) * 2.5-2.5, stationPos[1] + (usingPassedTrend[0]) * 2.5-2.5,
+            context.strokeLine(stationPos[0]+usingPassedTrend[1]*2.5+2.5+moveX, stationPos[1]-usingPassedTrend[0]*2.5+moveZ,
+                    stationPos[0]+usingPassedTrend[1]*2.5+2.5+moveX, stationPos[1]+usingPassedTrend[0]*2.5+moveZ);
+            context.strokeArc(stationPos[0]+usingPassedTrend[1]*2.5-2.5+moveX, stationPos[1]+usingPassedTrend[0]*2.5-2.5+moveZ,
                     5, 5, 270, 90, ArcType.OPEN);
-            context.strokeLine(stationPos[0] + (usingPassedTrend[1]) * 2.5, stationPos[1] + (usingPassedTrend[0]) * 2.5 + 2.5,
-                    stationPos[0] - (usingPassedTrend[1]) * 2.5, stationPos[1] + (usingPassedTrend[0]) * 2.5 + 2.5);
-            context.strokeArc(stationPos[0] - (usingPassedTrend[1]) * 2.5 - 2.5, stationPos[1] + (usingPassedTrend[0]) * 2.5-2.5,
+            context.strokeLine(stationPos[0]+usingPassedTrend[1]*2.5+moveX, stationPos[1]+usingPassedTrend[0]*2.5+2.5+moveZ,
+                    stationPos[0]-usingPassedTrend[1]*2.5+moveX, stationPos[1]+usingPassedTrend[0]*2.5+2.5+moveZ);
+            context.strokeArc(stationPos[0]-usingPassedTrend[1]*2.5-2.5+moveX, stationPos[1]+usingPassedTrend[0]*2.5-2.5+moveZ,
                     5, 5, 180, 90, ArcType.OPEN);
-            context.strokeLine(stationPos[0] - (usingPassedTrend[1]) * 2.5-2.5, stationPos[1] + (usingPassedTrend[0]) * 2.5,
-                    stationPos[0] - (usingPassedTrend[1]) * 2.5-2.5, stationPos[1] - (usingPassedTrend[0]) * 2.5);
+            context.strokeLine(stationPos[0]-usingPassedTrend[1]*2.5-2.5+moveX, stationPos[1]+usingPassedTrend[0]*2.5+moveZ,
+                    stationPos[0]-usingPassedTrend[1]*2.5-2.5+moveX, stationPos[1]-usingPassedTrend[0]*2.5+moveZ);
         });
 
         // 划线连接站点
@@ -221,27 +253,27 @@ public class ShowMap {
                     if (leftSide == 1) {
                         // 没有其他操作
                         if ((upSide == -1) && (downSide == -1)) {
-                            context.strokeLine(lastPos[0]-5-lastTrend[1]*2.5,
-                                    lastPos[1]-lastTrendAll[0]*2.5+2.5+(lastTrendAll[0]-lastDrawTemp[0])*5,
-                                    nowPos[0]+5+nowTrend[1]*2.5,
-                                    nowPos[1]- nowTrendAll[1]*2.5+2.5+(nowTrendAll[1]-nowDrawTemp[1])*5);
+                            context.strokeLine(lastPos[0]-5-lastTrend[1]*2.5+moveX,
+                                    lastPos[1]-lastTrendAll[0]*2.5+2.5+(lastTrendAll[0]-lastDrawTemp[0])*5+moveZ,
+                                    nowPos[0]+5+nowTrend[1]*2.5+moveX,
+                                    nowPos[1]- nowTrendAll[1]*2.5+2.5+(nowTrendAll[1]-nowDrawTemp[1])*5+moveZ);
                         } else {     // 还有其他操作
-                            context.strokeLine(lastPos[0]-5-lastTrend[1]*2.5,
-                                    lastPos[1]- lastTrendAll[0]*2.5+2.5+(lastTrendAll[0]-lastDrawTemp[0])*5,
-                                    nowPos[0]- nowTrendAll[3]*2.5+2.5+(nowTrendAll[3]-nowDrawTemp[3])*5,
-                                    lastPos[1]- lastTrendAll[0]*2.5+2.5+(lastTrendAll[0]-lastDrawTemp[0])*5);
+                            context.strokeLine(lastPos[0]-5-lastTrend[1]*2.5+moveX,
+                                    lastPos[1]- lastTrendAll[0]*2.5+2.5+(lastTrendAll[0]-lastDrawTemp[0])*5+moveZ,
+                                    nowPos[0]- nowTrendAll[3]*2.5+2.5+(nowTrendAll[3]-nowDrawTemp[3])*5+moveX,
+                                    lastPos[1]- lastTrendAll[0]*2.5+2.5+(lastTrendAll[0]-lastDrawTemp[0])*5+moveZ);
                         }
                     } else if (leftSide == 0) {     // 后向左
                         if (upSide == 1) {
-                            context.strokeLine(lastPos[0]- lastTrendAll[2]*3+2.5+(lastTrendAll[2]-lastDrawTemp[2])*5,
-                                    nowPos[1]- nowTrendAll[1]*2.5+2.5+(nowTrendAll[1]-nowDrawTemp[1])*5,
-                                    nowPos[0]+5+lastTrend[1]*2.5,
-                                    nowPos[1]- nowTrendAll[1]*2.5+2.5+(nowTrendAll[1]-nowDrawTemp[1])*5);
+                            context.strokeLine(lastPos[0]- lastTrendAll[2]*3+2.5+(lastTrendAll[2]-lastDrawTemp[2])*5+moveX,
+                                    nowPos[1]- nowTrendAll[1]*2.5+2.5+(nowTrendAll[1]-nowDrawTemp[1])*5+moveZ,
+                                    nowPos[0]+5+lastTrend[1]*2.5+moveX,
+                                    nowPos[1]- nowTrendAll[1]*2.5+2.5+(nowTrendAll[1]-nowDrawTemp[1])*5+moveZ);
                         } else {
-                            context.strokeLine(lastPos[0]- lastTrendAll[3]*2.5+2.5+(lastTrendAll[3]-lastDrawTemp[3])*5,
-                                    nowPos[1]- nowTrendAll[1]*2.5+2.5+(nowTrendAll[1]-nowDrawTemp[1])*5,
-                                    nowPos[0]+5+lastTrend[1]*2.5,
-                                    nowPos[1]- nowTrendAll[1]*2.5+2.5+(nowTrendAll[1]-nowDrawTemp[1])*5);
+                            context.strokeLine(lastPos[0]- lastTrendAll[3]*2.5+2.5+(lastTrendAll[3]-lastDrawTemp[3])*5+moveX,
+                                    nowPos[1]- nowTrendAll[1]*2.5+2.5+(nowTrendAll[1]-nowDrawTemp[1])*5+moveZ,
+                                    nowPos[0]+5+lastTrend[1]*2.5+moveX,
+                                    nowPos[1]- nowTrendAll[1]*2.5+2.5+(nowTrendAll[1]-nowDrawTemp[1])*5+moveZ);
                         }
                     }
 
@@ -249,27 +281,27 @@ public class ShowMap {
                     if (rightSide == 1) {
                         // 没有其他操作
                         if ((upSide == -1) && (downSide == -1)) {
-                            context.strokeLine(lastPos[0]+5+lastTrend[1]*2.5,
-                                    lastPos[1]- lastTrendAll[1]*2.5+2.5+(lastTrendAll[1]-lastDrawTemp[1])*5,
-                                    nowPos[0]-5-nowTrend[1]*2.5,
-                                    nowPos[1]- nowTrendAll[0]*2.5+2.5+(nowTrendAll[0]-nowDrawTemp[0])*5);
+                            context.strokeLine(lastPos[0]+5+lastTrend[1]*2.5+moveX,
+                                    lastPos[1]- lastTrendAll[1]*2.5+2.5+(lastTrendAll[1]-lastDrawTemp[1])*5+moveZ,
+                                    nowPos[0]-5-nowTrend[1]*2.5+moveX,
+                                    nowPos[1]- nowTrendAll[0]*2.5+2.5+(nowTrendAll[0]-nowDrawTemp[0])*5+moveZ);
                         } else {      // 还有其他操作
-                            context.strokeLine(lastPos[0]+5+lastTrend[1]*2.5,
-                                    lastPos[1]- lastTrendAll[1]*2.5+2.5+(lastTrendAll[1]-lastDrawTemp[1])*5,
-                                    nowPos[0]-5- nowTrendAll[2]*2.5+2.5+(nowTrendAll[2]-nowDrawTemp[2])*5,
-                                    lastPos[1]- lastTrendAll[1]*2.5+2.5+(lastTrendAll[1]-lastDrawTemp[1])*5);
+                            context.strokeLine(lastPos[0]+5+lastTrend[1]*2.5+moveX,
+                                    lastPos[1]- lastTrendAll[1]*2.5+2.5+(lastTrendAll[1]-lastDrawTemp[1])*5+moveZ,
+                                    nowPos[0]-5- nowTrendAll[2]*2.5+2.5+(nowTrendAll[2]-nowDrawTemp[2])*5+moveX,
+                                    lastPos[1]- lastTrendAll[1]*2.5+2.5+(lastTrendAll[1]-lastDrawTemp[1])*5+moveZ);
                         }
                     } else if (rightSide == 0) {     // 后向右
                         if (upSide == 1) {
-                            context.strokeLine(lastPos[0]- lastTrendAll[2]*2.5+2.5+(lastTrendAll[2]-lastDrawTemp[2])*5,
-                                    nowPos[1]- nowTrendAll[0]*2.5+2.5+(nowTrendAll[0]-nowDrawTemp[0])*5,
-                                    nowPos[0]-5-nowTrend[1]*2.5,
-                                    nowPos[1]- nowTrendAll[0]*2.5+2.5+(nowTrendAll[0]-nowDrawTemp[0])*5);
+                            context.strokeLine(lastPos[0]- lastTrendAll[2]*2.5+2.5+(lastTrendAll[2]-lastDrawTemp[2])*5+moveX,
+                                    nowPos[1]- nowTrendAll[0]*2.5+2.5+(nowTrendAll[0]-nowDrawTemp[0])*5+moveZ,
+                                    nowPos[0]-5-nowTrend[1]*2.5+moveX,
+                                    nowPos[1]- nowTrendAll[0]*2.5+2.5+(nowTrendAll[0]-nowDrawTemp[0])*5+moveZ);
                         } else {
-                            context.strokeLine(lastPos[0]- lastTrendAll[3]*2.5+2.5+(lastTrendAll[3]-lastDrawTemp[3])*5,
-                                    nowPos[1]- nowTrendAll[0]*2.5+2.5+(nowTrendAll[0]-nowDrawTemp[0])*5,
-                                    nowPos[0]-5-nowTrend[1]*2.5,
-                                    nowPos[1]- nowTrendAll[0]*2.5+2.5+(nowTrendAll[0]-nowDrawTemp[0])*5);
+                            context.strokeLine(lastPos[0]- lastTrendAll[3]*2.5+2.5+(lastTrendAll[3]-lastDrawTemp[3])*5+moveX,
+                                    nowPos[1]- nowTrendAll[0]*2.5+2.5+(nowTrendAll[0]-nowDrawTemp[0])*5+moveZ,
+                                    nowPos[0]-5-nowTrend[1]*2.5+moveX,
+                                    nowPos[1]- nowTrendAll[0]*2.5+2.5+(nowTrendAll[0]-nowDrawTemp[0])*5+moveZ);
                         }
                     }
 
@@ -277,27 +309,27 @@ public class ShowMap {
                     if (upSide == 1) {
                         // 没有其他操作
                         if ((leftSide == -1) && (rightSide == -1)) {
-                            context.strokeLine(lastPos[0]- lastTrendAll[2]*2.5+2.5+(lastTrendAll[2]-lastDrawTemp[2])*5,
-                                    lastPos[1]-5-lastTrend[0]*2.5,
-                                    nowPos[0]- nowTrendAll[3]*2.5+2.5+(nowTrendAll[3]-nowDrawTemp[3])*5,
-                                    nowPos[1]+5+nowTrend[0]*2.5);
+                            context.strokeLine(lastPos[0]- lastTrendAll[2]*2.5+2.5+(lastTrendAll[2]-lastDrawTemp[2])*5+moveX,
+                                    lastPos[1]-5-lastTrend[0]*2.5+moveZ,
+                                    nowPos[0]- nowTrendAll[3]*2.5+2.5+(nowTrendAll[3]-nowDrawTemp[3])*5+moveX,
+                                    nowPos[1]+5+nowTrend[0]*2.5+moveZ);
                         } else {    // 还有其他操作
-                            context.strokeLine(lastPos[0]- lastTrendAll[2]*2.5+2.5+(lastTrendAll[2]-lastDrawTemp[2])*5,
-                                    lastPos[1]-5-lastTrend[0]*2.5,
-                                    lastPos[0]- lastTrendAll[2]*2.5+2.5+(lastTrendAll[2]-lastDrawTemp[2])*5,
-                                    nowPos[1]- lastTrendAll[0]*2.5+2.5+(lastTrendAll[0]-lastDrawTemp[0])*5);
+                            context.strokeLine(lastPos[0]-lastTrendAll[2]*2.5+2.5+(lastTrendAll[2]-lastDrawTemp[2])*5+moveX,
+                                    lastPos[1]-5-lastTrend[0]*2.5+moveZ,
+                                    lastPos[0]-lastTrendAll[2]*2.5+2.5+(lastTrendAll[2]-lastDrawTemp[2])*5+moveX,
+                                    nowPos[1]-lastTrendAll[0]*2.5+2.5+(lastTrendAll[0]-lastDrawTemp[0])*5+moveZ);
                         }
                     } else if (upSide == 0) {      // 后向上
                         if (leftSide == 1) {
-                            context.strokeLine(nowPos[0]- nowTrendAll[3]*2.5+2.5+(nowTrendAll[3]-nowDrawTemp[3])*5,
-                                    lastPos[1]- lastTrendAll[0]*2.5+2.5+(lastTrendAll[0]-lastDrawTemp[0])*5,
-                                    nowPos[0]- nowTrendAll[3]*2.5+2.5+(nowTrendAll[3]-nowDrawTemp[3])*5,
-                                    nowPos[1]+5+nowTrend[0]*2.5);
+                            context.strokeLine(nowPos[0]- nowTrendAll[3]*2.5+2.5+(nowTrendAll[3]-nowDrawTemp[3])*5+moveX,
+                                    lastPos[1]- lastTrendAll[0]*2.5+2.5+(lastTrendAll[0]-lastDrawTemp[0])*5+moveZ,
+                                    nowPos[0]- nowTrendAll[3]*2.5+2.5+(nowTrendAll[3]-nowDrawTemp[3])*5+moveX,
+                                    nowPos[1]+5+nowTrend[0]*2.5+moveZ);
                         } else {
-                            context.strokeLine(nowPos[0]- nowTrendAll[3]*2.5+2.5+(nowTrendAll[3]-nowDrawTemp[3])*5,
-                                    lastPos[1]- lastTrendAll[1]*2.5+2.5+(lastTrendAll[1]-lastDrawTemp[1])*5,
-                                    nowPos[0]- nowTrendAll[3]*2.5+2.5+(nowTrendAll[3]-nowDrawTemp[3])*5,
-                                    nowPos[1]+5+nowTrend[0]*2.5);
+                            context.strokeLine(nowPos[0]- nowTrendAll[3]*2.5+2.5+(nowTrendAll[3]-nowDrawTemp[3])*5+moveX,
+                                    lastPos[1]- lastTrendAll[1]*2.5+2.5+(lastTrendAll[1]-lastDrawTemp[1])*5+moveZ,
+                                    nowPos[0]- nowTrendAll[3]*2.5+2.5+(nowTrendAll[3]-nowDrawTemp[3])*5+moveX,
+                                    nowPos[1]+5+nowTrend[0]*2.5+moveZ);
                         }
                     }
 
@@ -305,27 +337,27 @@ public class ShowMap {
                     if (downSide == 1) {
                         // 没有其他操作
                         if ((leftSide == -1) && (rightSide == -1)) {
-                            context.strokeLine(lastPos[0]- lastTrendAll[3]*2.5+2.5+(lastTrendAll[3]-lastDrawTemp[3])*5,
-                                    lastPos[1]+5+lastTrend[0]*2.5,
-                                    nowPos[0]- nowTrendAll[2]*2.5+2.5+(nowTrendAll[2]-nowDrawTemp[2])*5,
-                                    nowPos[1]-5-nowTrend[0]*2.5);
+                            context.strokeLine(lastPos[0]- lastTrendAll[3]*2.5+2.5+(lastTrendAll[3]-lastDrawTemp[3])*5+moveX,
+                                    lastPos[1]+5+lastTrend[0]*2.5+moveZ,
+                                    nowPos[0]- nowTrendAll[2]*2.5+2.5+(nowTrendAll[2]-nowDrawTemp[2])*5+moveX,
+                                    nowPos[1]-5-nowTrend[0]*2.5+moveZ);
                         } else {    // 还有其他操作
-                            context.strokeLine(lastPos[0]- lastTrendAll[3]*2.5+2.5+(lastTrendAll[3]-lastDrawTemp[3])*5,
-                                    lastPos[1]+5+lastTrend[0]*2.5,
-                                    lastPos[0]- lastTrendAll[3]*2.5+2.5+(lastTrendAll[3]-lastDrawTemp[3])*5,
-                                    nowPos[1]-5- nowTrendAll[0]*2.5+2.5+(nowTrendAll[0]-nowDrawTemp[0])*5);
+                            context.strokeLine(lastPos[0]- lastTrendAll[3]*2.5+2.5+(lastTrendAll[3]-lastDrawTemp[3])*5+moveX,
+                                    lastPos[1]+5+lastTrend[0]*2.5+moveZ,
+                                    lastPos[0]- lastTrendAll[3]*2.5+2.5+(lastTrendAll[3]-lastDrawTemp[3])*5+moveX,
+                                    nowPos[1]-5- nowTrendAll[0]*2.5+2.5+(nowTrendAll[0]-nowDrawTemp[0])*5+moveZ);
                         }
                     } else if (downSide == 0) {      // 后向下
                         if (leftSide == 1) {
-                            context.strokeLine(nowPos[0]- nowTrendAll[2]*2.5+2.5+(nowTrendAll[2]-nowDrawTemp[2])*5,
-                                    lastPos[1]- lastTrendAll[0]*2.5+2.5+(lastTrendAll[0]-lastDrawTemp[0])*5,
-                                    nowPos[0]-nowTrendAll[2]*2.5+2.5+(nowTrendAll[2]-nowDrawTemp[2])*5,
-                                    nowPos[1]-5-nowTrend[0]*2.5);
+                            context.strokeLine(nowPos[0]- nowTrendAll[2]*2.5+2.5+(nowTrendAll[2]-nowDrawTemp[2])*5+moveX,
+                                    lastPos[1]- lastTrendAll[0]*2.5+2.5+(lastTrendAll[0]-lastDrawTemp[0])*5+moveZ,
+                                    nowPos[0]-nowTrendAll[2]*2.5+2.5+(nowTrendAll[2]-nowDrawTemp[2])*5+moveX,
+                                    nowPos[1]-5-nowTrend[0]*2.5+moveZ);
                         } else {
-                            context.strokeLine(nowPos[0]- nowTrendAll[2]*2.5+2.5+(nowTrendAll[2]-nowDrawTemp[2])*5,
-                                    lastPos[1]- lastTrendAll[1]*2.5+2.5+(lastTrendAll[1]-lastDrawTemp[1])*5,
-                                    nowPos[0]- nowTrendAll[2]*2.5+2.5+(nowTrendAll[2]-nowDrawTemp[2])*5,
-                                    nowPos[1]-5-nowTrend[0]*2.5);
+                            context.strokeLine(nowPos[0]- nowTrendAll[2]*2.5+2.5+(nowTrendAll[2]-nowDrawTemp[2])*5+moveX,
+                                    lastPos[1]- lastTrendAll[1]*2.5+2.5+(lastTrendAll[1]-lastDrawTemp[1])*5+moveZ,
+                                    nowPos[0]- nowTrendAll[2]*2.5+2.5+(nowTrendAll[2]-nowDrawTemp[2])*5+moveX,
+                                    nowPos[1]-5-nowTrend[0]*2.5+moveZ);
                         }
                     }
 
@@ -391,10 +423,28 @@ public class ShowMap {
 
                 context.fillText(
                         name,
-                        position[0]-textBounds.getWidth()/2, position[1]+trend[0]*2.5+20
+                        position[0]-textBounds.getWidth()/2+moveX, position[1]+trend[0]*2.5+20+moveZ
                 );
             }
         }
+
+        // 将map中的内容缩小
+        SnapshotParameters sp = new SnapshotParameters();
+        sp.setFill(Color.TRANSPARENT);
+        WritableImage image = map.snapshot(sp, null);
+
+        ImageView view = new ImageView(image);
+        view.setPreserveRatio(true);
+        if (image.getWidth()>630 || image.getHeight()>630) {
+            if (image.getWidth()>image.getHeight()) {
+                view.setFitWidth(630);
+            } else {
+                view.setFitHeight(630);
+            }
+        }
+
+        showingContext.fillRect(0, 0, 630, 630);
+        showingContext.drawImage(view.snapshot(new SnapshotParameters(), null), 0, 0);
     }
 
     public void updateLineTrend() {
