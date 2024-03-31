@@ -210,10 +210,8 @@ public class Console extends Application {
         // 帮助菜单
         Menu help = new Menu("帮助");
         MenuItem help_document = new MenuItem("帮助文档");
-        help_document.setOnAction(actionEvent -> {
-            HelpDocument helper = new HelpDocument();
-            helper.entrance();
-        });
+        help_document.setOnAction(actionEvent ->
+                HelpDocument.entrance());
 
         help.getItems().addAll(help_document);
 

@@ -25,7 +25,6 @@ import java.util.*;
 public class ShowMap {
     private Canvas map;
     private GraphicsContext context;
-    private Canvas showingMap;
     private GraphicsContext showingContext;
     private final List<LineData> data;
     // 每一个站点经过的线路，用于换乘的站点用。Key为站的x和z轴，用"/"分割，Value是线路分别按照左，右，上，下的进出站路线数量
@@ -68,7 +67,7 @@ public class ShowMap {
 
         map = WinTool.createCanvas(0, 0, -1, -1, Color.WHITE);
         context = map.getGraphicsContext2D();
-        showingMap = WinTool.createCanvas(0, 80, 630, 630, Color.WHITE);
+        Canvas showingMap = WinTool.createCanvas(0, 80, 630, 630, Color.WHITE);
         showingContext = showingMap.getGraphicsContext2D();
 
         drawPoints();
@@ -133,7 +132,7 @@ public class ShowMap {
                 else if (value[0] < minX) minX = value[0];
 
                 if (value[1] > maxZ) maxZ = value[1];
-                else if (value[0] < minZ) minZ = value[1];
+                else if (value[1] < minZ) minZ = value[1];
             }
         }
 
