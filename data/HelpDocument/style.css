@@ -1,0 +1,21 @@
+h1 {
+  text-align: center;
+}
+
+body {
+  background-color: #e3e8f0;
+}
+
+footer {
+  font-size: 12px;
+  text-align: center;
+  color: dimgray;
+}
+
+a {
+  font-size: 20px;
+}
+
+label {
+  font-size: 20px;
+}

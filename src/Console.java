@@ -55,7 +55,7 @@ public class Console extends Application {
 
         if (return_value.equals("false")) {
             // 所有的东西进行归零
-            path = "none";
+            path = null;
             type = "日志";
         } else {
             createTempDirectory();
@@ -66,8 +66,8 @@ public class Console extends Application {
 
         // 绘制控件
         drawControls(group);
-        if (!path.equals("none")) {
-            File check = new File(path + File.separator + "check_item");
+        if (!(path == null)) {
+            File check = new File(path, "check_item");
             try {
                 if (check.exists()) {
                     Scanner sc = new Scanner(check);
@@ -82,7 +82,7 @@ public class Console extends Application {
                     throw new RuntimeException();
                 }
             } catch (Exception e) {
-                path = "none";
+                path = null;
                 WinTool.createAlert(Alert.AlertType.ERROR, "错误", "上一次打开的项目不存在或损坏", "");
             }
         }
@@ -134,27 +134,19 @@ public class Console extends Application {
         MenuItem createProject = new MenuItem("创建项目");
         createProject.setOnAction(actionEvent -> {
             CreateProject creator = new CreateProject();
-            String return_path = creator.entrance()[0];
 
-            if (!return_path.equals("")) {
-                path = return_path;
-                updateProjectName();
-
-                detail_pane.getChildren().clear();
-            }
+            path = creator.entrance()[0];
+            updateProjectName();
+            detail_pane.getChildren().clear();
         });
 
         MenuItem openProject = new MenuItem("打开项目");
         openProject.setOnAction(actionEvent -> {
             OpenProject opener = new OpenProject();
-            String return_path = opener.entrance()[0];
 
-            if (!return_path.equals("")) {
-                path = return_path;
-                updateProjectName();
-
-                updateType(group, false);
-            }
+            path = opener.entrance();
+            updateProjectName();
+            updateType(group, false);
         });
 
         MenuItem removeProject = new MenuItem("删除项目");
@@ -164,7 +156,7 @@ public class Console extends Application {
 
             // 删除项目后重置路径并清空界面
             if (return_value) {
-                path = "none";
+                path = null;
                 project_name.setText("项目名:");
                 detail_pane.getChildren().clear();
             }
@@ -234,13 +226,13 @@ public class Console extends Application {
      * 更新项目名标签
      */
     private void updateProjectName() {
-        String[] temp = path.replace(File.separator, "/").split("/");
-        String add_str = "项目名:" + temp[temp.length-1];
+        String projectName = (path == null) ? "" : new File(path).getName();
+        String add_str = "项目名:" + projectName;
         project_name.setText(add_str);
     }
 
     /**
-     * 更新项目类型
+     * 更新正在使用的项目类型
      */
     private void updateType(Group group, boolean is_first) {
         detail_pane.getChildren().clear();
@@ -364,7 +356,7 @@ public class Console extends Application {
 
         if (jsonData == null) {
             WinTool.createAlert(Alert.AlertType.ERROR, "错误", "读取系统文件错误", "");
-            path = "none";
+            path = null;
             type = "日志";
         } else {
             path = jsonData.getString("path");

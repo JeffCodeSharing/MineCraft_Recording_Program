@@ -22,7 +22,7 @@ import java.io.File;
  * 返回值: true --> 密码正确, false --> 用户没有输入
  */
 public class CheckPassword extends Application implements AbstractWindow {
-    private String type = "true";
+    private boolean runChecker = true;
     private final Stage global_stage = new Stage();
     private String project_name;
     private String password;
@@ -33,7 +33,7 @@ public class CheckPassword extends Application implements AbstractWindow {
      * @param path 要确认密码的项目的路径
      */
     public CheckPassword(String path) {
-        if (!path.equals("none")) {
+        if (!(path == null)) {
             try {
                 String[] file_data = path.replace(File.separator, "/").split("/");
                 this.project_name = file_data[file_data.length - 1];
@@ -42,19 +42,19 @@ public class CheckPassword extends Application implements AbstractWindow {
                 this.password = EDTool.decrypt(encrypt_password);
             } catch (Exception e) {
                 WinTool.createAlert(Alert.AlertType.ERROR, "密码读取错误", "本项目不能正常打开", "");
-                type = "false";
+                runChecker = false;
             }
         } else {
-            type = "false";    // 上一次关闭的时候没有打开项目，直接跳过
+            runChecker = false;    // 上一次关闭的时候没有打开项目，直接跳过
         }
     }
 
     @Override
     public String[] entrance() {
-        if (!type.equals("false")) {    // 如果在调用构造函数的时候就已经发生错误了，就不执行，直接返回"false"
+        if (runChecker) {    // 如果在调用构造函数的时候就已经发生错误了，就不执行，直接返回"false"
             start(global_stage);
         }
-        return new String[]{type};
+        return new String[]{runChecker ? "true" : "false"};
     }
 
     @Override
@@ -75,7 +75,7 @@ public class CheckPassword extends Application implements AbstractWindow {
 
         confirm.setOnAction(actionEvent -> afterConfirm(password.getText()));
         cancel.setOnAction(actionEvent -> {
-            type = "false";
+            runChecker = false;
             global_stage.close();
         });
 
@@ -100,7 +100,7 @@ public class CheckPassword extends Application implements AbstractWindow {
             stage.setScene(scene);
             stage.setResizable(false);
             stage.setOnCloseRequest(windowEvent -> {
-                type = "false";
+                runChecker = false;
                 stage.close();
             });
             stage.showAndWait();

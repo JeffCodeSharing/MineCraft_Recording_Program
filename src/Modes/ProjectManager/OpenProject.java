@@ -13,16 +13,16 @@ import java.util.Scanner;
  * OpenProject 类负责在 ProjectManager 中打开项目。
  */
 public class OpenProject {
-    private String path = "";
+    private String path = null;
 
     /**
      * 进入方法，用于打开项目。
      *
      * @return 返回打开项目的路径
      */
-    public String[] entrance() {
+    public String entrance() {
         chooseDir();
-        return new String[]{path};
+        return path;
     }
 
     /**
@@ -34,7 +34,7 @@ public class OpenProject {
 
         try {
             File file = chooser.showDialog(new Stage());
-            File check = new File(file.getPath() + File.separator + "check_item");
+            File check = new File(file.getPath(), "check_item");
             if (check.exists()) {
                 Scanner sc = new Scanner(check);
                 String time = sc.nextLine();
@@ -43,7 +43,7 @@ public class OpenProject {
                     throw new RuntimeException();
                 } else {
                     // 密码检查
-                    path = file.getPath();    // path设置
+                    path = file.getPath();
 
                     CheckPassword checker = new CheckPassword(path);
                     String return_value = checker.entrance()[0];
@@ -51,7 +51,7 @@ public class OpenProject {
                     if (return_value.equals("true")) {
                         WinTool.createAlert(Alert.AlertType.INFORMATION, "选择成功", "已成功切换项目", "切换项目:" + path);
                     } else {
-                        path = "";
+                        path = null;
                     }
                 }
             } else {
