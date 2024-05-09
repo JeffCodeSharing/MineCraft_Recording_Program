@@ -73,13 +73,14 @@ public class ShowFinishValues {
     }
 
     public void showData(JSONArray children, int indent) {
+        int nextIndent = indent+1;
         for (Object childTemp : children) {
             JSONObject child = (JSONObject) childTemp;
             box.getChildren().add(WinTool.createLabel(0, y_count, -1, 30, 25,
                     "\t".repeat(indent) + "· " + child.getString("name"), Color.GREEN));
             y_count += 30;
 
-            showData(child.getJSONArray("children"), ++indent);
+            showData(child.getJSONArray("children"), nextIndent);
         }
     }
 }
