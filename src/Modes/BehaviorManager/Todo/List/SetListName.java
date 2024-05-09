@@ -19,17 +19,24 @@ import java.io.File;
  */
 public class SetListName extends Application implements AbstractWindow {
     private final Stage global_stage = new Stage();
-    private final String[] lists_name;
+    private final String[] planList;
     private final String path;
 
     /**
      * 构造一个 ChangeListName 实例，使用给定的路径和列表名称。
      * @param path 列表的路径
-     * @param lists_name 列表名称
+     * @param planList 列表名称
      */
-    public SetListName(String path, String[] lists_name) {
+    public SetListName(String path, String[] planList) {
         this.path = path;
-        this.lists_name = lists_name;
+
+        // 去除.json后缀，再赋值给this.planList
+        for (int i=0; i<planList.length; i++) {
+            String listName = planList[i];
+            int dotIndex = listName.lastIndexOf(".");
+            planList[i] = listName.substring(0, dotIndex);
+        }
+        this.planList = planList;
     }
 
     @Override
@@ -44,13 +51,11 @@ public class SetListName extends Application implements AbstractWindow {
     @Override
     public void drawControls(Group group) {
         global_stage.setHeight(480);  // 设置全局舞台的高度
-        global_stage.setWidth(400);
-
         group.getChildren().clear();  // 清除组内的所有节点
 
-        ListView<String> listView = WinTool.createListView(10, 40, 320, 300, lists_name);
+        ListView<String> listView = WinTool.createListView(10, 40, 320, 300, planList);
 
-        Button open = WinTool.createButton(160, 370, 80, 40, 18, "打开");
+        Button open = WinTool.createButton(160, 370, 80, 40, 18, "更改");
         Button cancel = WinTool.createButton(250, 370, 80, 40, 18, "取消");
 
         open.setOnAction(actionEvent -> showDetails(group, listView.getSelectionModel().getSelectedItem()));
@@ -73,6 +78,7 @@ public class SetListName extends Application implements AbstractWindow {
         stage.setTitle("更改计划表名");
         stage.setScene(scene);
         stage.setResizable(false);
+        stage.setWidth(380);
         stage.showAndWait();
     }
 
@@ -84,11 +90,9 @@ public class SetListName extends Application implements AbstractWindow {
     private void showDetails(Group group, String old_name) {
         if (!(old_name == null) && !old_name.equals("")) {  // 检查 old_name 是否不为 null 或空
             global_stage.setHeight(310);  // 设置全局舞台的高度
-            global_stage.setWidth(380);
-
             group.getChildren().clear();  // 清除组内的所有节点
 
-            TextField name_field = WinTool.createTextField(90, 40, 260, 30, 15, old_name, "");  // 用于输入新名称的文本框
+            TextField name_field = WinTool.createTextField(90, 60, 260, 30, 15, old_name, "");  // 用于输入新名称的文本框
 
             Button confirm = WinTool.createButton(180, 210, 80, 40, 18, "确认");  // 确认按钮
             Button return_menu = WinTool.createButton(270, 210, 80, 40, 18, "返回");  // 返回按钮
@@ -98,7 +102,7 @@ public class SetListName extends Application implements AbstractWindow {
 
             group.getChildren().addAll(
                     WinTool.createLabel(0, 0, 100, 30, 25, "详细信息", Color.BLUE),
-                    WinTool.createLabel(10, 40, 80, 30, 15, "列表名称:"), name_field,
+                    WinTool.createLabel(10, 60, 80, 30, 15, "更改名称:"), name_field,
                     confirm, return_menu
             );
         }
@@ -111,8 +115,8 @@ public class SetListName extends Application implements AbstractWindow {
      */
     private void afterConfirm(String old_name, String new_name) {
         if (!(new_name == null) && !new_name.equals("")) {  // 检查 new_name 是否不为 null 或空
-            File old_file = new File(path, old_name);
-            File new_file = new File(path, new_name);
+            File old_file = new File(path, old_name+".json");
+            File new_file = new File(path, new_name+".json");
             if (old_file.renameTo(new_file)) {
                 global_stage.close();  // 关闭全局舞台
             } else {

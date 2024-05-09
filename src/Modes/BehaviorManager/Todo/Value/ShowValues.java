@@ -1,135 +1,125 @@
 package Modes.BehaviorManager.Todo.Value;
 
 import Modes.BehaviorManager.Todo.DataController;
+import Modes.BehaviorManager.Todo.ED.Decryption;
 import Modes.BehaviorManager.Todo.List.ListFinish;
 import Modes.BehaviorManager.Todo.List.ShowLists;
 import Tools.ColorTool;
-import Tools.EDTool;
 import Tools.IOTool;
 import Tools.WinTool;
+import com.alibaba.fastjson.JSONObject;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * 模块：行为管理器
- * 类名：SearchValue
- * 用途：用于搜索值的操作类
- */
 public class ShowValues {
     private final Pane box;
     private final String path;
-    private final String list_name;
+    private final String listName;
     private final DataController controller;
-    private int y_count;
+    private static int yCount;
 
     /**
-     * 构造方法
-     * @param box 垂直盒子容器
-     * @param path 文件路径
-     * @param list_name 列表名称
+     * @param box      显示控件的Pane
+     * @param path     路径 存储的是绝对路径，路径到达计划表储存处，但是不到包含计划表
+     * @param listName 计划表的名称
      */
-    public ShowValues(Pane box, String path, String list_name) {
+    public ShowValues(Pane box, String path, String listName) {
         this.box = box;
         this.path = path;
-        this.list_name = list_name;
+        this.listName = listName;
 
         // 准备DataController的基础数据
-        String[] values = IOTool.readFile(new File(path, list_name).getPath());
-
+        String readValues = String.join("", IOTool.readFile(new File(path, listName+".json").getPath()));
         // 进行解密
-        if (values == null) {
-            values = new String[0];
-        } else {
-            for (int i=0; i<values.length; i++) {
-                values[i] = EDTool.decrypt(values[i]);
-            }
-        }
-
+        JSONObject values = Decryption.decrypt(JSONObject.parseObject(readValues));
+        // 赋值
         controller = new DataController(values);
     }
 
-    /**
-     * 入口方法，用于启动搜索操作
-     */
     public void entrance() {
         start(getDone());
     }
 
-    /**
-     * 启动搜索操作
-     * @param is_done 指示计划表是否已完成
-     */
-    private void start(boolean is_done) {
-        // 重置
-        box.getChildren().clear();
-        y_count = 0;
+    private void start(boolean isDone) {
+        // 初始化yCount
+        yCount = 60;
 
-        Button return_menu = WinTool.createButton(0, 0, 120, 40, 18, "返回首页");
-        return_menu.setOnAction(actionEvent -> {
-            // 保存程序
-            save_data(controller.getValues());
-
-            ShowLists clazz = new ShowLists(box, path);
-            clazz.entrance();
-        });
-
-        Button save = WinTool.createButton(120, 0, 120, 40, 20, "保存");
-        save.setOnAction(actionEvent -> {
-            SaveValue saver = new SaveValue();
-            saver.entrance(controller, path, list_name);
-        });
-
-        box.getChildren().addAll(return_menu, save);
-        addLabelToBox(list_name, Color.BLUE, getDone(), -1);    // 添加列表名，index为-1，用于在末尾添加
-
-        List<String[]> values = controller.getValues();
-        for (int i=0; i<values.size(); i++) {
-            String[] temp = values.get(i);
-            addLabelToBox(temp[0], ColorTool.engToColor(temp[1]), temp[1].equals("GREEN"), i);
-        }
-
-        // 当is_done为true时，弹出弹窗，问使用者是否转入finish中
-        if (is_done) {
+        if (isDone) {
             Optional<ButtonType> type = WinTool.createAlert(Alert.AlertType.CONFIRMATION,
                     "移动计划表", "本计划表已经完成", "是否将这一个计划表转移至完成区？");
 
             if (type.get() == ButtonType.OK) {
                 ListFinish finisher = new ListFinish(controller);
-                String return_value = finisher.entrance(path, list_name);
+                String return_value = finisher.entrance(path, listName);
 
-                if (!(return_value == null)) {
+                if (return_value != null) {
                     WinTool.createAlert(Alert.AlertType.INFORMATION, "成功", "已将计划表转移至完成区",
                             "转以后计划表名：" + return_value);
 
+                    // 跳转到首页（显示计划表的页面）
                     ShowLists clazz = new ShowLists(box, path);
                     clazz.entrance();
                 } else {
                     WinTool.createAlert(Alert.AlertType.ERROR, "失败", "转移失败", "");
                 }
             }
+        } else {
+            // 重置
+            box.getChildren().clear();
+
+            Button return_menu = WinTool.createButton(0, 0, 120, 40, 18, "返回首页");
+            return_menu.setOnAction(actionEvent -> {
+                // 保存程序
+                SaveValue.save(controller, path, listName, false);
+
+                ShowLists clazz = new ShowLists(box, path);
+                clazz.entrance();
+            });
+
+            Button save = WinTool.createButton(120, 0, 120, 40, 20, "保存");
+            save.setOnAction(actionEvent ->
+                    SaveValue.save(controller, path, listName, true));
+
+            box.getChildren().addAll(return_menu, save);
+
+            DataController.DataPack values = controller.getValues();
+            addLabelToBox(values.getNote(), Color.BLUE, values, true);      // 添加标题
+
+            // 添加信息  逐级添加，每增加一级，indent增加1
+            updateScreen(values.getChildren(), 0);
         }
     }
 
     /**
-     * 将标签添加到垂直盒子容器中
-     * @param label_value 标签值
-     * @param color 颜色
-     * @param is_done 标记是否已完成
-     * @param index 索引值
+     * @implNote 用于显示计划表内容的时候使用  递归使用
      */
-    private void addLabelToBox(String label_value, Color color, boolean is_done, int index) {
+    private void updateScreen(List<DataController.DataPack> children, int indent) {
+        for (DataController.DataPack child : children) {
+            String msg = "\t".repeat(indent) + "· " + child.getNote() + " " + child.getWay();
+            addLabelToBox(msg, ColorTool.engToColor(child.getColor()), child, false);     // 添加项目
+
+            // 递归
+            updateScreen(child.getChildren(), indent+1);
+        }
+    }
+
+    private boolean getDone() {
+        return controller.getValues().isDone();
+    }
+
+    // 设置一个yCount值，初始值为60，是窗口上两个按钮占用的
+    private void addLabelToBox(String labelValue, Color color, DataController.DataPack data, boolean isTitle) {
         HBox value_box = new HBox();
         value_box.setLayoutX(0);
-        value_box.setLayoutY(60+y_count);
+        value_box.setLayoutY(yCount);
 
-        Label label = WinTool.createLabel(0, 0, -1, 30, 25, label_value + "\t", color);
+        Label label = WinTool.createLabel(0, 0, -1, 30, 25, labelValue, color);
         label.hoverProperty().addListener((observableValue, old_value, new_value) ->
                 label.setTextFill(new_value ? Color.PURPLE : color));
 
@@ -141,26 +131,25 @@ public class ShowValues {
         MenuItem change = new MenuItem("更改信息");
 
         create.setOnAction(actionEvent -> {
-            CreateValue creator = new CreateValue(controller, index);
+            CreateValue creator = new CreateValue(data);
             creator.entrance();
 
-            start(getDone());    // 刷新
+            start(false);    // 刷新（创建内容一定不可能完成）
         });
         delete.setOnAction(actionEvent -> {
-            RemoveValue remover = new RemoveValue();
-            remover.entrance(controller, index);
+            RemoveValue.remove(data);
 
             start(getDone());   // 刷新
         });
         change.setOnAction(actionEvent -> {
-            SetValueData setter = new SetValueData(controller, index);
+            SetValueData setter = new SetValueData(data);
             setter.entrance();
 
             start(getDone());   // 刷新
         });
 
         // 选择性添加控件，title和item的添加是不一样的
-        if (index == -1) {
+        if (isTitle) {
             menu.getItems().add(create);
         } else {
             menu.getItems().addAll(create, delete, change);
@@ -171,53 +160,17 @@ public class ShowValues {
 
         // 复选框的加载
         if (color != Color.GREEN) {
-            if (!is_done) {
-                CheckBox checkBox = WinTool.createCheckBox(0, 0, 120, 30, 18, "完成");
-                checkBox.selectedProperty().addListener((observableValue, old_type, new_type) -> {
-                    if (new_type) {
-                        ValueFinish finisher = new ValueFinish(controller, index);
-                        finisher.entrance();
-                    }
-                    start(getDone());   // 刷新
-                });
-                value_box.getChildren().add(checkBox);
-            }
+            CheckBox checkBox = WinTool.createCheckBox(0, 0, 120, 30, 18, "完成");
+            checkBox.selectedProperty().addListener((observableValue, old_type, new_type) -> {
+                if (new_type) {
+                    ValueFinish.entrance(data);
+                }
+                start(getDone());   // 刷新
+            });
+            value_box.getChildren().add(checkBox);
         }
         box.getChildren().add(value_box);
 
-        y_count += 30;
-    }
-
-    /**
-     * 检查是否所有值的第二个属性都为GREEN
-     * @return 如果是则返回true，否则返回false
-     */
-    private boolean getDone() {
-        List<String[]> values = controller.getValues();
-
-        boolean is_done = values.size() != 0;      // 当values是空的时，is_done仍然为false;
-        if (is_done) {
-            for (String[] temp : values) {
-                if (!temp[1].equals("GREEN")) {
-                    is_done = false;
-                    break;
-                }
-            }
-        }
-        return is_done;
-    }
-
-    /**
-     * 保存数据的方法，被动保存，没有Alert提示
-     * @param values 值列表
-     */
-    private void save_data(List<String[]> values) {
-        List<String> write_in_list = new ArrayList<>();
-
-        for (String[] strings:values) {
-            write_in_list.add(EDTool.encrypt(strings[0] + "\0" + strings[1]));
-        }
-
-        IOTool.overrideFile(new File(path, list_name).getPath(), write_in_list);
+        yCount += 30;
     }
 }

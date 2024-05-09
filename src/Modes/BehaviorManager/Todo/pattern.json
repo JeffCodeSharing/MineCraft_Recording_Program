@@ -1,0 +1,44 @@
+{
+  "name": "title",
+  "color": "BLACK",
+  "children": [
+    {
+      "name": "text1",
+      "color": "GREEN",
+      "children": [
+        {
+          "name": "text2-1",
+          "color": "GREEN",
+          "children": [
+            {
+              "name": "text3-1",
+              "color": "GREEN",
+              "children": []
+            },
+            {
+              "name": "text3-2",
+              "color": "GREEN",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "text2-2",
+          "color": "BLACK",
+          "children": [
+            {
+              "name": "text3-3",
+              "color": "BLACK",
+              "children": []
+            },
+            {
+              "name": "text3-4",
+              "color": "BLACK",
+              "children": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

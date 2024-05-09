@@ -18,18 +18,32 @@ import java.io.File;
  */
 public class RemoveList extends Application implements AbstractWindow {
     private final String path;
-    private final String[] title_list;
+    private final String[] planList;
     private final Stage global_stage = new Stage();
 
     /**
      * 构造一个DeleteList对象，指定路径和计划表列表。
      *
      * @param path   删除计划表的路径
-     * @param list_in   计划表列表
+     * @param list   计划表列表
      */
-    public RemoveList(String path, String[] list_in) {
+    public RemoveList(String path, String[] list) {
         this.path = path;
-        this.title_list = (list_in != null) ? list_in : new String[0];
+
+        // 处理planList中的数据，将.json后缀去除，然后赋值
+        if (list == null || list.length == 0) {
+            this.planList = new String[0];
+        } else {
+            try {
+                for (int i = 0; i < list.length; i++) {
+                    int dotIndex = list[i].lastIndexOf(".");
+                    list[i] = list[i].substring(0, dotIndex);
+                }
+            } catch (Exception e) {
+                WinTool.createAlert(Alert.AlertType.ERROR, "错误", "项目损坏", "");
+            }
+            this.planList = list;
+        }
     }
 
     @Override
@@ -40,7 +54,7 @@ public class RemoveList extends Application implements AbstractWindow {
 
     @Override
     public void drawControls(Group group) {
-        ListView<String> listView = WinTool.createListView(20, 40, 400, 350, title_list);
+        ListView<String> listView = WinTool.createListView(20, 40, 400, 350, planList);
 
         Button confirm = WinTool.createButton(250, 400, 80, 40, 16, "确定");
         Button cancel = WinTool.createButton(340, 400, 80, 40, 16, "取消");
@@ -74,11 +88,11 @@ public class RemoveList extends Application implements AbstractWindow {
      * ”确定“按钮的调用方法。
      * 删除选中的计划表名
      *
-     * @param view_choice 选中的计划表名称
+     * @param choice 选中的计划表名称
      */
-    private void afterConfirm(String view_choice) {
-        if ((view_choice != null) && (!view_choice.equals(""))) {
-            File file = new File(path + File.separator + view_choice);
+    private void afterConfirm(String choice) {
+        if ((choice != null) && (!choice.equals(""))) {
+            File file = new File(path, choice +".json");
 
             if (!file.delete()) {
                 WinTool.createAlert(Alert.AlertType.ERROR, "错误", "删除失败", "请重新尝试");

@@ -13,40 +13,19 @@ import javafx.scene.control.TextField;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
-/**
- * 模块：行为管理器
- * 类名：CreateValue
- * 用途：用于创建值的数据界面
- */
 public class CreateValue extends Application implements AbstractWindow {
     private final Stage global_stage = new Stage();
-    private final DataController controller;
-    private final int index;
+    private final DataController.DataPack parent;
 
-    /**
-     * 构造方法
-     * @param controller 数据控制器(使用ClassExpandTool反射实现)
-     * @param index 索引值
-     */
-    public CreateValue(DataController controller, int index) {
-        this.controller = controller;
-        this.index = index;
+    public  CreateValue(DataController.DataPack parent) {
+        this.parent = parent;
     }
 
-    /**
-     * 入口方法，用于启动界面
-     * @return null
-     */
-    @Override
     public String[] entrance() {
         start(global_stage);
         return null;
     }
 
-    /**
-     * 绘制界面控件
-     * @param group 界面根节点
-     */
     @Override
     public void drawControls(Group group) {
         Label information = WinTool.createLabel(20, 130, 350, 60, 18,
@@ -69,17 +48,13 @@ public class CreateValue extends Application implements AbstractWindow {
         cancel.setOnAction(actionEvent -> global_stage.close());
 
         group.getChildren().addAll(
-                WinTool.createLabel(10, 10, 300, 30, 25, "创建信息"),
+                WinTool.createLabel(10, 10, 300, 30, 25, "创建信息", Color.BLUE),
                 WinTool.createLabel(20, 50, 80, 30, 16, "信息："), notes_field,
                 WinTool.createLabel(20, 100, 100, 30, 16, "实现方法："), way_field,
                 information,
                 confirm, cancel);
     }
 
-    /**
-     * 启动JavaFX应用程序
-     * @param stage 舞台对象
-     */
     @Override
     public void start(Stage stage) {
         Group group = new Group();
@@ -97,22 +72,19 @@ public class CreateValue extends Application implements AbstractWindow {
 
     /**
      * 确认按钮点击事件处理
-     * @param notes 信息内容
-     * @param way 实现方法
+     * @param note 信息内容
+     * @param way  实现方法
      */
-    private void afterConfirm(String notes, String way) {
-        if (!(notes == null)) {
-            if (!(notes.equals(""))) {
+    private void afterConfirm(String note, String way) {
+        if (note != null) {
+            if (!(note.equals(""))) {
                 if (way == null) {   // 防止用户没有输入way输入框
                     way = "";
                 }
 
-                String add_str = notes + " " + way;
-                if (index == -1) {    // 若是点击了标题来加入的
-                    controller.add(add_str);
-                } else {      // 其他情况
-                    controller.add(index, add_str);
-                }
+                DataController.DataPack child = new DataController.DataPack(note, way, "BLACK", parent);
+                parent.addChildren(child);
+                child.setDone(false);
 
                 global_stage.close();
             } else {

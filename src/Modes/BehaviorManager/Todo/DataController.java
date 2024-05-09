@@ -1,248 +1,158 @@
 package Modes.BehaviorManager.Todo;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * 数据控制器类，用于管理任务列表的数据。
- */
 public class DataController {
-    private final List<String[]> values = new ArrayList<>();
+    private final DataPack value;
 
-    /**
-     * 创建一个DataController对象，用于初始化任务列表的数据。
-     *
-     * @param values_in 任务数据的初始数组，使用者那一边通过IOTool.read_file(String path)读取得来数据
-     */
-    public DataController(String[] values_in) {
-        for (String s : values_in) {
-            values.add(s.split("\0"));
-        }
+    public DataController(JSONObject data) {
+        // way设为 ""，因为大标题没有way
+        value = new DataPack(data.getString("name"), "", data.getString("color"), null);
+        initData(data.getJSONArray("children"), value);
     }
 
-    /**
-     * 添加新的任务。
-     *
-     * @param s 任务描述，本方法是直接添加到末尾，并且添加的一定是一级数据
-     */
-    public void add(String s) {
-        values.add(new String[]{" · " + s, "BLACK"});    // 用于点击title时的创建
-    }
+    private static void initData(JSONArray children, DataPack parentPack) {
+        for (Object tempChildData : children) {
+            JSONObject childData = (JSONObject) tempChildData;
+            String[] splitName = childData.getString("name").split(" ", 2);    // 防止用户因为没有填写way而读取不到空值的way
+            DataPack child = new DataPack(splitName[0], splitName[1], childData.getString("color"), parentPack);
+            parentPack.addChildren(child);
 
-    /**
-     * 在指定位置插入新的任务。
-     * 并且更改插入数据的所有父类的完成情况
-     *
-     * @param index 插入位置的索引
-     * @param s     任务描述
-     */
-    public void add(int index, String s) {
-        // 确定用户创建的信息的父类在第几级
-        int flag = getTabNum(values.get(index)[0]);
-
-        // 定位创建信息的创建位置
-        for (index++; index < values.size(); index++) {    // 从index的下一个开始尝试
-            int compare = getTabNum(values.get(index)[0]);
-
-            // 判断
-            if (compare <= flag) {   // 将新添数组移动到最后
-                break;
-            }
-        }
-
-        // 增加创建信息的"\t"数 并创建
-        String[] add_values = {"\t".repeat(flag + 1) + "· " + s, "BLACK"};
-        values.add(index, add_values);
-
-        // 去除所有直接父类和间接父类的完成属性 -> 改为 "BLACK"
-        int last_compare = flag+1;     // 用于记录上一个检索到的index的compare值，初始化为flag+1（新添加的数据的compare）
-        for (; index >= 0; index--) {
-            int compare = getTabNum(values.get(index)[0]);
-
-            if (compare == last_compare-1) {    // 如果检查到的compare是last_compare的父类时
-                String[] set_values = new String[]{values.get(index)[0], "BLACK"};
-                values.set(index, set_values);
-
-                // 判断是否是最后一个要改动的父类
-                if (compare == 0) {
-                    break;
-                }
-                last_compare = compare;
+            if (!childData.getJSONArray("children").isEmpty()) {
+                initData(childData.getJSONArray("children"), child);
             }
         }
     }
 
     /**
-     * 移除指定位置的任务。
-     * 并且更新它的所有父类的完成情况
-     *
-     * @param index 要移除的任务的索引
+     * @return 将DataPack的信息一同全部返回，方便查询
      */
-    public void remove(int index) {
-        int flag = getTabNum(values.get(index)[0]);
+    public DataPack getValues() {
+        return value;
+    }
 
-        // 对照flag进行删除
-        values.remove(index); // 删除传入的第一项
-        while (index < values.size()) { // index不用自增是因为删除的过程中values的大小变小了
-            int compare = getTabNum(values.get(index)[0]);
+    /**
+     * @return 生成一个JSONObject对象，方便进行保存操作
+     */
+    public JSONObject getJsonValues() {
+        return value.toJsonObject();
+    }
 
-            // 判断
-            if (compare <= flag) {
-                break;
-            } else {
-                values.remove(index);
-            }
+    /**
+     * @implNote 将每一级封装成一个DataPack，并且保存相应的子DataPack
+     */
+    public static class DataPack {
+        private final List<DataPack> children = new ArrayList<>();
+        private final DataPack parent;      // 如果parent的值为null，那么它是标题
+        private String note;
+        private String way;
+        private String color;
+
+        public DataPack(String note, String way, String color, DataPack parent) {
+            this.note = note;
+            this.way = way;
+            this.color = color;
+            this.parent = parent;
         }
 
-        // 更新Green情况
-        if (flag != 0) { // 如果不是一级父类的情况下
-            // 定位直接父类
-            for (index--; index >= 0; index--) {
-                int compare = getTabNum(values.get(index)[0]);
-                if (compare == flag - 1) {
-                    break;
-                }
-            }
+        public String getNote() {
+            return note;
+        }
 
-            // 向下搜索子类，判断是否达到更改条件
-            boolean be_green = true;
-            boolean has_child_index = false;
-            for (int backup = index + 1; backup < values.size(); backup++) {
-                String[] value_data = values.get(backup);
-                int compare = getTabNum(value_data[0]);
+        public String getWay() {
+            return way;
+        }
 
-                if (compare == flag) {   // 当与原先删除的是一个级别的情况下，确认是否可以继续
-                    has_child_index = true;
-                    if (!value_data[1].equals("GREEN")) {
-                        be_green = false;
-                        break;
-                    }
-                } else if (compare > flag) {
+        public String getColor() {
+            return color;
+        }
+
+        public List<DataPack> getChildren() {
+            return children;
+        }
+
+        public DataPack getParent() {
+            return parent;
+        }
+
+        public void setNote(String note) {
+            this.note = note;
+        }
+
+        public void setWay(String way) {
+            this.way = way;
+        }
+
+        public void setColor(String color) {
+            this.color = color;
+        }
+
+        /**
+         * @implNote 用于在用户将一个 子DataPack 变换为绿色时，对父类进行能否变为绿色的检查
+         */
+        public void updateColor() {
+            boolean canDone = true;
+            for (DataPack child:children){
+                if (!child.isDone()) {
+                    canDone = false;
                     break;
                 }
             }
 
-            if (be_green && has_child_index) {
-                set(index, values.get(index)[0], "GREEN");
-            }
-        }
-    }
-
-    /**
-     * 获取指定索引的字符串数组。
-     *
-     * @param index 要获取任务的索引
-     * @return 包含任务描述和颜色的字符串数组
-     */
-    public String[] get(int index) {
-        return values.get(index);
-    }
-
-    /**
-     * 更改指定位置的任务描述和颜色。
-     * 本函数只是用于方便调用者的描述和颜色是分开的情况时不用打包后再传入
-     *
-     * @param index       要设置任务的索引
-     * @param s           任务描述
-     * @param color_name  任务的颜色
-     */
-    public void set(int index, String s, String color_name) {     // 没有必要返回boolean，在更新后若有必要，可以调整
-        set(index, new String[]{s, color_name}); // 递交给 public void set(int index, String[] set_data) 进行递归处理
-    }
-
-    /**
-     * 设置指定位置的任务描述和颜色。
-     *
-     * @param index     要设置任务的索引
-     * @param set_data  包含任务描述和颜色的字符串数组
-     */
-    public void set(int index, String[] set_data) {
-        values.set(index, set_data);     // 设置自己
-
-        int flag = getTabNum(values.get(index)[0]);
-
-        if (set_data[1].equals("GREEN")) { // 如果第2值有GREEN
-            // 将子类设为完成
-            for (int backup = index+1; backup<values.size(); backup++) {
-                String[] value_data = values.get(backup);
-                int compare = getTabNum(value_data[0]);
-
-                if (compare <= flag) {
-                    break;
-                } else {
-                    values.set(backup, new String[]{value_data[0], "GREEN"});
-                }
-            }
-
-            boolean be_green = true;
-            int parent_index = 0;
-            // 向上寻找
-            for (int backup = index; backup >= 0; backup--) {    // backup是index的备份
-                String[] value_data = values.get(backup);
-                int compare = getTabNum(value_data[0]);
-
-                // 以下判断没有 compare > flag，原因是因为没有必要比较
-                if (compare == flag) {
-                    if (!value_data[1].equals("GREEN")) {
-                        be_green = false;
-                        break;
-                    }
-                } else if (compare < flag) {
-                    parent_index = backup;
-                    break;
-                }
-            }
-
-            // 向下寻找
-            if (be_green) { // 如果在向上寻找的过程中已经确定不可能，就不用再执行了
-                for (int backup = index; backup < values.size(); backup++) {
-                    String[] value_data = values.get(backup);
-                    int compare = getTabNum(value_data[0]);
-
-                    // 以下判断没有 compare > flag，原因是因为没有必要比较
-                    if (compare == flag) {
-                        if (!value_data[1].equals("GREEN")) {
-                            be_green = false;
-                            break;
-                        }
-                    } else if (compare < flag) {
-                        break;
-                    }
-                }
-            }
-
-            if (be_green) {
-                String[] set_value = {values.get(parent_index)[0], "GREEN"};
-                values.set(parent_index, set_value); // 如果是GREEN就将直接父类转换为GREEN
-
-                if (!(parent_index == 0)) { // 当parent_index == 0时执行set会出现无限递归，所以中断执行，不要陷入死循环
-                    set(parent_index, set_value);
+            if (canDone) {
+                // 此处不能够使用setDone(true); 否则会引发StackOverflowError
+                // 因为setDone会调用 子DataPack 中的parent.updateColor(); 从而陷入循环
+                setColor("GREEN");
+                if (parent != null) {     // 检查是否到达标题
+                    parent.updateColor();
                 }
             }
         }
-    }
 
-    /**
-     * 获取列表的数据。
-     *
-     * @return 返回列表
-     */
-    public List<String[]> getValues() {
-        return values;
-    }
+        public void setDone(boolean done) {
+            if (done) {       // 由黑色变为绿色
+                // 遵循将所有 子DataPack 都变为绿色
+                setColor("GREEN");
+                for (DataPack child:children) {
+                    child.setDone(true);
+                }
 
-    /**
-     * 统计指定字符串开头的制表符个数。
-     *
-     * @param data 要统计的字符串
-     * @return 开头的制表符个数
-     */
-    private int getTabNum(String data) {
-        // 统计字符串开头的制表符个数
-        int count = 0;
-        while (count < data.length() && data.charAt(count) == '\t') {    // 增加count数量来控制判断的字符
-            count++;
+                // 遵循如果在同一个父类下的同级也都是绿的，那么父类也变绿
+                if (parent != null) {
+                    parent.updateColor();
+                }
+            } else {          // 由绿色变为黑色（CreateValue触发）
+                // 遵循直接父类和所有间接父类变为黑色
+                setColor("BLACK");
+                if (parent != null) {     // 当调整父类时到达标题的时候（标题的parent值为null），停止对parent的调整
+                    parent.setDone(false);
+                }
+            }
         }
-        return count;
+
+        public void addChildren(DataPack addPack) {
+            children.add(addPack);
+        }
+
+        public JSONObject toJsonObject() {
+            JSONObject obj = new JSONObject();
+            obj.put("name", note + " " + way);
+            obj.put("color", color);
+
+            JSONArray childrenArray = new JSONArray();
+            for (DataPack child:children) {
+                childrenArray.add(child.toJsonObject());
+            }
+            obj.put("children", childrenArray);
+            return obj;
+        }
+
+        public boolean isDone() {
+            return this.color.equalsIgnoreCase("GREEN");
+        }
     }
 }

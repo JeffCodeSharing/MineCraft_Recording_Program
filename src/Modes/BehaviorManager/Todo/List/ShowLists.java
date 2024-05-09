@@ -4,6 +4,7 @@ import Modes.BehaviorManager.NowDoing.ShowItems;
 import Modes.BehaviorManager.Todo.Finish.ShowFinishList;
 import Modes.BehaviorManager.Todo.Value.ShowValues;
 import Tools.WinTool;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.Pane;
@@ -21,7 +22,7 @@ public class ShowLists {
     private int y_count;
 
     /**
-     * @param box 用于显示搜索结果的VBox。
+     * @param box  用于显示搜索结果的VBox。
      * @param path 包含待办列表的文件夹的路径。
      */
     public ShowLists(Pane box, String path) {
@@ -66,13 +67,14 @@ public class ShowLists {
             entrance();   // 重新加载
         });
         see_finish.setOnAction(actionEvent -> {
-            String path_for_finish = path.substring(0, path.length()-5) + "finish";
+            String finishPath = new File(new File(path).getParent(), "finish").getPath();
 
-            ShowFinishList searcher = new ShowFinishList(box, path_for_finish);
+            ShowFinishList searcher = new ShowFinishList(box, finishPath);
             searcher.entrance();
         });
         now_doing.setOnAction(actionEvent -> {
-            ShowItems clazz = new ShowItems(path.substring(0, path.length()-5) + "now_doing");
+            ShowItems clazz = new ShowItems(
+                    new File(new File(path).getParent(), "now_doing").getPath());
             clazz.entrance();
         });
 
@@ -81,7 +83,15 @@ public class ShowLists {
         // 绘制现有列表
         if (list != null) {
             for (String s : list) {
-                addLabelToBox(s);
+                // 去除.json后缀
+                int dotIndex = s.lastIndexOf(".");
+                if (dotIndex == -1) {
+                    WinTool.createAlert(Alert.AlertType.ERROR, "错误", "项目损坏", "");
+                    return;
+                } else {
+                    String fileName = s.substring(0, dotIndex);
+                    addLabelToBox(fileName);                      // 添加Label
+                }
             }
         }
     }
@@ -89,14 +99,15 @@ public class ShowLists {
     /**
      * 将指定列表名称的标签添加到VBox中。
      *
-     * @param list_name 要显示的列表的名称。
+     * @param listName 要显示的列表的名称。
      */
-    private void addLabelToBox(String list_name) {
-        Label label = WinTool.createLabel(0, 40+y_count, -1, 30, 25, "> " + list_name, Color.BLUE);
+    private void addLabelToBox(String listName) {
+        Label label = WinTool.createLabel(0, 40+y_count, -1, 30, 25,
+                "> " + listName, Color.BLUE);
         label.hoverProperty().addListener((observableValue, old_value, new_value) ->
                 label.setTextFill(new_value ? Color.PURPLE : Color.BLUE));
         label.setOnMousePressed(mouseEvent -> {
-            ShowValues clazz = new ShowValues(box, path, list_name);
+            ShowValues clazz = new ShowValues(box, path, listName);
             clazz.entrance();
         });
         box.getChildren().add(label);

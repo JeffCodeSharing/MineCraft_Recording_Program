@@ -1,6 +1,8 @@
 package Modes.BehaviorManager.Todo.List;
 
 import Interface.AbstractWindow;
+import Tools.EDTool;
+import Tools.IOTool;
 import Tools.WinTool;
 import javafx.application.Application;
 import javafx.scene.Group;
@@ -73,16 +75,22 @@ public class CreateList extends Application implements AbstractWindow {
      * @param field_data 文本框中的输入数据
      */
     private void afterConfirm(String field_data) {
-        File file = new File(path, field_data);
+        File file = new File(path, field_data+".json");
         try {
             if (file.exists()) {
                 throw new RuntimeException();
             }
 
             file.createNewFile();
-            global_stage.close();
 
-            WinTool.createAlert(Alert.AlertType.INFORMATION, "成功", "创建成功！！", "计划表名：" + field_data);
+            // 输入初始信息（一对大括号和标题名）
+            String encryptData = EDTool.encrypt(field_data);
+            String initMsg = "{\"name\": \"" + encryptData + "\"," +
+                    "\"color\": \"BLACK\"," +
+                    "\"children\": []}";
+            IOTool.overrideFile(file.getPath(), new String[]{initMsg});
+
+            global_stage.close();
         } catch (Exception e) {
             WinTool.createAlert(Alert.AlertType.ERROR, "错误", "创建失败", "请重新尝试\n可能是有重复名的计划表");
         }
