@@ -14,33 +14,17 @@ import java.util.List;
 
 public class CreateItem extends Application implements AbstractWindow {
     private final Stage global_stage = new Stage();
-    private final List<String> list;
+    private final List<String> data;
 
-    /**
-     * 创建一个CreateItem对象，用于创建新的内容。
-     *
-     * @param list 用于记录内容的列表
-     */
-    public CreateItem(List<String> list) {
-        this.list = list;
+    public CreateItem(List<String> data) {
+        this.data = data;
     }
 
-    /**
-     * 窗口的入口方法，在该方法中启动窗口并等待窗口关闭。
-     *
-     * @return 返回null
-     */
-    @Override
     public String[] entrance() {
         start(global_stage);
         return null;
     }
 
-    /**
-     * 绘制窗口组的控件。
-     *
-     * @param group 用于添加控件的 JavaFX Group 对象
-     */
     @Override
     public void drawControls(Group group) {
         TextField field = WinTool.createTextField(110, 40, 260, 30, 15);
@@ -58,11 +42,6 @@ public class CreateItem extends Application implements AbstractWindow {
         );
     }
 
-    /**
-     * 启动窗口并显示。
-     *
-     * @param stage JavaFX Stage 对象
-     */
     @Override
     public void start(Stage stage) {
         Group group = new Group();
@@ -84,7 +63,7 @@ public class CreateItem extends Application implements AbstractWindow {
      * @param create_data 要创建的内容
      */
     private void afterConfirm(String create_data) {
-        list.add(create_data);
+        data.add(create_data);
         global_stage.close();
     }
 }

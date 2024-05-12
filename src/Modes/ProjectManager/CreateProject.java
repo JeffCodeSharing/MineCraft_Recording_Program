@@ -2,7 +2,10 @@ package Modes.ProjectManager;
 
 import Interface.AbstractWindow;
 import Tools.EDTool;
+import Tools.IOTool;
 import Tools.WinTool;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import javafx.application.Application;
 import javafx.scene.Group;
 import javafx.scene.Scene;
@@ -146,7 +149,7 @@ public class CreateProject extends Application implements AbstractWindow {
             File behavior_dir = new File(create_path, "behavior");
             File todo_finish_dir = new File(behavior_dir, "finish");
             File todo_doing_dir = new File(behavior_dir, "doing");
-            File now_doing_file = new File(behavior_dir, "now_doing");
+            File now_doing_file = new File(behavior_dir, "now_doing.json");
             File map_dir = new File(create_path, "map");
             File map_file = new File(map_dir.getPath(), "map_data");
             File backup_dir = new File(create_path, "backup");
@@ -154,6 +157,10 @@ public class CreateProject extends Application implements AbstractWindow {
                 || !now_doing_file.createNewFile() || !map_file.createNewFile()) {
                 return false;
             }
+
+            JSONObject nowDoingData = new JSONObject();
+            nowDoingData.put("data", new JSONArray());
+            IOTool.overrideFile(now_doing_file.getPath(), new String[]{nowDoingData.toJSONString()});
 
             path = project_dir.getPath();     // 将path所记录的路径进行规范化
             global_stage.close();

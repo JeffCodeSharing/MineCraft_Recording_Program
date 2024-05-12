@@ -12,46 +12,26 @@ import javafx.stage.Stage;
 
 import java.util.List;
 
-/**
- * 显示正在做的任务的详细内容并提供修改的窗口类。
- */
 public class SetItemData extends Application implements AbstractWindow {
     private final Stage global_stage = new Stage();
-    private final List<String> list;
-    private final int index;
+    private final List<String> data;
+    private final int selectIndex;
 
-    /**
-     * 创建一个ShowItemData对象，用于显示正在做的任务的详细内容并提供修改功能。
-     *
-     * @param list  正在做的任务的列表，在保存和打开详细信息时使用
-     * @param index 当前用户选择的任务的索引
-     */
-    public SetItemData(List<String> list, int index) {
-        this.list = list;
-        this.index = index;
+    public SetItemData(List<String> data, int selectIndex) {
+        this.data = data;
+        this.selectIndex = selectIndex;
     }
 
-    /**
-     * 入口方法，在该方法中启动窗口并等待窗口关闭。
-     *
-     * @return 返回null
-     */
-    @Override
     public String[] entrance() {
-        if (index != -1) {    // 如果用户选择的情况下，才执行
+        if (selectIndex != -1) {    // 如果用户选择的情况下，才执行
             start(global_stage);
         }
         return null;
     }
 
-    /**
-     * 绘制窗口组的控件。
-     *
-     * @param group 用于添加控件的 JavaFX Group 对象
-     */
     @Override
     public void drawControls(Group group) {
-        TextField field = WinTool.createTextField(110, 40, 270, 30, 15, list.get(index), "");
+        TextField field = WinTool.createTextField(110, 40, 270, 30, 15, data.get(selectIndex), "");
 
         Button confirm = WinTool.createButton(200, 160, 80, 40, 16, "确定");
         Button cancel = WinTool.createButton(290, 160, 80, 40, 16, "关闭");
@@ -66,11 +46,6 @@ public class SetItemData extends Application implements AbstractWindow {
         );
     }
 
-    /**
-     * 启动窗口并显示。
-     *
-     * @param stage JavaFX Stage 对象
-     */
     @Override
     public void start(Stage stage) {
         Group group = new Group();
@@ -89,10 +64,10 @@ public class SetItemData extends Application implements AbstractWindow {
     /**
      * 在点击"确定"按钮后的处理逻辑。
      *
-     * @param set_data 修改后的任务内容
+     * @param setData 修改后的任务内容
      */
-    private void afterConfirm(String set_data) {
-        list.set(index, set_data);
+    private void afterConfirm(String setData) {
+        data.set(selectIndex, setData);
         global_stage.close();
     }
 }
