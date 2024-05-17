@@ -66,7 +66,7 @@ public class Updater {
             String information_path = System.getProperty("user.dir") + File.separator + "data" + File.separator + "information.json";
             JSONObject jsonObject = JsonTool.readJson(information_path);
             jsonObject.replace("version", UPDATE_VERSION);
-            JsonTool.write_json(jsonObject, information_path);
+            JsonTool.writeJson(jsonObject, information_path);
         } catch (Exception e) {
             e.printStackTrace();
             update_success = false;

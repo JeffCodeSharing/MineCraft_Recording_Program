@@ -94,7 +94,7 @@ public class Console extends Application {
             jsonData.replace("path", path);
             jsonData.replace("function", type);
 
-            JsonTool.write_json(jsonData, jsonPath);
+            JsonTool.writeJson(jsonData, jsonPath);
             System.exit(0);
         });
         stage.show();
@@ -260,11 +260,11 @@ public class Console extends Application {
                 ListView<String> date_list = WinTool.createListView(0, 130, 150, 560);
                 year_field.textProperty().addListener((observableValue, s, t1) -> {
                     temp_data_final.replace("year", year_field.getText());
-                    JsonTool.write_json(temp_data_final, temp_path);
+                    JsonTool.writeJson(temp_data_final, temp_path);
                 });
                 month_field.textProperty().addListener((observableValue, s, t1) -> {
                     temp_data_final.replace("month", month_field.getText());
-                    JsonTool.write_json(temp_data_final, temp_path);
+                    JsonTool.writeJson(temp_data_final, temp_path);
                 });
                 Button button_search = WinTool.createButton(10, 690, 60, 30, 15, "查询");
                 button_search.setOnAction(actionEvent -> {
@@ -274,7 +274,7 @@ public class Console extends Application {
                 Button button_delete = WinTool.createButton(80, 690, 60, 30, 15, "删除");
                 button_delete.setOnAction(actionEvent -> {
                     temp_data_final.replace("day", "");
-                    JsonTool.write_json(temp_data_final, temp_path);
+                    JsonTool.writeJson(temp_data_final, temp_path);
 
                     RemoveDate remover = new RemoveDate();
                     remover.entrance(date_list, path);
@@ -287,7 +287,7 @@ public class Console extends Application {
                 Button button_open = WinTool.createButton(80, 725, 60, 30, 10, "打开日志");
                 button_open.setOnAction(actionEvent -> {
                     temp_data_final.replace("day", date_list.getSelectionModel().getSelectedItem());
-                    JsonTool.write_json(temp_data_final, temp_path);
+                    JsonTool.writeJson(temp_data_final, temp_path);
 
                     ShowData showData = new ShowData(detail_pane, path, date_list.getSelectionModel().getSelectedItem());
                     showData.entrance();
@@ -344,7 +344,7 @@ public class Console extends Application {
                 jsonObject.put("month", "");
                 jsonObject.put("day", "");
 
-                JsonTool.write_json(jsonObject, log_temp.getPath());
+                JsonTool.writeJson(jsonObject, log_temp.getPath());
             } catch (IOException ignored) {
             }
         }

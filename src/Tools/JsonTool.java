@@ -9,20 +9,16 @@ public class JsonTool {
         String[] temp = IOTool.readFile(path);
 
         if (temp != null) {
-            StringBuilder json_data = new StringBuilder();
-
-            for (String s : temp) {
-                json_data.append(s);
-            }
-
-            return JSON.parseObject(json_data.toString());
+            return JSON.parseObject(String.join("", temp));
         } else {
             return null;
         }
     }
 
-    public static void write_json(JSONObject jsonObject, String path) {
-        String jsonString = JSON.toJSONString(jsonObject, SerializerFeature.PrettyFormat);
+    public static void writeJson(JSONObject jsonObject, String path) {
+        System.out.println(jsonObject.containsKey("path"));
+        String jsonString = JSONObject.toJSONString(jsonObject, SerializerFeature.WriteMapNullValue);
+        System.out.println(jsonString);
         IOTool.overrideFile(path, new String[]{jsonString});
     }
 }
