@@ -328,23 +328,26 @@ public class Console extends Application {
      * 创建临时文件夹，并初始化缓存文件
      */
     private void createTempDirectory() {
-        File temp_dir = new File(path + File.separator + "temp");
-        File log_temp = new File(temp_dir.getPath() + File.separator + "log_temp.json");
+        if (path != null) {
+            File temp_dir = new File(path, "temp");
+            File log_temp = new File(temp_dir.getPath(), "log_temp.json");
 
-        IOTool.removeDirectory(temp_dir.getPath());
-        temp_dir.mkdirs();
+            IOTool.removeDirectory(temp_dir.getPath());
+            temp_dir.mkdirs();
 
-        try {
-            log_temp.createNewFile();
+            try {
+                log_temp.createNewFile();
 
-            // 添加空的 年、月、日编号
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put("year", "");
-            jsonObject.put("month", "");
-            jsonObject.put("day", "");
+                // 添加空的 年、月、日编号
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("year", "");
+                jsonObject.put("month", "");
+                jsonObject.put("day", "");
 
-            JsonTool.write_json(jsonObject, log_temp.getPath());
-        } catch (IOException ignored){}
+                JsonTool.write_json(jsonObject, log_temp.getPath());
+            } catch (IOException ignored) {
+            }
+        }
     }
 
     private void initJsonData() {
