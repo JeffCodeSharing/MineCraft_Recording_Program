@@ -1,13 +1,14 @@
 package Modes.ProjectManager;
 
 import ProjectSafe.CheckPassword;
+import Tools.IOTool;
 import Tools.WinTool;
+import com.alibaba.fastjson.JSONObject;
 import javafx.scene.control.Alert;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 
 import java.io.File;
-import java.util.Scanner;
 
 /**
  * OpenProject 类负责在 ProjectManager 中打开项目。
@@ -34,12 +35,10 @@ public class OpenProject {
 
         try {
             File file = chooser.showDialog(new Stage());
-            File check = new File(file.getPath(), "check_item");
+            File check = new File(file.getPath(), "checkItem.json");
             if (check.exists()) {
-                Scanner sc = new Scanner(check);
-                String time = sc.nextLine();
-                sc.close();
-                if (!time.startsWith("Create Time:")) {
+                JSONObject fileData = JSONObject.parseObject(String.join("", IOTool.readFile(check.getPath())));
+                if (fileData.getString("CreateTime") == null) {
                     throw new RuntimeException();
                 } else {
                     // 密码检查

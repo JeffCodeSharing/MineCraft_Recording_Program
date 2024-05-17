@@ -4,6 +4,7 @@ import Interface.AbstractWindow;
 import Tools.EDTool;
 import Tools.IOTool;
 import Tools.WinTool;
+import com.alibaba.fastjson.JSONObject;
 import javafx.application.Application;
 import javafx.scene.Group;
 import javafx.scene.Scene;
@@ -33,13 +34,13 @@ public class CheckPassword extends Application implements AbstractWindow {
      * @param path 要确认密码的项目的路径
      */
     public CheckPassword(String path) {
-        if (!(path == null)) {
+        if (path != null) {
             try {
-                String[] file_data = path.replace(File.separator, "/").split("/");
-                this.project_name = file_data[file_data.length - 1];
+                File projectFile = new File(path);
+                this.project_name = projectFile.getName();
 
-                String encrypt_password = IOTool.readFile(new File(path, "check_item").getPath())[2];     // 第三行的数据为密码
-                this.password = EDTool.decrypt(encrypt_password);
+                JSONObject jsonData = JSONObject.parseObject(String.join("", IOTool.readFile(new File(path, "checkItem.json").getPath())));
+                this.password = EDTool.decrypt(jsonData.getString("password"));
             } catch (Exception e) {
                 WinTool.createAlert(Alert.AlertType.ERROR, "密码读取错误", "本项目不能正常打开", "");
                 runChecker = false;
@@ -88,7 +89,7 @@ public class CheckPassword extends Application implements AbstractWindow {
 
     @Override
     public void start(Stage stage) {
-        if (!password.equals("")) {
+        if (!password.isEmpty()) {
             Group group = new Group();
             Scene scene = new Scene(group);
 

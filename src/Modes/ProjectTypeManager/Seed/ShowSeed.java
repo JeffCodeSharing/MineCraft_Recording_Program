@@ -4,6 +4,7 @@ import Interface.AbstractWindow;
 import Tools.EDTool;
 import Tools.IOTool;
 import Tools.WinTool;
+import com.alibaba.fastjson.JSONObject;
 import javafx.application.Application;
 import javafx.scene.Group;
 import javafx.scene.Scene;
@@ -19,8 +20,10 @@ import javafx.stage.Stage;
  */
 public class ShowSeed extends Application implements AbstractWindow {
     private String seed;
-    private final String path;    // 已包含到check_item
-    private String[] file_values;
+    private final String path;    // 已包含到CheckItem.json
+    private final JSONObject jsonData;
+    private boolean canChange;
+
 
     /**
      * ShowSeed类的构造函数。
@@ -29,33 +32,22 @@ public class ShowSeed extends Application implements AbstractWindow {
     public ShowSeed(String path) {
         this.path = path;
 
+        JSONObject readValues;
         try {
-            String[] temp = IOTool.readFile(path)[1].split("\0");   // 读取文件的第二行并且以'\0'为分界线
-            if (temp == null) {
-                throw new RuntimeException();
-            } else {
-                file_values = temp;
-            }
+            readValues = JSONObject.parseObject(String.join("", IOTool.readFile(path)));
+            this.seed = EDTool.decrypt(readValues.getString("seed"));
+            this.canChange = readValues.getBooleanValue("seedCanChange");
 
-            file_values[0] = EDTool.decrypt(file_values[0]);
-            file_values[2] = EDTool.decrypt(file_values[2]);
+            if (seed.equals("")) {
+                seed = "未填写";
+            }
         } catch (Exception e) {
             WinTool.createAlert(Alert.AlertType.ERROR, "错误", "读取错误", "请重新尝试");
-            file_values = new String[]{"", "FALSE", "123456"};
-        }
-
-        getSeedNum();    // 获取种子号
-    }
-
-    /**
-     * 从文件中获取种子号。
-     * 如果种子号为空，则将种子值设置为"未填写"。
-     */
-    private void getSeedNum() {
-        seed = file_values[0];
-        if (seed.equals("")) {
+            readValues = new JSONObject();
             seed = "未填写";
+            canChange = false;
         }
+        this.jsonData = readValues;
     }
 
     /**
@@ -97,8 +89,8 @@ public class ShowSeed extends Application implements AbstractWindow {
 
         Button changeButton = WinTool.createButton(10, 70, 100, 40, 15, "更改种子号");
         changeButton.setOnAction(actionEvent -> {
-            if (file_values[1].equals("FALSE")) {
-                SetSeedData setter = new SetSeedData(group, file_values, path);
+            if (canChange) {
+                SetSeedData setter = new SetSeedData(group, path);
                 setter.entrance();
             } else {
                 WinTool.createAlert(Alert.AlertType.INFORMATION, "禁止", "修改种子号的行为被禁止", "请解锁之后再进行更改");
@@ -107,18 +99,20 @@ public class ShowSeed extends Application implements AbstractWindow {
 
         group.getChildren().addAll(seed_label, changeButton);
 
-        if (file_values[1].equals("FALSE")) {
+        if (canChange) {
             Button lockButton = WinTool.createButton(120, 70, 100, 40, 18, "锁定");
             lockButton.setOnAction(actionEvent -> {
-                SetLocking setter = new SetLocking(group, path, true);
-                setter.entrance();
+                canChange = false;
+                saveChange();
+                drawControls(group);
             });
             group.getChildren().add(lockButton);
         } else {
             Button unlockButton = WinTool.createButton(120, 70, 100, 40, 18, "解锁");
             unlockButton.setOnAction(actionEvent -> {
-                SetLocking setter = new SetLocking(group, path, true);
-                setter.entrance();
+                canChange = true;
+                saveChange();
+                drawControls(group);
             });
             group.getChildren().add(unlockButton);
         }
@@ -142,5 +136,12 @@ public class ShowSeed extends Application implements AbstractWindow {
         stage.setWidth(300);
         stage.setResizable(false);
         stage.showAndWait();
+    }
+
+    private void saveChange() {
+        try {
+            jsonData.replace("seedCanChange", canChange);
+            IOTool.overrideFile(path, new String[]{jsonData.toJSONString()});
+        } catch (Exception ignored) {}
     }
 }

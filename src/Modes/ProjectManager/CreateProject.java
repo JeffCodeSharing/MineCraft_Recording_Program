@@ -18,8 +18,6 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 
 import java.io.File;
-import java.io.FileWriter;
-import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -28,6 +26,7 @@ import java.util.Date;
  */
 public class CreateProject extends Application implements AbstractWindow {
     private final Stage global_stage = new Stage();
+    private final JSONObject writeData = new JSONObject();
     private String path = null;
 
     @Override
@@ -57,7 +56,9 @@ public class CreateProject extends Application implements AbstractWindow {
         search_dir.setOnAction(actionEvent -> chooseDirectory(project_path));
         Button create_button = WinTool.createButton(380, 480, 80, 40, 15, "创建");
         create_button.setOnAction(actionEvent -> {
-            if (createProject(create_path.getText()) && otherEventWriteIn(seed_in, password_in)) {
+            if (createProject(create_path.getText()) &&
+                    otherEventWriteIn(seed_in, password_in) &&
+                    writeData()) {
                 WinTool.createAlert(Alert.AlertType.INFORMATION, "创建成功", "项目创建成功！", "项目路径：" + path);
             } else {
                 WinTool.createAlert(Alert.AlertType.WARNING, "警告", "该项目已存在或路径不正确！", "");
@@ -130,16 +131,14 @@ public class CreateProject extends Application implements AbstractWindow {
                 return false;
             }
 
-            File check_file = new File(create_path, "check_item");
+            File check_file = new File(create_path, "checkItem.json");
             if (!check_file.createNewFile()) {
                 return false;
             }
 
-            FileWriter writer = new FileWriter(check_file, StandardCharsets.UTF_8);
+            // 注意CreateTime是大写的Create
             SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-            String create_value = "Create Time:" + formatter.format(new Date());
-            writer.append(create_value).append("\n");
-            writer.close();
+            writeData.put("CreateTime", EDTool.encrypt(formatter.format(new Date())));
 
             File position_dir = new File(create_path, "positions");
             if (!position_dir.mkdirs()) {
@@ -192,26 +191,31 @@ public class CreateProject extends Application implements AbstractWindow {
      */
     private boolean otherEventWriteIn(TextField... textFields) {
         try {
-            // 初始化所有FileWriter
-            FileWriter writer = new FileWriter(path + File.separator + "check_item", true);
-
             // index 0 -> 种子号
             String seed = textFields[0].getText();
             seed = (seed == null) ? "" : seed.replace(" ", "");
-
-            // false代表种子号可以更改，123456是初始密码，不和\0写在一起是因为这样会被转义
-            writer.append(EDTool.encrypt(seed)).append("\0FALSE\0").append(EDTool.encrypt("123456")).append("\n");
+            writeData.put("seed", EDTool.encrypt(seed));
+            writeData.put("seedCanChange", false);
 
             // index 1 -> 密码
             String password = textFields[1].getText();
-            password = (password == null) ? "" : password.replace(" ", "");
-            writer.append(EDTool.encrypt(password)).append("\n");
-
-            // 关闭所有Writer
-            writer.close();
+            if (password == null) {
+                writeData.put("password", null);
+            } else {
+                password = password.replace(" ", "");
+                writeData.put("password", EDTool.encrypt(password));
+            }
         } catch (Exception e) {
             return false;
         }
         return true;
+    }
+
+    private boolean writeData() {
+        try {
+            return IOTool.overrideFile(new File(path, "checkItem.json").getPath(), new String[]{writeData.toJSONString()});
+        } catch (Exception e) {
+            return false;
+        }
     }
 }

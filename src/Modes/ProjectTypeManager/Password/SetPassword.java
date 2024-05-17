@@ -3,6 +3,7 @@ package Modes.ProjectTypeManager.Password;
 import Tools.EDTool;
 import Tools.IOTool;
 import Tools.WinTool;
+import com.alibaba.fastjson.JSONObject;
 import javafx.scene.Group;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
@@ -115,14 +116,14 @@ public class SetPassword {
     }
 
     private boolean writePassword(String password) {
-        String file_path = path + File.separator + "check_item";
+        try {
+            String filePath = path + File.separator + "checkItem.json";
+            JSONObject fileData = JSONObject.parseObject(String.join("", IOTool.readFile(filePath)));
 
-        String[] file_data = IOTool.readFile(file_path);
-        if (file_data == null) {
+            fileData.replace("password", EDTool.encrypt(password));
+            return IOTool.overrideFile(filePath, new String[]{fileData.toJSONString()});
+        } catch (Exception e) {
             return false;
-        } else {
-            file_data[2] = EDTool.encrypt(password);
-            return IOTool.overrideFile(file_path, file_data);
         }
     }
 }

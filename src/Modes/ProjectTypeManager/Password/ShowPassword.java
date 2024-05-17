@@ -5,6 +5,7 @@ import ProjectSafe.CheckPassword;
 import Tools.EDTool;
 import Tools.IOTool;
 import Tools.WinTool;
+import com.alibaba.fastjson.JSONObject;
 import javafx.application.Application;
 import javafx.scene.Group;
 import javafx.scene.Scene;
@@ -35,12 +36,13 @@ public class ShowPassword extends Application implements AbstractWindow {
             this.path = path;
 
             // 密码获取
-            String[] file_data = IOTool.readFile(path + File.separator + "check_item");
-            if (file_data == null) {
+            String[] arrayData = IOTool.readFile(new File(path, "checkItem.json").getPath());
+            if (arrayData == null) {
                 WinTool.createAlert(Alert.AlertType.ERROR, "错误", "读取密码错误", "请重新尝试");
                 password = "未填写";
             } else {
-                password = file_data[2].equals("") ? "未填写" : EDTool.decrypt(file_data[2]);
+                JSONObject jsonData = JSONObject.parseObject(String.join("", arrayData));
+                password = (jsonData.getString("password") == null) ? "未填写" : EDTool.decrypt(jsonData.getString("password"));
             }
         }
     }

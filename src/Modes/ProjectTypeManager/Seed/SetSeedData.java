@@ -3,6 +3,7 @@ package Modes.ProjectTypeManager.Seed;
 import Tools.EDTool;
 import Tools.IOTool;
 import Tools.WinTool;
+import com.alibaba.fastjson.JSONObject;
 import javafx.scene.Group;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -15,12 +16,10 @@ import javafx.scene.paint.Color;
  */
 public class SetSeedData {
     private final Group group;
-    private final String[] seed_values;
     private final String path;
 
-    public SetSeedData(Group group, String[] seed_values, String path) {
+    public SetSeedData(Group group, String path) {
         this.group = group;
-        this.seed_values = seed_values;
         this.path = path;
     }
 
@@ -53,18 +52,19 @@ public class SetSeedData {
      * 将新的种子号保存到文件中。
      * 如果数据保存成功，则弹出成功提示框，要不然弹出失败提示框
      *
-     * @param seed_num 用户输入的新的种子号。
+     * @param seedNum 用户输入的新的种子号。
      */
-    private void saveData(String seed_num) {
-        seed_values[0] = seed_num;
+    private void saveData(String seedNum) {
 
-        String[] read_data = IOTool.readFile(path);
-        read_data[1] = EDTool.encrypt(seed_values[0]) + "\0" + seed_values[1] + "\0" + EDTool.encrypt(seed_values[2]);
+        JSONObject jsonData = JSONObject.parseObject(String.join("", IOTool.readFile(path)));
+        jsonData.replace("seed", EDTool.encrypt(seedNum));
 
-        if (IOTool.overrideFile(path, read_data)) {
-            WinTool.createAlert(Alert.AlertType.INFORMATION, "成功", "保存成功", "");
-        } else {
+        boolean success = IOTool.overrideFile(path, new String[]{jsonData.toJSONString()});
+        if (!success) {
             WinTool.createAlert(Alert.AlertType.ERROR, "失败", "保存失败", "请重新尝试");
+        } else {
+            ShowSeed clazz = new ShowSeed(path);
+            clazz.drawControls(group);
         }
     }
 }

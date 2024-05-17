@@ -29,7 +29,6 @@ import javafx.stage.Stage;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Scanner;
 
 /**
  * 主程序入口，为Minecraft玩家提供信息记录的辅助功能。
@@ -66,18 +65,16 @@ public class Console extends Application {
 
         // 绘制控件
         drawControls(group);
-        if (!(path == null)) {
-            File check = new File(path, "check_item");
+        if (path != null) {
+            File check = new File(path, "checkItem.json");
             try {
                 if (check.exists()) {
-                    Scanner sc = new Scanner(check);
-                    String check_temp = sc.nextLine();
-                    if (!check_temp.startsWith("Create Time:")) {
+                    JSONObject jsonData = JSONObject.parseObject(String.join("", IOTool.readFile(check.getPath())));
+                    if (jsonData.getString("CreateTime") == null) {
                         throw new RuntimeException();
                     } else {
                         updateProjectName();
                     }
-                    sc.close();
                 } else {
                     throw new RuntimeException();
                 }
@@ -178,7 +175,7 @@ public class Console extends Application {
         MenuItem seed = new MenuItem("种子");
         seed.setOnAction(actionEvent -> {
             if (!path.equals("none")) {
-                ShowSeed clazz = new ShowSeed(path + File.separator + "check_item");
+                ShowSeed clazz = new ShowSeed(path + File.separator + "checkItem.json");
                 clazz.entrance();
             } else {
                 WinTool.createAlert(Alert.AlertType.INFORMATION, "提示", "还没有打开或创建项目", "请打开或创建项目后重试");
