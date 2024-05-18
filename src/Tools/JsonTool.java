@@ -4,6 +4,8 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 
+import java.io.File;
+
 public class JsonTool {
     public static JSONObject readJson(String path) {
         String[] temp = IOTool.readFile(path);
@@ -15,10 +17,16 @@ public class JsonTool {
         }
     }
 
-    public static void writeJson(JSONObject jsonObject, String path) {
-        System.out.println(jsonObject.containsKey("path"));
+    public static JSONObject readJson(File file) {
+        return readJson(file.getPath());
+    }
+
+    public static boolean writeJson(JSONObject jsonObject, String path) {
         String jsonString = JSONObject.toJSONString(jsonObject, SerializerFeature.WriteMapNullValue);
-        System.out.println(jsonString);
-        IOTool.overrideFile(path, new String[]{jsonString});
+        return IOTool.overrideFile(path, new String[]{jsonString});
+    }
+
+    public static boolean writeJson(JSONObject jsonObject, File file) {
+        return writeJson(jsonObject, file.getPath());
     }
 }

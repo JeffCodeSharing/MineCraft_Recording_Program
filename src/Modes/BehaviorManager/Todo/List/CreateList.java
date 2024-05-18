@@ -2,8 +2,9 @@ package Modes.BehaviorManager.Todo.List;
 
 import Interface.AbstractWindow;
 import Tools.EDTool;
-import Tools.IOTool;
+import Tools.JsonTool;
 import Tools.WinTool;
+import com.alibaba.fastjson.JSONObject;
 import javafx.application.Application;
 import javafx.scene.Group;
 import javafx.scene.Scene;
@@ -88,7 +89,7 @@ public class CreateList extends Application implements AbstractWindow<Void> {
             String initMsg = "{\"name\": \"" + encryptData + "\"," +
                     "\"color\": \"BLACK\"," +
                     "\"children\": []}";
-            IOTool.overrideFile(file.getPath(), new String[]{initMsg});
+            JsonTool.writeJson(JSONObject.parseObject(initMsg), file);
 
             global_stage.close();
         } catch (Exception e) {

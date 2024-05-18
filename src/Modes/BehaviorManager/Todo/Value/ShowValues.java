@@ -5,7 +5,7 @@ import Modes.BehaviorManager.Todo.ED.Decryption;
 import Modes.BehaviorManager.Todo.List.ListFinish;
 import Modes.BehaviorManager.Todo.List.ShowLists;
 import Tools.ColorTool;
-import Tools.IOTool;
+import Tools.JsonTool;
 import Tools.WinTool;
 import com.alibaba.fastjson.JSONObject;
 import javafx.scene.control.*;
@@ -34,10 +34,8 @@ public class ShowValues {
         this.path = path;
         this.listName = listName;
 
-        // 准备DataController的基础数据
-        String readValues = String.join("", IOTool.readFile(new File(path, listName+".json").getPath()));
-        // 进行解密
-        JSONObject values = Decryption.decrypt(JSONObject.parseObject(readValues));
+        // 准备DataController的基础数据，并且解密
+        JSONObject values = Decryption.decrypt(JsonTool.readJson(new File(path, listName)));
         // 赋值
         controller = new DataController(values);
     }

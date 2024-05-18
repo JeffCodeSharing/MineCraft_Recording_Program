@@ -2,7 +2,7 @@ package Modes.BehaviorManager.Todo.Finish;
 
 import Modes.BehaviorManager.Todo.ED.Decryption;
 import Modes.BehaviorManager.Todo.List.ShowLists;
-import Tools.IOTool;
+import Tools.JsonTool;
 import Tools.WinTool;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -31,14 +31,11 @@ public class ShowFinishValues {
         this.path = path;
         this.listName = listName;
 
-        String[] temp = IOTool.readFile(new File(path, listName+".json").getPath());
-        if (temp == null) {
+        JSONObject jsonData = JsonTool.readJson(new File(path, listName+".json"));
+        if (jsonData == null) {
             WinTool.createAlert(Alert.AlertType.ERROR, "错误", "读取文件错误", "请重新尝试");
             this.data = null;
         } else {
-            String jsonString = String.join("", temp);
-            JSONObject jsonData = JSONObject.parseObject(jsonString);
-
             this.data = Decryption.decrypt(jsonData);
         }
     }

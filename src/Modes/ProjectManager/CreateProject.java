@@ -2,7 +2,7 @@ package Modes.ProjectManager;
 
 import Interface.AbstractWindow;
 import Tools.EDTool;
-import Tools.IOTool;
+import Tools.JsonTool;
 import Tools.WinTool;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -159,7 +159,7 @@ public class CreateProject extends Application implements AbstractWindow<String>
 
             JSONObject nowDoingData = new JSONObject();
             nowDoingData.put("data", new JSONArray());
-            IOTool.overrideFile(now_doing_file.getPath(), new String[]{nowDoingData.toJSONString()});
+            JsonTool.writeJson(nowDoingData, now_doing_file);
 
             path = project_dir.getPath();     // 将path所记录的路径进行规范化
             global_stage.close();
@@ -213,7 +213,7 @@ public class CreateProject extends Application implements AbstractWindow<String>
 
     private boolean writeData() {
         try {
-            return IOTool.overrideFile(new File(path, "checkItem.json").getPath(), new String[]{writeData.toJSONString()});
+            return JsonTool.writeJson(writeData, new File(path, "checkItem.json"));
         } catch (Exception e) {
             return false;
         }

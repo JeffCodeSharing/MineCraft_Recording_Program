@@ -2,7 +2,7 @@ package Modes.BehaviorManager.Todo.Value;
 
 import Modes.BehaviorManager.Todo.DataController;
 import Modes.BehaviorManager.Todo.ED.Encryption;
-import Tools.IOTool;
+import Tools.JsonTool;
 import Tools.WinTool;
 import com.alibaba.fastjson.JSONObject;
 import javafx.scene.control.Alert;
@@ -21,9 +21,8 @@ public class SaveValue {
         File file = new File(path, listName+".json");
         JSONObject jsonData = controller.getJsonValues();
         JSONObject encryptData = Encryption.encrypt(jsonData);
-        String writeData = encryptData.toJSONString();
 
-        boolean success = IOTool.overrideFile(file.getPath(), new String[]{writeData});
+        boolean success = JsonTool.writeJson(encryptData, file);
         if (showAlert) {
             if (success) {
                 WinTool.createAlert(Alert.AlertType.INFORMATION, "成功", "保存成功", "");

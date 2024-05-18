@@ -3,6 +3,7 @@ package Modes.BehaviorManager.Todo.List;
 import Modes.BehaviorManager.Todo.DataController;
 import Modes.BehaviorManager.Todo.ED.Encryption;
 import Tools.IOTool;
+import Tools.JsonTool;
 import com.alibaba.fastjson.JSONObject;
 
 import java.io.File;
@@ -47,8 +48,7 @@ public class ListFinish {
         String endPath = new File(newPathHead, newName +".json").getPath();
 
         // 保存计划表
-        String[] writeData = new String[]{values.toJSONString()};
-        if (!IOTool.overrideFile(oldPath, writeData)) {    // 保存计划表，要不然转移了以前的计划表
+        if (!JsonTool.writeJson(values, oldPath)) {    // 保存计划表，要不然转移了以前的计划表
             return null;
         }
 

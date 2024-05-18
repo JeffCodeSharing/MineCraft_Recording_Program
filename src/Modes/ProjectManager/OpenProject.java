@@ -1,7 +1,7 @@
 package Modes.ProjectManager;
 
 import ProjectSafe.CheckPassword;
-import Tools.IOTool;
+import Tools.JsonTool;
 import Tools.WinTool;
 import com.alibaba.fastjson.JSONObject;
 import javafx.scene.control.Alert;
@@ -37,7 +37,7 @@ public class OpenProject {
             File file = chooser.showDialog(new Stage());
             File check = new File(file.getPath(), "checkItem.json");
             if (check.exists()) {
-                JSONObject fileData = JSONObject.parseObject(String.join("", IOTool.readFile(check.getPath())));
+                JSONObject fileData = JsonTool.readJson(check.getPath());
                 if (fileData.getString("CreateTime") == null) {
                     throw new RuntimeException();
                 } else {

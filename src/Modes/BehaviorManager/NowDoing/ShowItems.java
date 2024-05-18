@@ -2,7 +2,7 @@ package Modes.BehaviorManager.NowDoing;
 
 import Interface.AbstractWindow;
 import Tools.EDTool;
-import Tools.IOTool;
+import Tools.JsonTool;
 import Tools.WinTool;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -32,7 +32,7 @@ public class ShowItems extends Application implements AbstractWindow<Void> {
 
         // 初始化data
         try {
-            JSONObject jsonObject = JSONObject.parseObject(String.join("", IOTool.readFile(this.path)));
+            JSONObject jsonObject = JsonTool.readJson(this.path);
             for (Object tempObj : jsonObject.getJSONArray("data")) {
                 String childData = (String) tempObj;
                 data.add(EDTool.decrypt(childData));
@@ -117,7 +117,7 @@ public class ShowItems extends Application implements AbstractWindow<Void> {
             dataArray.add(EDTool.encrypt(s));
         }
 
-        boolean success = IOTool.overrideFile(path, new String[]{encryptJson.toJSONString()});
+        boolean success = JsonTool.writeJson(encryptJson, path);
         if (showAlert) {
             if (success) {
                 WinTool.createAlert(Alert.AlertType.INFORMATION, "成功！", "保存成功", "");

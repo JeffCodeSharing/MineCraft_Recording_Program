@@ -1,7 +1,7 @@
 package Modes.ProjectTypeManager.Seed;
 
 import Tools.EDTool;
-import Tools.IOTool;
+import Tools.JsonTool;
 import Tools.WinTool;
 import com.alibaba.fastjson.JSONObject;
 import javafx.scene.Group;
@@ -55,11 +55,10 @@ public class SetSeedData {
      * @param seedNum 用户输入的新的种子号。
      */
     private void saveData(String seedNum) {
-
-        JSONObject jsonData = JSONObject.parseObject(String.join("", IOTool.readFile(path)));
+        JSONObject jsonData = JsonTool.readJson(path);
         jsonData.replace("seed", EDTool.encrypt(seedNum));
 
-        boolean success = IOTool.overrideFile(path, new String[]{jsonData.toJSONString()});
+        boolean success = JsonTool.writeJson(jsonData, path);
         if (!success) {
             WinTool.createAlert(Alert.AlertType.ERROR, "失败", "保存失败", "请重新尝试");
         } else {

@@ -2,7 +2,7 @@ package Modes.ProjectTypeManager.Seed;
 
 import Interface.AbstractWindow;
 import Tools.EDTool;
-import Tools.IOTool;
+import Tools.JsonTool;
 import Tools.WinTool;
 import com.alibaba.fastjson.JSONObject;
 import javafx.application.Application;
@@ -34,7 +34,7 @@ public class ShowSeed extends Application implements AbstractWindow<Void> {
 
         JSONObject readValues;
         try {
-            readValues = JSONObject.parseObject(String.join("", IOTool.readFile(path)));
+            readValues = JsonTool.readJson(path);
             this.seed = EDTool.decrypt(readValues.getString("seed"));
             this.canChange = readValues.getBooleanValue("seedCanChange");
 
@@ -141,7 +141,7 @@ public class ShowSeed extends Application implements AbstractWindow<Void> {
     private void saveChange() {
         try {
             jsonData.replace("seedCanChange", canChange);
-            IOTool.overrideFile(path, new String[]{jsonData.toJSONString()});
+            JsonTool.writeJson(jsonData, path);
         } catch (Exception ignored) {}
     }
 }
