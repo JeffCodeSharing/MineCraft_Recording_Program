@@ -17,7 +17,7 @@ import javafx.stage.Stage;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CreateLine extends Application implements AbstractWindow {
+public class CreateLine extends Application implements AbstractWindow<Void> {
     private final Stage global_stage = new Stage();
     private final List<LineData> lines;
 
@@ -26,7 +26,7 @@ public class CreateLine extends Application implements AbstractWindow {
     }
 
     @Override
-    public String[] entrance() {
+    public Void entrance() {
         start(global_stage);
         return null;
     }

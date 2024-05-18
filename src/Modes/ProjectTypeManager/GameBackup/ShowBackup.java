@@ -14,7 +14,7 @@ import javafx.stage.Stage;
 import java.io.File;
 import java.util.Arrays;
 
-public class ShowBackup extends Application implements AbstractWindow {
+public class ShowBackup extends Application implements AbstractWindow<Void> {
     private final Stage global_stage = new Stage();
     private final String path;    // 已经包含到了backup文件夹
     private final boolean is_backup;
@@ -35,7 +35,7 @@ public class ShowBackup extends Application implements AbstractWindow {
     }
 
     @Override
-    public String[] entrance() {
+    public Void entrance() {
         start(global_stage);
         return null;
     }

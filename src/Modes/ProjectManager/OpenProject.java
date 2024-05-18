@@ -45,9 +45,9 @@ public class OpenProject {
                     path = file.getPath();
 
                     CheckPassword checker = new CheckPassword(path);
-                    String return_value = checker.entrance()[0];
+                    boolean returnValue = checker.entrance();
 
-                    if (return_value.equals("true")) {
+                    if (returnValue) {
                         WinTool.createAlert(Alert.AlertType.INFORMATION, "选择成功", "已成功切换项目", "切换项目:" + path);
                     } else {
                         path = null;

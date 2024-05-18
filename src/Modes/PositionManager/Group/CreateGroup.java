@@ -20,7 +20,7 @@ import java.util.List;
 /**
  * CreateGroup类实现了AbstractWindow接口和Application类，用于创建坐标组的窗口。
  */
-public class CreateGroup extends Application implements AbstractWindow {
+public class CreateGroup extends Application implements AbstractWindow<Void> {
     private final Stage global_stage = new Stage();
     private final Pane box;
     private final String create_dir;
@@ -46,7 +46,7 @@ public class CreateGroup extends Application implements AbstractWindow {
     }
 
     @Override
-    public String[] entrance() {
+    public Void entrance() {
         start(global_stage);
         return null;
     }

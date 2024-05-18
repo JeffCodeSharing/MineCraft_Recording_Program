@@ -12,7 +12,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
-public class SetValueData extends Application implements AbstractWindow {
+public class SetValueData extends Application implements AbstractWindow<Void> {
     private final Stage global_stage = new Stage();
     private final DataController.DataPack value;
 
@@ -23,7 +23,7 @@ public class SetValueData extends Application implements AbstractWindow {
         this.value = value;
     }
 
-    public String[] entrance() {
+    public Void entrance() {
         start(global_stage);
         return null;
     }

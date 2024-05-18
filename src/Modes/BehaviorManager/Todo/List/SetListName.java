@@ -17,7 +17,7 @@ import java.io.File;
 /**
  * 一个类，允许用户更改待办事项列表的名称。
  */
-public class SetListName extends Application implements AbstractWindow {
+public class SetListName extends Application implements AbstractWindow<Void> {
     private final Stage global_stage = new Stage();
     private final String[] planList;
     private final String path;
@@ -40,7 +40,7 @@ public class SetListName extends Application implements AbstractWindow {
     }
 
     @Override
-    public String[] entrance() {
+    public Void entrance() {
         start(global_stage);
         return null;
     }

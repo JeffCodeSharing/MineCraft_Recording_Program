@@ -18,7 +18,7 @@ import javafx.stage.Stage;
  * 并且也是管理Seed的模块，承担主页的工作
  * 该类扩展了JavaFX的Application类，并实现了AbstractWindow接口。
  */
-public class ShowSeed extends Application implements AbstractWindow {
+public class ShowSeed extends Application implements AbstractWindow<Void> {
     private String seed;
     private final String path;    // 已包含到CheckItem.json
     private final JSONObject jsonData;
@@ -57,7 +57,7 @@ public class ShowSeed extends Application implements AbstractWindow {
      * @return null
      */
     @Override
-    public String[] entrance() {
+    public Void entrance() {
         start(new Stage());
         return null;
     }

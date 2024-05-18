@@ -16,7 +16,7 @@ import java.util.Optional;
 /**
  * 删除数据类。
  */
-public class RemoveData extends Application implements AbstractWindow {
+public class RemoveData extends Application implements AbstractWindow<Void> {
     private final Pane box;
     private final Stage global_stage = new Stage();
     private final List<TextField> fields;
@@ -37,7 +37,7 @@ public class RemoveData extends Application implements AbstractWindow {
     }
 
     @Override
-    public String[] entrance() {
+    public Void entrance() {
         start(global_stage);
         return null;
     }

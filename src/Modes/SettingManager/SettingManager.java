@@ -9,9 +9,9 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
-public class SettingManager extends Application implements AbstractWindow {
+public class SettingManager extends Application implements AbstractWindow<Void> {
     @Override
-    public String[] entrance() {
+    public Void entrance() {
         start(new Stage());
         return null;
     }

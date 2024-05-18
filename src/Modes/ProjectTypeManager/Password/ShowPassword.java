@@ -19,7 +19,7 @@ import javafx.stage.Stage;
 
 import java.io.File;
 
-public class ShowPassword extends Application implements AbstractWindow {
+public class ShowPassword extends Application implements AbstractWindow<Void> {
     private final String path;
     private String password;
     private final Stage global_stage = new Stage();
@@ -48,7 +48,7 @@ public class ShowPassword extends Application implements AbstractWindow {
     }
 
     @Override
-    public String[] entrance() {
+    public Void entrance() {
         start(global_stage);
         return null;
     }
@@ -88,9 +88,9 @@ public class ShowPassword extends Application implements AbstractWindow {
         } else {
             // 密码确认
             CheckPassword checker = new CheckPassword(path);
-            String return_value = checker.entrance()[0];
+            boolean returnValue = checker.entrance();
 
-            if (return_value.equals("true")) {
+            if (returnValue) {
                 Group group = new Group();
                 Scene scene = new Scene(group);
 

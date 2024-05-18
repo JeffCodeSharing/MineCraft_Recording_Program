@@ -13,7 +13,7 @@ import javafx.stage.Stage;
 import java.util.ArrayList;
 import java.util.List;
 
-public class LineChooser extends Application implements AbstractWindow {
+public class LineChooser extends Application implements AbstractWindow<String> {
     private static String choose_line = null;
     private final Stage global_stage = new Stage();
     private final String[] lines;
@@ -27,9 +27,9 @@ public class LineChooser extends Application implements AbstractWindow {
     }
 
     @Override
-    public String[] entrance() {
+    public String entrance() {
         start(global_stage);
-        return new String[]{choose_line};
+        return choose_line;
     }
 
     @Override

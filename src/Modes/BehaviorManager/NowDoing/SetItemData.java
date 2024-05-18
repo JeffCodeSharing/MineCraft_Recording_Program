@@ -12,7 +12,7 @@ import javafx.stage.Stage;
 
 import java.util.List;
 
-public class SetItemData extends Application implements AbstractWindow {
+public class SetItemData extends Application implements AbstractWindow<Void> {
     private final Stage global_stage = new Stage();
     private final List<String> data;
     private final int selectIndex;
@@ -22,7 +22,7 @@ public class SetItemData extends Application implements AbstractWindow {
         this.selectIndex = selectIndex;
     }
 
-    public String[] entrance() {
+    public Void entrance() {
         if (selectIndex != -1) {    // 如果用户选择的情况下，才执行
             start(global_stage);
         }

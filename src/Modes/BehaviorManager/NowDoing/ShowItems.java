@@ -18,7 +18,7 @@ import javafx.stage.Stage;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ShowItems extends Application implements AbstractWindow {
+public class ShowItems extends Application implements AbstractWindow<Void> {
     private final String path;
     private final List<String> data = new ArrayList<>();
     private final Stage global_stage = new Stage();
@@ -44,7 +44,7 @@ public class ShowItems extends Application implements AbstractWindow {
     }
 
     @Override
-    public String[] entrance() {
+    public Void entrance() {
         start(global_stage);
         return null;
     }

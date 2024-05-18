@@ -50,9 +50,9 @@ public class Console extends Application {
 
         // 密码确认
         CheckPassword checker = new CheckPassword(path);
-        String return_value = checker.entrance()[0];
+        boolean returnValue = checker.entrance();
 
-        if (return_value.equals("false")) {
+        if (!returnValue) {
             // 所有的东西进行归零
             path = null;
             type = "日志";
@@ -132,7 +132,7 @@ public class Console extends Application {
         createProject.setOnAction(actionEvent -> {
             CreateProject creator = new CreateProject();
 
-            path = creator.entrance()[0];
+            path = creator.entrance();
             updateProjectName();
             detail_pane.getChildren().clear();
         });

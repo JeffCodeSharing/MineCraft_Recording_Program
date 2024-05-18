@@ -22,7 +22,7 @@ import java.io.File;
  * 在使用项目之前先尽心密码操作
  * 返回值: true --> 密码正确, false --> 用户没有输入
  */
-public class CheckPassword extends Application implements AbstractWindow {
+public class CheckPassword extends Application implements AbstractWindow<Boolean> {
     private boolean runChecker = true;
     private final Stage global_stage = new Stage();
     private String project_name;
@@ -51,11 +51,11 @@ public class CheckPassword extends Application implements AbstractWindow {
     }
 
     @Override
-    public String[] entrance() {
+    public Boolean entrance() {
         if (runChecker) {    // 如果在调用构造函数的时候就已经发生错误了，就不执行，直接返回"false"
             start(global_stage);
         }
-        return new String[]{runChecker ? "true" : "false"};
+        return runChecker;
     }
 
     @Override

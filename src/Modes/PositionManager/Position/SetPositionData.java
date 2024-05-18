@@ -19,7 +19,7 @@ import java.util.List;
 /**
  * 更改坐标组中坐标的信息
  */
-public class SetPositionData extends Application implements AbstractWindow {
+public class SetPositionData extends Application implements AbstractWindow<Void> {
     private final Pane box;
     private final List<List<String[]>> group_values;
     private final List<String[]> group_value;
@@ -48,7 +48,7 @@ public class SetPositionData extends Application implements AbstractWindow {
     }
 
     @Override
-    public String[] entrance() {
+    public Void entrance() {
         start(global_stage);
         return null;
     }

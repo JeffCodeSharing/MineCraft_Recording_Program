@@ -18,7 +18,7 @@ import java.util.List;
 /**
  * 创建位置数据的窗口类，实现了AbstractWindow接口。
  */
-public class CreatePosition extends Application implements AbstractWindow {
+public class CreatePosition extends Application implements AbstractWindow<Void> {
     private final Pane box;
     private final List<List<String[]>> group_values;
     private final List<String> group_names;
@@ -46,7 +46,7 @@ public class CreatePosition extends Application implements AbstractWindow {
     }
 
     @Override
-    public String[] entrance() {
+    public Void entrance() {
         start(global_stage);
         return null;
     }

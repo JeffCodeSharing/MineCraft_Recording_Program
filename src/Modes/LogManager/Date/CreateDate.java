@@ -14,7 +14,7 @@ import javafx.stage.Stage;
 import java.io.File;
 import java.time.LocalDate;
 
-public class CreateDate extends Application implements AbstractWindow {
+public class CreateDate extends Application implements AbstractWindow<Void> {
     private String date = "";
     private final Stage global_stage = new Stage();
     private final String path;
@@ -30,7 +30,7 @@ public class CreateDate extends Application implements AbstractWindow {
     }
 
     @Override
-    public String[] entrance() {
+    public Void entrance() {
         start(global_stage);
         createDate();
         return null;

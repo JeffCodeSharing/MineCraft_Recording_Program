@@ -12,7 +12,7 @@ import javafx.stage.Stage;
 
 import java.util.List;
 
-public class CreateItem extends Application implements AbstractWindow {
+public class CreateItem extends Application implements AbstractWindow<Void> {
     private final Stage global_stage = new Stage();
     private final List<String> data;
 
@@ -20,7 +20,7 @@ public class CreateItem extends Application implements AbstractWindow {
         this.data = data;
     }
 
-    public String[] entrance() {
+    public Void entrance() {
         start(global_stage);
         return null;
     }

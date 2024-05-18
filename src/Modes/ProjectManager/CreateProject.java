@@ -24,15 +24,15 @@ import java.util.Date;
 /**
  * CreateProject 类负责在 ProjectManager 中创建项目。
  */
-public class CreateProject extends Application implements AbstractWindow {
+public class CreateProject extends Application implements AbstractWindow<String> {
     private final Stage global_stage = new Stage();
     private final JSONObject writeData = new JSONObject();
     private String path = null;
 
     @Override
-    public String[] entrance() {
+    public String entrance() {
         start(global_stage);
-        return new String[]{path};
+        return path;
     }
 
     @Override

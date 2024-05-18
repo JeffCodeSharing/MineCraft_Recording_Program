@@ -18,7 +18,7 @@ import java.io.File;
 /**
  * 创建计划表
  */
-public class CreateList extends Application implements AbstractWindow {
+public class CreateList extends Application implements AbstractWindow<Void> {
     private final Stage global_stage = new Stage();
     private final String path;
 
@@ -32,7 +32,7 @@ public class CreateList extends Application implements AbstractWindow {
     }
 
     @Override
-    public String[] entrance() {
+    public Void entrance() {
         start(global_stage);
         return null;
     }

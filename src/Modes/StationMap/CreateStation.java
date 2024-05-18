@@ -15,7 +15,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CreateStation extends Application implements AbstractWindow {
+public class CreateStation extends Application implements AbstractWindow<Void> {
     private final Stage global_stage = new Stage();
     private final List<LineData> data;
     private int lineIndex;
@@ -39,7 +39,7 @@ public class CreateStation extends Application implements AbstractWindow {
     }
 
     @Override
-    public String[] entrance() {
+    public Void entrance() {
         start(global_stage);
         return null;
     }

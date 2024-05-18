@@ -13,7 +13,7 @@ import java.io.File;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class RemoveFinishList extends Application implements AbstractWindow {
+public class RemoveFinishList extends Application implements AbstractWindow<Void> {
     private final Stage global_stage = new Stage();
     private final String[] listNames;
     private final String path;
@@ -24,7 +24,7 @@ public class RemoveFinishList extends Application implements AbstractWindow {
     }
 
     @Override
-    public String[] entrance() {
+    public Void entrance() {
         start(global_stage);
         return null;
     }

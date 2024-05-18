@@ -16,7 +16,7 @@ import java.io.File;
 /**
  * 删除计划表的类。
  */
-public class RemoveList extends Application implements AbstractWindow {
+public class RemoveList extends Application implements AbstractWindow<Void> {
     private final String path;
     private final String[] planList;
     private final Stage global_stage = new Stage();
@@ -47,7 +47,7 @@ public class RemoveList extends Application implements AbstractWindow {
     }
 
     @Override
-    public String[] entrance() {
+    public Void entrance() {
         start(global_stage);
         return null;
     }
