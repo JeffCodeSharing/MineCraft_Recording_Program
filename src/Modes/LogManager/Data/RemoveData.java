@@ -83,7 +83,7 @@ public class RemoveData extends Application implements AbstractWindow<Void> {
      */
     private void delete_item() {
         int index = listView.getSelectionModel().getSelectedIndex();
-        if (!(index == -1)) {
+        if (index != -1) {
             Optional<ButtonType> type = WinTool.createAlert(Alert.AlertType.CONFIRMATION,
                     "删除事件点", "您是否要删除这一个事件点", "删除后事件点将不复存在，\n删除前请先确保没有在使用本项目");
 

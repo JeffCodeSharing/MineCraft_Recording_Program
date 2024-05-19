@@ -269,7 +269,7 @@ public class Console extends Application {
                 Button button_search = WinTool.createButton(10, 690, 60, 30, 15, "查询");
                 button_search.setOnAction(actionEvent -> {
                     ShowDate showDate = new ShowDate(date_list, false);
-                    showDate.entrance(path, year_field.getText(), month_field.getText());
+                    showDate.entrance(new File(path, "log").getPath(), year_field.getText(), month_field.getText());
                 });
                 Button button_delete = WinTool.createButton(80, 690, 60, 30, 15, "删除");
                 button_delete.setOnAction(actionEvent -> {
@@ -277,11 +277,11 @@ public class Console extends Application {
                     JsonTool.writeJson(temp_data_final, temp_path);
 
                     RemoveDate remover = new RemoveDate();
-                    remover.entrance(date_list, path);
+                    remover.entrance(date_list, new File(path, "log").getPath());
                 });
                 Button button_create = WinTool.createButton(10, 725, 60, 30, 10, "创建日志");
                 button_create.setOnAction(actionEvent -> {
-                    CreateDate creator = new CreateDate(path, date_list, year_field.getText(), month_field.getText());
+                    CreateDate creator = new CreateDate(new File(path, "log").getPath(), date_list, year_field.getText(), month_field.getText());
                     creator.entrance();
                 });
                 Button button_open = WinTool.createButton(80, 725, 60, 30, 10, "打开日志");
@@ -289,7 +289,8 @@ public class Console extends Application {
                     temp_data_final.replace("day", date_list.getSelectionModel().getSelectedItem());
                     JsonTool.writeJson(temp_data_final, temp_path);
 
-                    ShowData showData = new ShowData(detail_pane, path, date_list.getSelectionModel().getSelectedItem());
+                    ShowData showData = new ShowData(detail_pane, new File(path, "log").getPath(),
+                            date_list.getSelectionModel().getSelectedItem());
                     showData.entrance();
                 });
                 group.getChildren().addAll(year, year_field, month, month_field, date_list,
@@ -302,7 +303,8 @@ public class Console extends Application {
                     searchDate.entrance(path, year_field.getText(), month_field.getText());
 
                     // SearchData
-                    ShowData searchData = new ShowData(detail_pane, path, temp_data_final.getString("day"));
+                    ShowData searchData = new ShowData(detail_pane, new File(path, "log").getPath(),
+                            temp_data_final.getString("day"));
                     searchData.entrance();
                 }
             }

@@ -25,16 +25,14 @@ public class RemoveDate {
 
         if (type.get() == ButtonType.OK) {
             String deleteValue = listView.getSelectionModel().getSelectedItem();
-            if (!(deleteValue == null)) {
-                if (!deleteValue.equals("")) {
-                    listView.getItems().remove(deleteValue);    // 更新listView
+            if ((deleteValue != null) || !deleteValue.isEmpty()) {
+                listView.getItems().remove(deleteValue);    // 更新listView
 
-                    boolean returnValue = IOTool.removeDirectory(path + File.separator + deleteValue);
-                    if (!returnValue) {
-                        WinTool.createAlert(Alert.AlertType.ERROR, "失败", "删除失败", "文件夹内可能被更改或使用");
-                    } else {
-                        WinTool.createAlert(Alert.AlertType.INFORMATION, "成功", "删除成功", "");
-                    }
+                boolean returnValue = IOTool.removeDirectory(new File(path, deleteValue).getPath());
+                if (!returnValue) {
+                    WinTool.createAlert(Alert.AlertType.ERROR, "失败", "删除失败", "文件夹内可能被更改或使用");
+                } else {
+                    WinTool.createAlert(Alert.AlertType.INFORMATION, "成功", "删除成功", "");
                 }
             }
         }

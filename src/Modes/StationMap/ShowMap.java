@@ -78,12 +78,12 @@ public class ShowMap {
 
         choose_line.setOnAction(actionEvent -> {
             LineChooser chooser = new LineChooser(data);
-            this.nowUsingLine = chooser.entrance()[0];
+            this.nowUsingLine = chooser.entrance();
         });
         create_station.setOnAction(actionEvent -> {
             if (nowUsingLine == null) {
                 LineChooser chooser = new LineChooser(data);
-                this.nowUsingLine = chooser.entrance()[0];
+                this.nowUsingLine = chooser.entrance();
             }
 
             // 如果上一步用户直接点击叉叉关掉的话，下方代码不执行

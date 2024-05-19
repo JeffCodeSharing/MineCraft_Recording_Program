@@ -1,7 +1,10 @@
 package Modes.LogManager.Date;
 
 import Interface.AbstractWindow;
+import Tools.JsonTool;
 import Tools.WinTool;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import javafx.application.Application;
 import javafx.scene.Group;
 import javafx.scene.Scene;
@@ -170,14 +173,19 @@ public class CreateDate extends Application implements AbstractWindow<Void> {
      */
     private void createDate() {
         if (!date.equals("")) {
-            File create_file = new File(path + File.separator + date);
-            File create_data = new File(create_file.getPath() + File.separator+ "simple_data");
-            if (!create_file.exists()) {
+            File createFolder = new File(path, date);
+            File createFile = new File(createFolder.getPath(), "basicData.json");
+            if (!createFolder.exists()) {
                 try {
-                    if (create_file.mkdir()) {
-                        if (!create_data.createNewFile()) {
+                    if (createFolder.mkdir()) {
+                        if (!createFile.createNewFile()) {
                             throw new RuntimeException();
                         }
+
+                        // 输入初始数据
+                        JSONObject initMsg = new JSONObject();
+                        initMsg.put("data", new JSONArray());
+                        JsonTool.writeJson(initMsg, createFile);
 
                         // 刷新listView
                         ShowDate showDate = new ShowDate(listView, true);

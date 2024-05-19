@@ -29,7 +29,7 @@ public class ShowDate {
 
     /**
      * 进入搜索日期
-     * @param path 日志路径
+     * @param path 日志路径，直达存放日志路径的log文件夹
      * @param yearValue 年份
      * @param monthValue 月份
      */

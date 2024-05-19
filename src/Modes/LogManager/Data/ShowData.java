@@ -1,9 +1,14 @@
 package Modes.LogManager.Data;
 
 import Tools.EDTool;
-import Tools.IOTool;
+import Tools.JsonTool;
 import Tools.WinTool;
-import javafx.scene.control.*;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 
@@ -27,13 +32,13 @@ public class ShowData {
      *
      * @param box 显示搜索结果的 VBox 对象。
      */
-    public ShowData(Pane box, String projectPath, String date) {
+    public ShowData(Pane box, String rootPath, String date) {
         this.box = box;
         this.fields = new ArrayList<>();
         this.areas = new ArrayList<>();
         this.isUpdate = false;
-        this.can_start = !((date == null) || date.equals(""));
-        this.datePath = new File(projectPath, date).getPath();
+        this.can_start = !((date == null) || date.isEmpty());
+        this.datePath = new File(rootPath, date).getPath();
     }
 
     public ShowData(Pane box, List<TextField> fields, List<TextArea> areas) {
@@ -97,13 +102,15 @@ public class ShowData {
                 createPoint(fieldData, areaData, i);
             }
         } else {
-            String[] temp_array = IOTool.readFile(new File(datePath, "simple_data").getPath());
-            if (temp_array == null) {
+            JSONObject jsonData = JsonTool.readJson(new File(datePath, "basicData.json"));
+            if (jsonData == null) {
                 WinTool.createAlert(Alert.AlertType.ERROR, "错误", "读取文件错误", "请重新尝试");
             } else {
-                for (int i = 0; i < temp_array.length; i += 2) {
-                    String fieldData = EDTool.decrypt(temp_array[i]);
-                    String areaData = EDTool.decrypt(temp_array[i + 1]).replace("\0", "\n");
+                JSONArray jsonArray = jsonData.getJSONArray("data");
+                for (int i = 0; i < jsonArray.size(); i++) {
+                    JSONObject eventData = jsonArray.getJSONObject(i);
+                    String fieldData = EDTool.decrypt(eventData.getString("event"));
+                    String areaData = EDTool.decrypt(eventData.getString("details"));
                     createPoint(fieldData, areaData, fields, areas);
                 }
             }

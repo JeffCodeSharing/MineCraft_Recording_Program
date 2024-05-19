@@ -140,11 +140,8 @@ public class CreateProject extends Application implements AbstractWindow<String>
             SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
             writeData.put("CreateTime", EDTool.encrypt(formatter.format(new Date())));
 
+            File log_dir = new File(create_path, "log");
             File position_dir = new File(create_path, "positions");
-            if (!position_dir.mkdirs()) {
-                return false;
-            }
-
             File behavior_dir = new File(create_path, "behavior");
             File todo_finish_dir = new File(behavior_dir, "finish");
             File todo_doing_dir = new File(behavior_dir, "doing");
@@ -152,7 +149,8 @@ public class CreateProject extends Application implements AbstractWindow<String>
             File map_dir = new File(create_path, "map");
             File map_file = new File(map_dir.getPath(), "map_data");
             File backup_dir = new File(create_path, "backup");
-            if (!behavior_dir.mkdirs() || !todo_finish_dir.mkdirs() || !todo_doing_dir.mkdirs() || !map_dir.mkdirs() || !backup_dir.mkdirs()
+            if (!position_dir.mkdirs() || !log_dir.mkdirs() || !behavior_dir.mkdirs() || !todo_finish_dir.mkdirs() ||
+                    !todo_doing_dir.mkdirs() || !map_dir.mkdirs() || !backup_dir.mkdirs()
                 || !now_doing_file.createNewFile() || !map_file.createNewFile()) {
                 return false;
             }
