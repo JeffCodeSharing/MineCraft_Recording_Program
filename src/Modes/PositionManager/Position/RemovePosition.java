@@ -1,5 +1,6 @@
 package Modes.PositionManager.Position;
 
+import Modes.PositionManager.Event.GroupEvent;
 import Modes.PositionManager.Group.SaveGroup;
 import Modes.PositionManager.GroupAdder;
 import Tools.WinTool;
@@ -17,9 +18,8 @@ import java.util.Optional;
 public class RemovePosition {
     private final Pane box;
     private final int index;
-    private final List<List<String[]>> group_values;
-    private final List<String> group_names;
-    private final List<String[]> group_value;
+    private final List<GroupEvent> group_values;
+    private final GroupEvent group_value;
     private final String group_path;
 
     /**
@@ -32,12 +32,11 @@ public class RemovePosition {
      * @param group_name  要删除的组的名称。
      */
     public RemovePosition(Pane box, int index,
-                          List<List<String[]>> group_values, List<String> group_names,
-                          List<String[]> group_value, String group_dir, String group_name) {
+                          List<GroupEvent> group_values, GroupEvent group_value,
+                          String group_dir, String group_name) {
         this.box = box;
         this.index = index;
         this.group_values = group_values;
-        this.group_names = group_names;
         this.group_value = group_value;
         this.group_path = new File(group_dir, group_name).getPath();
     }
@@ -60,7 +59,7 @@ public class RemovePosition {
         if (type.get() == ButtonType.OK) {
             group_value.remove(index);
 
-            GroupAdder updater = new GroupAdder(box, group_values, group_names, new File(group_path).getParent());
+            GroupAdder updater = new GroupAdder(box, group_values, new File(group_path).getParent());
             updater.update(false);
 
             SaveGroup saver = new SaveGroup();

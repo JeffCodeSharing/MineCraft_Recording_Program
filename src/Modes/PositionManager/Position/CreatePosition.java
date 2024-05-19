@@ -1,6 +1,8 @@
 package Modes.PositionManager.Position;
 
 import Interface.AbstractWindow;
+import Modes.PositionManager.Event.GroupEvent;
+import Modes.PositionManager.Event.PositionEvent;
 import Modes.PositionManager.Group.SaveGroup;
 import Modes.PositionManager.GroupAdder;
 import Tools.WinTool;
@@ -20,9 +22,8 @@ import java.util.List;
  */
 public class CreatePosition extends Application implements AbstractWindow<Void> {
     private final Pane box;
-    private final List<List<String[]>> group_values;
-    private final List<String> group_names;
-    private final List<String[]> group_value;
+    private final List<GroupEvent> group_values;
+    private final GroupEvent group_value;
     private final Stage global_stage = new Stage();
     private final String group_path;
 
@@ -35,12 +36,10 @@ public class CreatePosition extends Application implements AbstractWindow<Void> 
      * @param group_name 分组名称
      */
     public CreatePosition(Pane box,
-                          List<List<String[]>> group_values, List<String> group_names,
-                          List<String[]> group_value,
+                          List<GroupEvent> group_values, GroupEvent group_value,
                           String group_dir, String group_name) {
         this.box = box;
         this.group_values = group_values;
-        this.group_names = group_names;
         this.group_value = group_value;
         this.group_path = new File(group_dir, group_name).getPath();
     }
@@ -105,9 +104,9 @@ public class CreatePosition extends Application implements AbstractWindow<Void> 
      * @param notes 备注的字符串值
      */
     private void afterConfirm(String x, String y, String z, String notes) {
-        group_value.add(new String[]{x, y, z, notes, "BLACK"});
+        group_value.add(new PositionEvent(x, y, z, notes, "BLACK"));
 
-        GroupAdder updater = new GroupAdder(box, group_values, group_names, new File(group_path).getParent());
+        GroupAdder updater = new GroupAdder(box, group_values, new File(group_path).getParent());
         updater.update(false);
 
         global_stage.close();

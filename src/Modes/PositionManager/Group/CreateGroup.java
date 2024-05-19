@@ -1,6 +1,7 @@
 package Modes.PositionManager.Group;
 
 import Interface.AbstractWindow;
+import Modes.PositionManager.Event.GroupEvent;
 import Modes.PositionManager.GroupAdder;
 import Tools.JsonTool;
 import Tools.WinTool;
@@ -17,7 +18,6 @@ import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -27,24 +27,18 @@ public class CreateGroup extends Application implements AbstractWindow<Void> {
     private final Stage global_stage = new Stage();
     private final Pane box;
     private final String create_dir;
-    private final List<Integer> item_num;
-    private final List<List<String[]>> group_value;
-    private final List<String> group_name;
+    private final List<GroupEvent> group_values;
 
     /**
      * CreateGroup类的构造函数，初始化创建坐标组所需的参数。
      *
      * @param box       坐标组显示的VBox
-     * @param item_num        记录每个坐标组中已有的项目数
-     * @param group_value  存储坐标组数据的列表的列表
-     * @param group_name   存储坐标组名的列表
+     * @param group_values  存储坐标组数据的列表的列表
      * @param create_dir       坐标组所在文件夹的路径
      */
-    public CreateGroup(Pane box, List<Integer> item_num, List<List<String[]>> group_value, List<String> group_name, String create_dir) {
+    public CreateGroup(Pane box, List<GroupEvent> group_values, String create_dir) {
         this.box = box;
-        this.item_num = item_num;
-        this.group_value = group_value;
-        this.group_name = group_name;
+        this.group_values = group_values;
         this.create_dir = create_dir;
     }
 
@@ -63,14 +57,12 @@ public class CreateGroup extends Application implements AbstractWindow<Void> {
             if (createFile(field.getText())) {
                 global_stage.close();
 
-                group_value.add(new ArrayList<>());
-                group_name.add(field.getText()+".json");     // 因为用户输入的组不包括".json"后缀
+                // 因为用户输入的组不包括".json"后缀
+                group_values.add(new GroupEvent(field.getText()+".json"));
 
                 // 更新
-                GroupAdder adder = new GroupAdder(box, group_value, group_name, create_dir);
+                GroupAdder adder = new GroupAdder(box, group_values, create_dir);
                 adder.update(false);
-
-                item_num.add(0);
             } else {
                 WinTool.createAlert(Alert.AlertType.ERROR, "创建失败", "创建失败", "原因可能：\n记录文件创建失败或组名已经存在");
             }

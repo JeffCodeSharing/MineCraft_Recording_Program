@@ -1,5 +1,7 @@
 package Modes.PositionManager;
 
+import Modes.PositionManager.Event.GroupEvent;
+import Modes.PositionManager.Event.PositionEvent;
 import Modes.PositionManager.Group.CreateGroup;
 import Tools.JsonTool;
 import Tools.WinTool;
@@ -17,9 +19,7 @@ import java.util.List;
  * 负责管理PositionManager中的方法
  */
 public class Searcher {
-    private final List<String> group_name = new ArrayList<>();
-    private final List<List<String[]>> group_value = new ArrayList<>();
-    private final List<Integer> item_num = new ArrayList<>();
+    private final List<GroupEvent> group_value = new ArrayList<>();
 
     /**
      * @param box 添加控件的VBox
@@ -36,7 +36,7 @@ public class Searcher {
     private void start(Pane box, String path) {      // 传入path已经到了positions路径下了
         Button create_group = WinTool.createButton(0, 0, 130, 40, 20, "创建坐标组");
         create_group.setOnAction(actionEvent -> {
-            CreateGroup creator = new CreateGroup(box, item_num, group_value, group_name, path);
+            CreateGroup creator = new CreateGroup(box, group_value, path);
             creator.entrance();
         });
 
@@ -51,34 +51,28 @@ public class Searcher {
      * @param dir 目录的文件类
      */
     private void addGroup(String dir, Pane box) {
-        GroupAdder adder = new GroupAdder(box, group_value, group_name, dir);
+        GroupAdder adder = new GroupAdder(box, group_value, dir);
 
         try {
             String[] list = new File(dir).list();
 
             for (int i=0; i<list.length; i++) {
                 try {
-                    String s = list[i];
+                    String groupName = list[i];
 
-                    JSONObject jsonData = JsonTool.readJson(new File(dir, s));
-                    JSONArray jsonArray = jsonData.getJSONArray("data");
-                    List<String[]> piece_value = new ArrayList<>();
+                    JSONObject groupData = JsonTool.readJson(new File(dir, groupName));
+                    JSONArray groupArray = groupData.getJSONArray("data");
+                    GroupEvent eventData = new GroupEvent(groupName);
 
-                    for (int j=0; j<jsonArray.size(); j++) {
-                        JSONObject position = jsonArray.getJSONObject(j);
-                        String[] add_array = new String[]{
-                                position.getString("x"), position.getString("y"), position.getString("z"),
-                                position.getString("note"), position.getString("color")
-                        };
-                        piece_value.add(add_array);
+                    for (int j=0; j<groupArray.size(); j++) {
+                        JSONObject position = groupArray.getJSONObject(j);
+                        eventData.add(new PositionEvent(position));
                     }
 
-                    item_num.add(piece_value.size());
-                    group_value.add(piece_value);
-                    group_name.add(s);
+                    group_value.add(eventData);
 
                     // 执行GroupAdder中的add的操作
-                    adder.add(group_value.get(i), group_name.get(i));
+                    adder.add(group_value.get(i));
                 } catch (Exception e) {
                     e.printStackTrace();
                     WinTool.createAlert(Alert.AlertType.ERROR, "错误", "读取文件错误", "请重新尝试或删除项目重新尝试");
