@@ -1,9 +1,10 @@
 package Modes.PositionManager;
 
 import Modes.PositionManager.Group.CreateGroup;
-import Tools.EDTool;
-import Tools.IOTool;
+import Tools.JsonTool;
 import Tools.WinTool;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.layout.Pane;
@@ -59,11 +60,16 @@ public class Searcher {
                 try {
                     String s = list[i];
 
-                    String[] temp = IOTool.readFile(new File(dir, s).getPath());
+                    JSONObject jsonData = JsonTool.readJson(new File(dir, s));
+                    JSONArray jsonArray = jsonData.getJSONArray("data");
                     List<String[]> piece_value = new ArrayList<>();
 
-                    for (String value : temp) {
-                        String[] add_array = EDTool.decrypt(value).split("\0");
+                    for (int j=0; j<jsonArray.size(); j++) {
+                        JSONObject position = jsonArray.getJSONObject(j);
+                        String[] add_array = new String[]{
+                                position.getString("x"), position.getString("y"), position.getString("z"),
+                                position.getString("note"), position.getString("color")
+                        };
                         piece_value.add(add_array);
                     }
 
@@ -74,6 +80,7 @@ public class Searcher {
                     // 执行GroupAdder中的add的操作
                     adder.add(group_value.get(i), group_name.get(i));
                 } catch (Exception e) {
+                    e.printStackTrace();
                     WinTool.createAlert(Alert.AlertType.ERROR, "错误", "读取文件错误", "请重新尝试或删除项目重新尝试");
                 }
             }

@@ -3,10 +3,9 @@ package Modes.PositionManager;
 import Modes.PositionManager.Group.RemoveGroup;
 import Modes.PositionManager.Position.CreatePosition;
 import Modes.PositionManager.Position.SetPositionData;
-import Tools.ColorTool;
-import Tools.EDTool;
-import Tools.IOTool;
-import Tools.WinTool;
+import Tools.*;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -48,40 +47,43 @@ public class GroupAdder {
     /**
      * 向 PositionManager 添加组。
      * @param group_value 要添加的组的值。
-     * @param title_str 组的标题。
+     * @param fileName    组对应的文件名称
      */
-    public void add(List<String[]> group_value, String title_str) {
+    public void add(List<String[]> group_value, String fileName) {
         final int group_type = group_names.size();      // 在调用本方法之前，group_names 已经添加信息了
+        // 获取到要显示的标题名字
+        int dotIndex = fileName.lastIndexOf(".");
+        String titleStr = fileName.substring(0, dotIndex);
 
         Button delete_group = WinTool.createButton(300, 70+y_count, 90, 30, 15, "删除本组");
         delete_group.setOnAction(actionEvent -> {
             RemoveGroup remover = new RemoveGroup();
-            remover.entrance(new File(group_dir, title_str).getPath());
+            remover.entrance(new File(group_dir, fileName).getPath());
 
             update(true);
         });
 
         Button create_item = WinTool.createButton(390, 70+y_count, 90, 30, 15, "创建坐标");
         create_item.setOnAction(actionEvent -> {
-            CreatePosition creator = new CreatePosition(box, group_values, group_names, group_value, group_dir, title_str);
+            CreatePosition creator = new CreatePosition(box, group_values, group_names, group_value, group_dir, fileName);
             creator.entrance();
         });
 
         Button change = WinTool.createButton(480, 70+y_count, 110, 30, 14, "更改坐标信息");
         change.setOnAction(actionEvent -> {
-            SetPositionData setter = new SetPositionData(box, group_values, group_names, group_value, group_dir, title_str);
+            SetPositionData setter = new SetPositionData(box, group_values, group_names, group_value, group_dir, fileName);
             setter.entrance();
         });
 
         box.getChildren().addAll(
-                WinTool.createLabel(0, 70+y_count, 320, 35, 20, group_type + "组: " + title_str, Color.BLUE),
+                WinTool.createLabel(0, 70+y_count, 320, 35, 20, group_type + "组: " + titleStr, Color.BLUE),
                 delete_group, create_item, change
         );
         y_count += 35;
 
         int i = 1;
         for (String[] values : group_value) {
-            String add_str = title_str + i + "  X:" + values[0] + "  Y:" + values[1] + "  Z:" + values[2] + "  备注:" + values[3];
+            String add_str = titleStr + i + "  X:" + values[0] + "  Y:" + values[1] + "  Z:" + values[2] + "  备注:" + values[3];
             Label label = WinTool.createLabel(0, 70+y_count, -1, 25, 18, add_str, ColorTool.engToColor(values[4]));
             box.getChildren().addAll(label);
 
@@ -93,36 +95,40 @@ public class GroupAdder {
         y_count += 30;
     }
 
-    public void add(List<String[]> group_value, String title_str, int group_type) {
+    public void add(List<String[]> group_value, String fileName, int group_type) {
+        // 获取titleStr
+        int dotIndex = fileName.lastIndexOf(".");
+        String titleStr = fileName.substring(0, dotIndex);
+
         Button delete_group = WinTool.createButton(300, 70+y_count, 90, 30, 15, "删除本组");
         delete_group.setOnAction(actionEvent -> {
             RemoveGroup remover = new RemoveGroup();
-            remover.entrance(new File(group_dir, title_str).getPath());
+            remover.entrance(new File(group_dir, fileName).getPath());
 
             update(true);
         });
 
         Button create_item = WinTool.createButton(390, 70+y_count, 90, 30, 15, "创建坐标");
         create_item.setOnAction(actionEvent -> {
-            CreatePosition creator = new CreatePosition(box, group_values, group_names, group_value, group_dir, title_str);
+            CreatePosition creator = new CreatePosition(box, group_values, group_names, group_value, group_dir, fileName);
             creator.entrance();
         });
 
         Button change = WinTool.createButton(480, 70+y_count, 110, 30, 14, "更改坐标信息");
         change.setOnAction(actionEvent -> {
-            SetPositionData setter = new SetPositionData(box, group_values, group_names, group_value, group_dir, title_str);
+            SetPositionData setter = new SetPositionData(box, group_values, group_names, group_value, group_dir, fileName);
             setter.entrance();
         });
 
         box.getChildren().addAll(
-                WinTool.createLabel(0, 70+y_count, 320, 35, 20, group_type + "组: " + title_str, Color.BLUE),
+                WinTool.createLabel(0, 70+y_count, 320, 35, 20, group_type + "组: " + titleStr, Color.BLUE),
                 delete_group, create_item, change
         );
         y_count += 35;
 
         int i = 1;
         for (String[] values : group_value) {
-            String add_str = title_str + i + "  X:" + values[0] + "  Y:" + values[1] + "  Z:" + values[2] + "  备注:" + values[3];
+            String add_str = titleStr + i + "  X:" + values[0] + "  Y:" + values[1] + "  Z:" + values[2] + "  备注:" + values[3];
             Label label = WinTool.createLabel(0, 70+y_count, -1, 25, 18, add_str, ColorTool.engToColor(values[4]));
             box.getChildren().addAll(label);
 
@@ -149,11 +155,16 @@ public class GroupAdder {
             for (int i = 0; i < list.length; i++) {
                 String s = list[i];
                 try {
-                    List<String> temp = IOTool.readFileAsArrayList(new File(group_dir, s).getPath());
+                    JSONObject jsonData = JsonTool.readJson(new File(group_dir, s));
+                    JSONArray jsonArray = jsonData.getJSONArray("data");
                     List<String[]> value_group = new ArrayList<>();
 
-                    for (String value : temp) {
-                        String[] add_array = EDTool.decrypt(value).split("\0");
+                    for (int j=0; j<jsonArray.size(); j++) {
+                        JSONObject position = jsonArray.getJSONObject(j);
+                        String[] add_array = new String[]{
+                                position.getString("x"), position.getString("y"), position.getString("z"),
+                                position.getString("note"), position.getString("color")
+                        };
                         value_group.add(add_array);
                     }
 

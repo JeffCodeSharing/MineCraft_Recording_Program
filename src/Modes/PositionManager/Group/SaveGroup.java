@@ -1,10 +1,11 @@
 package Modes.PositionManager.Group;
 
-import Tools.EDTool;
+import Tools.JsonTool;
 import Tools.WinTool;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import javafx.scene.control.Alert;
 
-import java.io.FileWriter;
 import java.util.List;
 
 /**
@@ -19,9 +20,8 @@ public class SaveGroup {
      * @param group_value   需要保存的分组数据
      */
     public void entrance(String group_path, List<String[]> group_value) {
-        try {
-            start(group_path, group_value);
-        } catch (Exception e) {
+        boolean success = start(group_path, group_value);
+        if (!success) {
             WinTool.createAlert(Alert.AlertType.ERROR, "失败", "保存失败", "");
         }
     }
@@ -31,23 +31,22 @@ public class SaveGroup {
      *
      * @param path        分组数据保存的路径
      * @param group_value 需要保存的分组数据
-     * @throws Exception 如果保存失败抛出异常
      */
-    private void start(String path, List<String[]> group_value) throws Exception {
-        FileWriter writer = new FileWriter(path);
+    private boolean start(String path, List<String[]> group_value) {
+        JSONObject jsonData = new JSONObject();
+        JSONArray jsonArray = new JSONArray();
+        jsonData.put("data", jsonArray);
 
-        for (String[] strings : group_value) {
-            StringBuilder builder = new StringBuilder();
-            for (int i=0; i<strings.length; i++) {
-                builder.append(strings[i]);
-
-                if (i < strings.length-1) {
-                    builder.append("\0");
-                }
-            }
-            writer.append(EDTool.encrypt(builder.toString())).append("\n");
+        for (String[] data_piece:group_value) {
+            JSONObject positionData = new JSONObject();
+            positionData.put("x", data_piece[0]);
+            positionData.put("y", data_piece[1]);
+            positionData.put("z", data_piece[2]);
+            positionData.put("note", data_piece[3]);
+            positionData.put("color", data_piece[4]);
+            jsonArray.add(positionData);
         }
 
-        writer.close();
+        return JsonTool.writeJson(jsonData, path);
     }
 }

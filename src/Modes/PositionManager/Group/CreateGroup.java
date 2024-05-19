@@ -2,7 +2,10 @@ package Modes.PositionManager.Group;
 
 import Interface.AbstractWindow;
 import Modes.PositionManager.GroupAdder;
+import Tools.JsonTool;
 import Tools.WinTool;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import javafx.application.Application;
 import javafx.scene.Group;
 import javafx.scene.Scene;
@@ -61,7 +64,7 @@ public class CreateGroup extends Application implements AbstractWindow<Void> {
                 global_stage.close();
 
                 group_value.add(new ArrayList<>());
-                group_name.add(field.getText());
+                group_name.add(field.getText()+".json");     // 因为用户输入的组不包括".json"后缀
 
                 // 更新
                 GroupAdder adder = new GroupAdder(box, group_value, group_name, create_dir);
@@ -104,7 +107,7 @@ public class CreateGroup extends Application implements AbstractWindow<Void> {
      * @return 插入成功返回true，否则返回false
      */
     private boolean createFile(String name) {
-        File createFile = new File(create_dir, name);
+        File createFile = new File(create_dir, name+".json");
 
         // 检索是否存在一样名字的文件
         if (createFile.exists()) {
@@ -114,6 +117,9 @@ public class CreateGroup extends Application implements AbstractWindow<Void> {
         // 创建文件
         try {
             createFile.createNewFile();
+            JSONObject initMsg = new JSONObject();
+            initMsg.put("data", new JSONArray());
+            JsonTool.writeJson(initMsg, createFile);
         } catch (Exception e) {
             return false;
         }
