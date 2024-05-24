@@ -23,7 +23,7 @@ public class JsonTool {
 
     public static boolean writeJson(JSONObject jsonObject, String path) {
         String jsonString = JSONObject.toJSONString(jsonObject, SerializerFeature.WriteMapNullValue);
-        return IOTool.overrideFile(path, new String[]{jsonString});
+        return IOTool.overrideFile(path, jsonString);
     }
 
     public static boolean writeJson(JSONObject jsonObject, File file) {

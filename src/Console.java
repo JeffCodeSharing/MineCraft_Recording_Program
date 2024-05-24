@@ -69,7 +69,7 @@ public class Console extends Application {
             File check = new File(path, "checkItem.json");
             try {
                 if (check.exists()) {
-                    JSONObject jsonData = JSONObject.parseObject(String.join("", IOTool.readFile(check.getPath())));
+                    JSONObject jsonData = JSONObject.parseObject(String.join("", IOTool.readFile(check)));
                     if (jsonData.getString("CreateTime") == null) {
                         throw new RuntimeException();
                     } else {

@@ -39,7 +39,7 @@ public class CheckPassword extends Application implements AbstractWindow<Boolean
                 File projectFile = new File(path);
                 this.project_name = projectFile.getName();
 
-                JSONObject jsonData = JSONObject.parseObject(String.join("", IOTool.readFile(new File(path, "checkItem.json").getPath())));
+                JSONObject jsonData = JSONObject.parseObject(String.join("", IOTool.readFile(new File(path, "checkItem.json"))));
                 this.password = EDTool.decrypt(jsonData.getString("password"));
             } catch (Exception e) {
                 WinTool.createAlert(Alert.AlertType.ERROR, "密码读取错误", "本项目不能正常打开", "");

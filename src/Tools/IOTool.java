@@ -47,33 +47,31 @@ public class IOTool {
         }
     }
 
+    public static String[] readFile(File file) {
+        return readFile(file.getPath());
+    }
+
     /**
      * 覆盖写入文件。
      *
-     * @param path 文件路径
-     * @param list 要写入的内容列表
+     * @param path  文件路径
+     * @param array 要写入的内容数组
      * @return 写入成功返回true，写入失败返回false
      */
-    public static boolean overrideFile(String path, List<String> list) {
-        try (FileWriter fileWriter = new FileWriter(path, StandardCharsets.UTF_8)) {    // 使用try来释放FileWriter
-            for (String item : list) {
-                fileWriter.append(item).append("\n");
+    public static boolean overrideFile(String path, String[] array) {
+        try (FileWriter writer = new FileWriter(path, StandardCharsets.UTF_8)) {
+            for (String event : array) {
+                writer.append(event).append("\n");
             }
+            writer.close();
             return true;
         } catch (Exception e) {
             return false;
         }
     }
 
-    /**
-     * 覆盖写入文件。
-     *
-     * @param file  文件路径
-     * @param array 要写入的内容数组
-     * @return 写入成功返回true，写入失败返回false
-     */
-    public static boolean overrideFile(String file, String[] array) {
-        return overrideFile(file, List.of(array));
+    public static boolean overrideFile(String path, String data) {
+        return overrideFile(path, new String[]{data});
     }
 
     /**
@@ -88,7 +86,7 @@ public class IOTool {
             String[] list = file.list();
             if (list != null) {
                 for (String temp : list) {
-                    if (!removeDirectory(file.getPath() + File.separator + temp)) {
+                    if (!removeDirectory(new File(file.getPath(), temp).getPath())) {
                         return true;
                     }
                 }
@@ -112,14 +110,11 @@ public class IOTool {
         }
 
         for (File file : files) {
-            String endTempString = end + File.separator + file.getName();
-            String startTempString = start + File.separator + file.getName();
-
-            File endCheckFile = new File(endTempString);
-            File startCheckFile = new File(startTempString);
+            File endCheckFile = new File(end, file.getName());
+            File startCheckFile = new File(start, file.getName());
 
             if (startCheckFile.isDirectory()) {
-                if (!endCheckFile.mkdirs() || !saveAsDirectory(startTempString, endTempString)) {
+                if (!endCheckFile.mkdirs() || !saveAsDirectory(startCheckFile.getPath(), endCheckFile.getPath())) {
                     return false;
                 }
             } else if (startCheckFile.isFile()) {
