@@ -1,5 +1,6 @@
 package ProjectSafe;
 
+import Constant.SystemPathConstant;
 import Interface.AbstractWindow;
 import Tools.EDTool;
 import Tools.IOTool;
@@ -36,8 +37,7 @@ public class CheckPassword extends Application implements AbstractWindow<Boolean
     public CheckPassword(String path) {
         if (path != null) {
             try {
-                File projectFile = new File(path);
-                this.project_name = projectFile.getName();
+                this.project_name = new File(path).getName();
 
                 JSONObject jsonData = JSONObject.parseObject(String.join("", IOTool.readFile(new File(path, "checkItem.json"))));
                 this.password = EDTool.decrypt(jsonData.getString("password"));
@@ -68,7 +68,7 @@ public class CheckPassword extends Application implements AbstractWindow<Boolean
         password.textProperty().addListener((observableValue, old_value, new_value) -> password_plaintext.setText(new_value));
 
         ImageView view = WinTool.createImageView(230, 40, 30, 30,
-                System.getProperty("user.dir") + File.separator + "data" + File.separator + "show_password.png");
+                SystemPathConstant.SHOW_PASSWORD);
         view.setOnMousePressed(mouseEvent -> imageClick(view, password_plaintext, password));
 
         Button confirm = WinTool.createButton(100, 150, 80, 40, 16, "确定");
@@ -118,9 +118,9 @@ public class CheckPassword extends Application implements AbstractWindow<Boolean
 
     private void imageClick(ImageView view, TextField plaintext, PasswordField ciphertext) {
         if (plaintext.isVisible()) {
-            view.setImage(new Image(System.getProperty("user.dir") + File.separator + "data" + File.separator + "show_password.png"));
+            view.setImage(new Image(SystemPathConstant.SHOW_PASSWORD));
         } else {
-            view.setImage(new Image(System.getProperty("user.dir") + File.separator + "data" + File.separator + "hide_password.png"));
+            view.setImage(new Image(SystemPathConstant.HIDE_PASSWORD));
         }
         plaintext.setVisible(!plaintext.isVisible());
         ciphertext.setVisible(!ciphertext.isVisible());

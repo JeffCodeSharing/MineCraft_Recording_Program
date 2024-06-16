@@ -4,7 +4,7 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import java.security.cert.X509Certificate;
 
-public class SSLConstant {
+public final class SSLConstant {
     // 一个信任所有证书的 TrustManager
     public static final TrustManager[] TRUST_MANAGER = new TrustManager[] {
             new X509TrustManager() {

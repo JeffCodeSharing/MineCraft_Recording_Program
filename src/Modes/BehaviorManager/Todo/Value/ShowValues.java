@@ -35,7 +35,7 @@ public class ShowValues {
         this.listName = listName;
 
         // 准备DataController的基础数据，并且解密
-        JSONObject values = Decryption.decrypt(JsonTool.readJson(new File(path, listName)));
+        JSONObject values = Decryption.decrypt(JsonTool.readJson(new File(path, listName+".json")));
         // 赋值
         controller = new DataController(values);
     }

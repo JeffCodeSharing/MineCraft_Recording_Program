@@ -74,8 +74,7 @@ public class Searcher {
                     // 执行GroupAdder中的add的操作
                     adder.add(group_value.get(i));
                 } catch (Exception e) {
-                    e.printStackTrace();
-                    WinTool.createAlert(Alert.AlertType.ERROR, "错误", "读取文件错误", "请重新尝试或删除项目重新尝试");
+                    WinTool.createAlert(Alert.AlertType.ERROR, "错误", "读取文件错误", "错误文件：" + list[i]);
                 }
             }
         } catch (Exception ignored) {
